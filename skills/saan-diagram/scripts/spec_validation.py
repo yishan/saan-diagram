@@ -91,6 +91,7 @@ def validate_spec(spec):
         fail("layout", "无效的图示布局")
     for key, choices in {
         "orientation": ("horizontal", "vertical"),
+        "language": ("en", "zh-CN"),
         "titlebar": ("outline", "gray", "brand", "dark"),
         "column_semantics": ("roles", "stages", "layout"),
         "profile": ("dfd", "audit", "opportunity"),

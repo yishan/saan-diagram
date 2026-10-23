@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""saan-diagram renderer v1.1.0 (stages | layers | er | org | fishbone | timeline | quadrant | idef0): YAML spec -> HTML / SVG / PNG / Feishu whiteboard DSL.
+"""saan-diagram renderer v1.2.0 (stages | layers | er | org | fishbone | timeline | quadrant | idef0): YAML spec -> HTML / SVG / PNG / Feishu whiteboard DSL.
 
 Usage:
   python3 render.py spec.yaml [-o out.html] [--svg out.svg] [--png out.png]
@@ -20,6 +20,7 @@ except ImportError:  # pragma: no cover
     sys.exit("需要 PyYAML：请在虚拟环境中安装 requirements.txt")
 
 from spec_validation import SpecError, load_spec, validate_spec
+from i18n import tr, join_labels
 
 # ---------------------------------------------------------------- tokens
 # Semantic roles (never inline hex elsewhere). Neutrals are fixed; everything that
@@ -193,9 +194,9 @@ def special_info(spec):
     if cfg.get("label"):
         res = (str(cfg["label"]), cfg.get("prefix"))
     elif "ai" in seen and "special" not in seen:      # 旧 spec：kind: ai → 图例"AI 能力"，标签以 AI 开头
-        res = ("AI 能力", "AI")
+        res = (tr(spec, 'AI 能力'), "AI")
     else:
-        res = ("重点能力", cfg.get("prefix"))
+        res = (tr(spec, '重点能力'), cfg.get("prefix"))
     spec["_special"] = res
     return res
 
@@ -206,6 +207,7 @@ class Diagram:
         preset = PRESETS.get(theme or spec.get("theme") or "gray", DEFAULT_BRAND)
         self.t = make_theme(brand or spec.get("brand") or preset,
                             titlebar or spec.get("titlebar") or "outline")
+        self.t["language"] = spec.get("language", "zh-CN")
         self.t["special_label"], self.t["special_prefix"] = special_info(spec)
         self.vertical = (orient or spec.get("orientation") or "horizontal") == "vertical"
         self.nodes, self.containers, self.edges = {}, {}, []
@@ -630,9 +632,9 @@ class Diagram:
         W = self.width
         o = []
         A = o.append
-        title = self.spec.get("title", "业务架构")
+        title = self.spec.get("title", tr(self.t, '业务架构'))
         A(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W:.0f} {H:.0f}" width="{W:.0f}" height="{H:.0f}" '
-          f'role="img" aria-labelledby="{slug}-title {slug}-desc" font-family="{FONT}">')
+          f'role="img" xml:lang="{esc(t.get("language", "zh-CN"))}" aria-labelledby="{slug}-title {slug}-desc" font-family="{FONT}">')
         A(f'<title id="{slug}-title">{esc(title)}</title><desc id="{slug}-desc">{esc(self.spec.get("desc", title))}</desc>')
         A('<defs>')
         for k, col in (("flow", t["ink"]), ("data", t["muted"]), ("meta", t["meta"]), ("accent", t["accent"])):
@@ -794,18 +796,20 @@ class Diagram:
 
     def notes(self):
         """Lines printed under the legend: control matrix (audit) and value ratio (opportunity)."""
-        out = [f"{c}  {lab.rstrip('？?')}：{risk or '（未写风险）'}" for c, lab, risk in self.controls()]
+        out = [tr(self.t, '{0}  {1}：{2}', c, lab.rstrip('？?'), risk or tr(self.t, '（未写风险）')) for c, lab, risk in self.controls()]
         vals = {cid: c.get("value") for cid, c in ((c["id"], c) for c in self.spec.get("columns") or [])}
         if any(v is not None for v in vals.values()):
             nodes = [n for n in self.nodes.values() if n.kind not in ("system", "external", "label")]
             va = sum(1 for n in nodes if vals.get(n.col) is True)
             nva = sum(1 for n in nodes if vals.get(n.col) is False)
             if va + nva:
-                out.insert(0, f"增值环节 {va} 个 · 非增值环节 {nva} 个（占 {nva * 100 // (va + nva)}%）")
-        return out
+                out.insert(0, tr(self.t, '增值环节 {0} 个 · 非增值环节 {1} 个（占 {2}%）', va, nva, nva * 100 // (va + nva)))
+        return [line for note in out for line in _wrap_w(note, self.width - 2 * BODY_PAD - 64)]
 
     def _wrap(self, s, k):
         s = str(s)
+        if any(c.isascii() and c.isalpha() for c in s):
+            return _wrap_w(s, k * FS)
         if "\n" in s:
             return s.split("\n")
         if len(s) <= 3:
@@ -813,7 +817,7 @@ class Diagram:
         n = max(2, math.ceil(len(s) / k))
         base, extra = divmod(len(s), n)
         out, i = [], 0
-        for j in range(n):  # 前短后长：招采/现系统
+        for j in range(n):
             ln = base + (1 if j >= n - extra else 0)
             out.append(s[i:i + ln]); i += ln
         return out
@@ -860,25 +864,25 @@ class Diagram:
         used_e = {e["kind"] for e in self.edges}
         ovk = {ov.get("kind", "ai") for ov in self.spec.get("overlays") or []}
         it = []
-        if "hub" in used_n: it.append(("rect", t["hub"], None, "主线节点"))
+        if "hub" in used_n: it.append(("rect", t["hub"], None, tr(self.t, '主线节点')))
         dfd = self.spec.get("profile") == "dfd"
-        if "module" in used_n: it.append(("rect", t["node"], None, "处理过程" if dfd else "功能模块"))
+        if "module" in used_n: it.append(("rect", t["node"], None, tr(self.t, '处理过程') if dfd else tr(self.t, '功能模块')))
         if any(n.core for n in self.nodes.values()) or any(c.core for c in self.containers.values()):
-            it.append(("rect", t["accent_tint"], t["accent"], "核心业务"))
-        if "decision" in used_n: it.append(("diamond", t["paper"], t["ink"], "判断"))
-        if "optional" in used_n: it.append(("rect", t["paper"], t["frame"], "可选环节"))
-        if any(c.frame for c in self.containers.values()): it.append(("rect", "none", t["frame"], "业务域"))
-        if "system" in used_n: it.append(("sys", t["sys_int"], None, "内部系统"))
-        if "external" in used_n: it.append(("sys", t["sys_ext"], None, "外部实体" if dfd else "外部服务"))
-        if "flow" in used_e: it.append(("line", "flow", None, "业务主流程"))
-        if used_e & {"data", "return", "bidir"}: it.append(("line", "data", None, "数据 / 集成 / 推送"))
-        if "meta" in used_e: it.append(("line", "meta", None, "配置 / 委托关系"))
-        if any(e.get("emphasis") for e in self.edges): it.append(("line", "accent", None, "关键路径"))
+            it.append(("rect", t["accent_tint"], t["accent"], tr(self.t, '核心业务')))
+        if "decision" in used_n: it.append(("diamond", t["paper"], t["ink"], tr(self.t, '判断')))
+        if "optional" in used_n: it.append(("rect", t["paper"], t["frame"], tr(self.t, '可选环节')))
+        if any(c.frame for c in self.containers.values()): it.append(("rect", "none", t["frame"], tr(self.t, '业务域')))
+        if "system" in used_n: it.append(("sys", t["sys_int"], None, tr(self.t, '内部系统')))
+        if "external" in used_n: it.append(("sys", t["sys_ext"], None, tr(self.t, '外部实体') if dfd else tr(self.t, '外部服务')))
+        if "flow" in used_e: it.append(("line", "flow", None, tr(self.t, '业务主流程')))
+        if used_e & {"data", "return", "bidir"}: it.append(("line", "data", None, tr(self.t, '数据 / 集成 / 推送')))
+        if "meta" in used_e: it.append(("line", "meta", None, tr(self.t, '配置 / 委托关系')))
+        if any(e.get("emphasis") for e in self.edges): it.append(("line", "accent", None, tr(self.t, '关键路径')))
         if "ai" in ovk or "ai" in used_n: it.append(("rect", t["ai_fill"], None, t["special_label"]))
-        if "scope" in ovk: it.append(("rect", "none", t["soft"], "范围标注"))
-        if "doc" in used_n: it.append(("rect", t["paper"], t["muted"], "单据 / 文档"))
-        if "store" in used_n: it.append(("rect", t["paper"], t["muted"], "数据存储"))
-        if self.controls(): it.append(("rect", t["ink"], None, "控制点"))
+        if "scope" in ovk: it.append(("rect", "none", t["soft"], tr(self.t, '范围标注')))
+        if "doc" in used_n: it.append(("rect", t["paper"], t["muted"], tr(self.t, '单据 / 文档')))
+        if "store" in used_n: it.append(("rect", t["paper"], t["muted"], tr(self.t, '数据存储')))
+        if self.controls(): it.append(("rect", t["ink"], None, tr(self.t, '控制点')))
         return it
 
     def legend_layout(self, y0):
@@ -897,7 +901,7 @@ class Diagram:
     def _legend(self, A, y, W, slug):
         t = self.t
         A(f'<line x1="{BODY_PAD}" x2="{W-BODY_PAD}" y1="{y-16}" y2="{y-16}" stroke="{t["rule"]}"/>')
-        A(f'<text x="{BODY_PAD + 8}" y="{y+14}" fill="{t["soft"]}" font-size="{FS}" font-weight="600">图例</text>')
+        A(f'<text x="{BODY_PAD + 8}" y="{y+14}" fill="{t["soft"]}" font-size="{FS}" font-weight="600">{esc(tr(t, '图例'))}</text>')
         for kind, c, s, label, x, y in self.legend_layout(y)[0]:
             if kind == "rect":
                 sa = f' stroke="{s}"' if s else ""
@@ -945,7 +949,7 @@ def to_wb_dsl(d, route_mode="fixed"):
                 "text": s, "fontSize": fs, "textColor": color or t["ink"], "textAlign": align, "verticalAlign": "middle"}
 
     N.append(rect(BODY_PAD, 0, W - 2 * BODY_PAD, TOP_TITLE, id="titlebar", fillColor=t["titlebar"], borderColor=t["titleedge"],
-                  borderWidth=1 if t["titleedge"] != t["titlebar"] else 0, text=d.spec.get("title", "业务架构"), fontSize=16, textColor=t["titletext"]))
+                  borderWidth=1 if t["titleedge"] != t["titlebar"] else 0, text=d.spec.get("title", tr(t, '业务架构')), fontSize=16, textColor=t["titletext"]))
     stages, rule, divider = d.chrome(legend_y)
     for k, ((fx, fy, fw, fh), (hx, hy, hw, hh), label) in enumerate(stages):
         N.append(rect(fx, fy, fw, fh, id=f"stage_{k}", fillColor=t["paper"], borderColor=t["rule"], borderWidth=1))
@@ -1013,7 +1017,7 @@ def to_wb_dsl(d, route_mode="fixed"):
     # legend
     lx = BODY_PAD + 8
     N.append(rect(BODY_PAD, legend_y - 16, W - 2 * BODY_PAD, 1, fillColor=t["rule"], borderColor=t["rule"], borderWidth=0))
-    N.append(text(lx, legend_y, 40, 20, "图例", FS, t["soft"], "left"))
+    N.append(text(lx, legend_y, 40, 20, tr(t, '图例'), FS, t["soft"], "left"))
     for kind, c, s, label, lx, legend_y in d.legend_layout(legend_y)[0]:
         if kind in ("rect", "diamond", "sys"):
             N.append({"type": "diamond" if kind == "diamond" else "rect", "id": rid("lg"), "x": lx, "y": legend_y + 2,
@@ -1211,25 +1215,25 @@ def lint(d):
             outs[a.id] = outs.get(a.id, 0) + 1
             ins[b.id] = ins.get(b.id, 0) + 1
             if a.kind not in PROCESS_KINDS and b.kind not in PROCESS_KINDS:
-                out.append(("DF1", f"[DF1] 数据流 {a.label}→{b.label} 两端都不是处理过程：数据只能经过处理才能流转（存储/外部实体之间不能直连）"))
+                out.append(("DF1", tr(d.t, '[DF1] 数据流 {0}→{1} 两端都不是处理过程：数据只能经过处理才能流转（存储/外部实体之间不能直连）', a.label, b.label)))
         for n in nodes:
             if n.kind in PROCESS_KINDS and n.kind != "decision":
                 if ins.get(n.id) and not outs.get(n.id):
-                    out.append(("DF2", f"[DF2] 处理 '{n.label}' 只有输入没有输出（黑洞）：补上它产出的数据"))
+                    out.append(("DF2", tr(d.t, "[DF2] 处理 '{0}' 只有输入没有输出（黑洞）：补上它产出的数据", n.label)))
                 if outs.get(n.id) and not ins.get(n.id):
-                    out.append(("DF2", f"[DF2] 处理 '{n.label}' 只有输出没有输入（奇迹）：补上它依赖的数据"))
+                    out.append(("DF2", tr(d.t, "[DF2] 处理 '{0}' 只有输出没有输入（奇迹）：补上它依赖的数据", n.label)))
             if n.kind == "store" and not (ins.get(n.id) and outs.get(n.id)):
-                out.append(("DF3", f"[DF3] 数据存储 '{n.label}' 缺少{'写入' if not ins.get(n.id) else '读取'}：没人写或没人读的存储要么多余，要么漏画了流程"))
+                out.append(("DF3", tr(d.t, "[DF3] 数据存储 '{0}' 缺少{1}：没人写或没人读的存储要么多余，要么漏画了流程", n.label, tr(d.t, '写入') if not ins.get(n.id) else tr(d.t, '读取'))))
     for c, lab, risk in d.controls():
         if not risk:
-            out.append(("AU1", f"[AU1] 控制点 {c}（{lab}）没有写 risk：每个控制点都要说明它防的是什么风险"))
+            out.append(("AU1", tr(d.t, '[AU1] 控制点 {0}（{1}）没有写 risk：每个控制点都要说明它防的是什么风险', c, lab)))
     if profile == "audit":
         linked = {e["a"].id for e in d.edges} | {e["b"].id for e in d.edges}
         for n in nodes:
             if n.kind == "doc" and n.id not in linked:
-                out.append(("AU2", f"[AU2] 单据 '{n.label}' 没有连线：审计流程里每张单据都要说明谁产生、流向谁"))
+                out.append(("AU2", tr(d.t, "[AU2] 单据 '{0}' 没有连线：审计流程里每张单据都要说明谁产生、流向谁", n.label)))
         if not d.controls():
-            out.append(("AU1", "[AU1] profile: audit 但没有标任何控制点：用 control: K1 + risk 标出关键控制"))
+            out.append(("AU1", tr(d.t, '[AU1] profile: audit 但没有标任何控制点：用 control: K1 + risk 标出关键控制')))
     # D1 density
     for cid, c in d.cols.items():
         cnt = sum(1 for n in nodes if n.col == cid and not getattr(n, "path", None))
@@ -1274,6 +1278,10 @@ def _vlines(s):
                 out.append(buf.strip())
             buf = ""
             out.append(c)
+        elif c.isspace():
+            if buf.strip():
+                out.append(buf.strip())
+            buf = ""
         else:
             buf += c
     if buf.strip():
@@ -1282,31 +1290,40 @@ def _vlines(s):
 
 
 def _wrap_w(s, width, size=FS):
-    """Greedy wrap by measured width (CJK 1em, Latin .6em); never splits a Latin run."""
-    out, cur = [], ""
-    for tok in __import__("re").findall(r"[A-Za-z0-9 ._/-]+|.", str(s)):
-        if cur and text_w(cur + tok, size) > width:
-            out.append(cur)
-            cur = tok.strip()
-        else:
-            cur += tok
-    if cur:
-        out.append(cur)
-    if len(out) == 2:   # balance two lines: 第三方 / AI能力, not 第三方AI能 / 力
-        toks = __import__("re").findall(r"[A-Za-z0-9 ._/-]+|.", str(s))
-        best = None
-        for i in range(1, len(toks)):
-            a, b = "".join(toks[:i]).strip(), "".join(toks[i:]).strip()
-            m = max(text_w(a, size), text_w(b, size))
-            if m <= width and (best is None or m < best[0]):
-                best = (m, [a, b])
-        if best:
-            out = best[1]
+    """Wrap at Latin word boundaries or CJK characters, preserving explicit lines."""
+    import re
+    out = []
+    for paragraph in str(s).split("\n"):
+        cur = ""
+        for token in re.findall(r"[\u2e80-\uffff]|[^\s\u2e80-\uffff]+|[ \t]+", paragraph):
+            if not token.strip():
+                if cur:
+                    cur += " "
+                continue
+            if cur.strip() and text_w(cur + token, size) > width:
+                out.append(cur.rstrip())
+                cur = token
+            else:
+                cur += token
+        out.append(cur.rstrip())
+    # Preserve balanced two-line CJK labels while keeping Latin words intact.
+    if len(out) == 2 and "\n" not in str(s) and not any(c.isascii() and c.isalpha() for c in str(s)):
+        tokens = list(str(s))
+        candidates = []
+        for i in range(1, len(tokens)):
+            lines = ["".join(tokens[:i]).strip(), "".join(tokens[i:]).strip()]
+            longest = max(text_w(line, size) for line in lines)
+            if longest <= width:
+                candidates.append((longest, i, lines))
+        if candidates:
+            out = min(candidates)[2]
     return out or [""]
 
 
 def _chunks(s, k):
     s = str(s)
+    if any(c.isascii() and c.isalpha() for c in s):
+        return _wrap_w(s, k * FS)
     return [s[i:i + k] for i in range(0, len(s), k)] or [""]
 
 
@@ -1314,7 +1331,7 @@ def scene_svg(scene, W, H, t, title, desc, slug):
     o = []
     A = o.append
     A(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W:.0f} {H:.0f}" width="{W:.0f}" height="{H:.0f}" '
-      f'role="img" aria-labelledby="{slug}-title {slug}-desc" font-family="{FONT}">')
+      f'role="img" xml:lang="{esc(t.get("language", "zh-CN"))}" aria-labelledby="{slug}-title {slug}-desc" font-family="{FONT}">')
     A(f'<title id="{slug}-title">{esc(title)}</title><desc id="{slug}-desc">{esc(desc)}</desc>')
     A('<defs>')
     cols = sorted({i["color"] for i in scene.items if i["t"] == "conn"})
@@ -1472,6 +1489,7 @@ def scene_wb(scene, t):
 def _theme_from(spec, theme, brand, titlebar):
     preset = PRESETS.get(theme or spec.get("theme") or "gray", DEFAULT_BRAND)
     t = make_theme(brand or spec.get("brand") or preset, titlebar or spec.get("titlebar") or "outline")
+    t["language"] = spec.get("language", "zh-CN")
     t["special_label"], t["special_prefix"] = special_info(spec)
     return t
 
@@ -1486,7 +1504,7 @@ def _titlebar(S, t, W, title):
 def _legend_row(S, t, items, x0, y, W):
     """items: (kind, label). Wraps to a second line when it runs out of width."""
     S.rect(BODY_PAD, y - 16, W - 2 * BODY_PAD, 1, fill=t["rule"], rx=0)
-    S.text(x0, y, 40, 20, "图例", FS, 600, t["soft"], "left")
+    S.text(x0, y, 40, 20, tr(t, '图例'), FS, 600, t["soft"], "left")
     x, line = x0 + 48, 0
     for kind, label in items:
         need = 40 + text_w(label) + 24
@@ -1619,18 +1637,23 @@ class LayersDiagram:
         rails = sp.get("rails") or {}
         side = sp.get("side") or []
         links = sp.get("links") or []
+        rail_labels = []
+        for rail in rails.values():
+            rail_labels += rail if isinstance(rail, list) else (rail.get("items") or [rail.get("label", "")])
+        self.rail_w = max([RAIL_W] + [up4(text_w(word) + 16) for label in rail_labels for word in _vlines(label)])
+        self.label_w = max([LBL_W] + [up4(text_w(layer.get("label", layer["id"]), 14) + 24) for layer in layers]) if sp.get("language") == "en" else LBL_W
 
         # horizontal tracks: [left rail] [layer names] [main] [side columns…] [right rail]
         x = BODY_PAD
         if rails.get("left"):
             self.rail_l = x
-            x += RAIL_W + GAP
+            x += self.rail_w + GAP
         self.x_lbl = x
-        x += LBL_W + GAP
+        x += self.label_w + GAP
         x_main = x
         xr = W - BODY_PAD
         if rails.get("right"):
-            xr -= RAIL_W
+            xr -= self.rail_w
             self.rail_r = xr
             xr -= GAP
         # column index: main = 0, side i = i + 1; a link between neighbours widens their gap
@@ -1666,7 +1689,7 @@ class LayersDiagram:
         for L in layers:
             h = self._layer(L, x_main, y, main_w)
             self.layer_y[L["id"]] = (y, h)
-            S.rect(self.x_lbl, y, LBL_W, h, fill=t["node"], rx=8, text=L.get("label", L["id"]), fs=14, weight=600,
+            S.rect(self.x_lbl, y, self.label_w, h, fill=t["node"], rx=8, text=L.get("label", L["id"]), fs=14, weight=600,
                    color=t["header"], vtext=h < 64 and False, z=0)
             y += h + GAP
         y_top, y_bot = TOP_TITLE + 16, y - GAP
@@ -1680,14 +1703,14 @@ class LayersDiagram:
         for l_ in links:
             self._link(l_)
 
-        _titlebar(S, t, W, sp.get("title", "总体架构"))
+        _titlebar(S, t, W, sp.get("title", tr(self.t, '总体架构')))
         legend = []
-        if "core" in self.used: legend.append(("core", "核心业务"))
-        if "sys" in self.used: legend.append(("sys", "内部系统"))
-        if "ext" in self.used: legend.append(("ext", "外部系统"))
+        if "core" in self.used: legend.append(("core", tr(self.t, '核心业务')))
+        if "sys" in self.used: legend.append(("sys", tr(self.t, '内部系统')))
+        if "ext" in self.used: legend.append(("ext", tr(self.t, '外部系统')))
         if "ai" in self.used: legend.append(("ai", self.t["special_label"]))
-        if "flow" in self.used: legend.append(("flow", "流程推进"))
-        if "more" in self.used: legend.append(("more", "可扩展"))
+        if "flow" in self.used: legend.append(("flow", tr(self.t, '流程推进')))
+        if "more" in self.used: legend.append(("more", tr(self.t, '可扩展')))
         H = y_bot + 24
         if legend:
             ly = y_bot + 40
@@ -1724,7 +1747,7 @@ class LayersDiagram:
             self._f("D1", f"区块 '{b.get('title') or b.get('tab')}' 有 {len(items)} 个条目，上限 {MAX_BLOCK_ITEMS}：拆分或只留代表项 + ……")
         head = (TAB_H + 8 if b.get("tab") else 0) + (36 if b.get("title") else LPAD)
         if b.get("stages"):
-            mx = max(len(_chunks(s_, int(b.get("step_wrap", 2)))) for st in b["stages"] for s_ in st.get("steps") or [])
+            mx = max(len(_chunks(it["label"], int(b.get("step_wrap", 2)))) for st in b["stages"] for it in self._items(st.get("steps")))
             chip_h = max(64, up4(mx * (FS + 6) + 16))
             return {"h": head + 32 + chip_h + 2 * LPAD, "chip_h": chip_h, "head": head}
         if not items:
@@ -1763,7 +1786,9 @@ class LayersDiagram:
         t, S = self.t, self.S
         stages = b["stages"]
         wrap = int(b.get("step_wrap", 2))
-        nat = [len(st.get("steps") or []) * STEP_W + (len(st.get("steps") or []) - 1) * STEP_GAP + 2 * LPAD
+        labels = [it["label"] for st in stages for it in self._items(st.get("steps"))]
+        step_w = max([STEP_W] + [up4(text_w(line) + 16) for label in labels for line in _chunks(label, wrap)])
+        nat = [len(st.get("steps") or []) * step_w + (len(st.get("steps") or []) - 1) * STEP_GAP + 2 * LPAD
                for st in stages]
         for st, nw in zip(stages, nat):
             if text_w(st.get("title", "")) + 2 * LPAD > nw:
@@ -1785,16 +1810,16 @@ class LayersDiagram:
             S.text(sx, y + 6, sw, 24, st.get("title", ""), 14, 600, t["accent"] if core else t["header"])
             steps = self._items(st.get("steps"))
             n = len(steps)
-            gap = (sw - 2 * LPAD - n * STEP_W) / max(1, n - 1) if n > 1 else 0
-            cx = sx + (sw - STEP_W) / 2 if n == 1 else sx + LPAD
+            gap = (sw - 2 * LPAD - n * step_w) / max(1, n - 1) if n > 1 else 0
+            cx = sx + (sw - step_w) / 2 if n == 1 else sx + LPAD
             for k, s_ in enumerate(steps):
                 lab = s_["label"]
-                S.rect(cx, y + 36, STEP_W, chip_h, fill=t["paper"], stroke=t["rule"], rx=4,
+                S.rect(cx, y + 36, step_w, chip_h, fill=t["paper"], stroke=t["rule"], rx=4,
                        text="\n".join(_chunks(lab, wrap)), fs=FS, color=t["node_text"], z=2)
                 if k < n - 1:   # small chevron between steps
-                    mx, my = cx + STEP_W + gap / 2, y + 36 + chip_h / 2
+                    mx, my = cx + step_w + gap / 2, y + 36 + chip_h / 2
                     S.conn([(mx - 4, my - 4), (mx, my), (mx - 4, my + 4)], t["frame"], 1.2, end=False, z=2, glyph="›")
-                cx += STEP_W + gap
+                cx += step_w + gap
             if i < len(stages) - 1:  # stage arrow
                 ax, ay = sx + sw + STAGE_GAP / 2, y + 36 + chip_h / 2
                 S.poly([(ax - 6, ay - 8), (ax + 6, ay), (ax - 6, ay + 8)], t["ink"])
@@ -1866,7 +1891,7 @@ class LayersDiagram:
         yy = y0
         for i, (it, nd) in enumerate(zip(items, need)):
             h = nd + max(0, free) / len(items)
-            S.rect(x, yy, RAIL_W, h, fill=t["node"] if i % 2 == 0 else "#F7F8FA", rx=8, text=it, fs=FS, weight=500,
+            S.rect(x, yy, self.rail_w, h, fill=t["node"] if i % 2 == 0 else "#F7F8FA", rx=8, text=it, fs=FS, weight=500,
                    color=t["muted"], vtext=True, z=0)
             yy += h + 4
 
@@ -1891,7 +1916,7 @@ class LayersDiagram:
     # ---------------------------------------------------------------- outputs
     def svg(self, slug="biz"):
         sp = self.spec
-        return scene_svg(self.S, self.W, self.H, self.t, sp.get("title", "总体架构"), sp.get("desc", sp.get("title", "")),
+        return scene_svg(self.S, self.W, self.H, self.t, sp.get("title", tr(self.t, '总体架构')), sp.get("desc", sp.get("title", "")),
                          slug), self.W, self.H
 
     def wb(self, route_mode="fixed"):
@@ -1979,11 +2004,11 @@ class ERDiagram:
             self._entity(e, self.box[e["id"]])
         self._relations(sp.get("relations") or [])
         bottom = max(b.b for b in boxes)
-        _titlebar(S, t, W, sp.get("title", "数据模型"))
+        _titlebar(S, t, W, sp.get("title", tr(self.t, '数据模型')))
         ly = bottom + 48
-        legend = [("tag:PK", "主键"), ("tag:FK", "外键"), ("rel", "两端标基数")]
+        legend = [("tag:PK", tr(self.t, '主键')), ("tag:FK", tr(self.t, '外键')), ("rel", tr(self.t, '两端标基数'))]
         if cores:
-            legend.insert(0, ("core", "聚合根"))
+            legend.insert(0, ("core", tr(self.t, '聚合根')))
         extra = _legend_row(S, t, legend, BODY_PAD + 8, ly, W)
         self.W, self.H = W, ly + 40 + extra * 32
 
@@ -2022,7 +2047,7 @@ class ERDiagram:
                 raise SpecError(f"relations 引用了不存在的实体：{r}")
             card = r.get("card")
             if not card or len(card) != 2:
-                self._f("C1", f"关系 {a.label}—{b.label} 两端都要标基数，例如 card: ['1', 'N']")
+                self._f("C1", tr(self.t, "关系 {0}—{1} 两端都要标基数，例如 card: ['1', 'N']", a.label, b.label))
                 card = ["", ""]
             gap_x = max(b.x - a.r, a.x - b.r)
             gap_y = max(b.y - a.b, a.y - b.b)
@@ -2106,7 +2131,7 @@ class ERDiagram:
 
     def svg(self, slug="biz"):
         sp = self.spec
-        return scene_svg(self.S, self.W, self.H, self.t, sp.get("title", "数据模型"), sp.get("desc", sp.get("title", "")),
+        return scene_svg(self.S, self.W, self.H, self.t, sp.get("title", tr(self.t, '数据模型')), sp.get("desc", sp.get("title", "")),
                          slug), self.W, self.H
 
     def wb(self, route_mode="fixed"):
@@ -2190,7 +2215,7 @@ class OrgDiagram:
         for i, a in enumerate(sc):
             for b in sc[i + 1:]:
                 if a["cover"] & b["cover"] and not (a["cover"] <= b["cover"] or b["cover"] <= a["cover"]):
-                    self._f("O1", f"数据域 '{a['label']}' 与 '{b['label']}' 交叉：一个组织只能有一个直属数据域，域之间只能嵌套或并列")
+                    self._f("O1", tr(self.t, "数据域 '{0}' 与 '{1}' 交叉：一个组织只能有一个直属数据域，域之间只能嵌套或并列", a['label'], b['label']))
         self.scope_of = {}
         for nid in self.n:
             cands = [s for s in sc if nid in s["cover"]]
@@ -2308,7 +2333,7 @@ class OrgDiagram:
                     continue
                 b = self._box(k)
                 if b[0] >= fx and b[2] <= fr and b[1] >= fy and b[3] <= fb:
-                    self._f("O2", f"数据域 '{s['label']}' 的框住了不属于它的组织 '{v['label']}'：调整成员 / exclude，或把它拆成独立的域")
+                    self._f("O2", tr(self.t, "数据域 '{0}' 的框住了不属于它的组织 '{1}'：调整成员 / exclude，或把它拆成独立的域", s['label'], v['label']))
         self.frames = frames
 
         # tree connectors
@@ -2395,7 +2420,7 @@ class OrgDiagram:
             else:
                 for nid in (a, b):
                     badges.setdefault(nid, []).append(gid)
-            self.notes.append(f"{gid}  {va['label']} → {vb['label']}：{g.get('label', '（未写用途）')}（{GRANT_KINDS[kind]}）")
+            self.notes.append(tr(self.t, '{0}  {1} → {2}：{3}（{4}）', gid, va['label'], vb['label'], g.get('label', tr(self.t, '（未写用途）')), tr(self.t, GRANT_KINDS[kind])))
             self.used.add("grant")
         for nid, ids in badges.items():
             v = self.n[nid]
@@ -2406,25 +2431,26 @@ class OrgDiagram:
                 S.rect(x, v["y"] + v["h"] - 7, bw, 16, fill=t["accent_tint"], stroke=t["accent"], rx=8, text=gid, fs=9,
                        weight=600, color=t["accent"], z=4)
         if self.notes:
-            self.notes.insert(0, f"跨数据域授权 {cross} 条（其中读写 / 委托 {writes} 条）")
+            self.notes.insert(0, tr(self.t, '跨数据域授权 {0} 条（其中读写 / 委托 {1} 条）', cross, writes))
 
         # chrome + legend
-        _titlebar(S, t, W, sp.get("title", "组织架构与数据隔离"))
+        _titlebar(S, t, W, sp.get("title", tr(self.t, '组织架构与数据隔离')))
         bottom = max([bottom] + [f[3] for f in frames.values()])
         legend = []
-        if "hq" in self.used: legend.append(("hq", "总部 / 上级"))
-        if "unit" in self.used: legend.append(("chip", "组织单元"))
-        if "core" in self.used: legend.append(("core", "核心单元"))
-        if "virtual" in self.used: legend.append(("more", "虚拟组织"))
-        if "shared" in self.used: legend.append(("scope_s", "共享数据域"))
-        if "isolated" in self.used: legend.append(("scope_i", "隔离数据域"))
-        if "grant" in self.used: legend.append(("tag:A1", "跨域授权"))
+        if "hq" in self.used: legend.append(("hq", tr(self.t, '总部 / 上级')))
+        if "unit" in self.used: legend.append(("chip", tr(self.t, '组织单元')))
+        if "core" in self.used: legend.append(("core", tr(self.t, '核心单元')))
+        if "virtual" in self.used: legend.append(("more", tr(self.t, '虚拟组织')))
+        if "shared" in self.used: legend.append(("scope_s", tr(self.t, '共享数据域')))
+        if "isolated" in self.used: legend.append(("scope_i", tr(self.t, '隔离数据域')))
+        if "grant" in self.used: legend.append(("tag:A1", tr(self.t, '跨域授权')))
         ly = bottom + 40
         extra = self._legend(legend, ly, W)
         ny = ly + 36 + extra * 32
-        for k, line in enumerate(self.notes):
+        lines = [line for note in self.notes for line in _wrap_w(note, W - 2 * BODY_PAD - 64)]
+        for k, line in enumerate(lines):
             S.text(BODY_PAD + 56, ny + k * 22, max(240, text_w(line) + 16), 20, line, FS, 400, t["muted"], "left")
-        self.W, self.H = W, ny + 22 * len(self.notes) + 24
+        self.W, self.H = W, ny + 22 * len(lines) + 24
 
     def _legend(self, items, y, W):
         t, S = self.t, self.S
@@ -2439,7 +2465,7 @@ class OrgDiagram:
             else:
                 mapped.append((kind, label))
         S.rect(BODY_PAD, y - 16, W - 2 * BODY_PAD, 1, fill=t["rule"], rx=0)
-        S.text(BODY_PAD + 8, y, 40, 20, "图例", FS, 600, t["soft"], "left")
+        S.text(BODY_PAD + 8, y, 40, 20, tr(self.t, '图例'), FS, 600, t["soft"], "left")
         x, line = BODY_PAD + 56, 0
         for kind, label in mapped:
             if x + 40 + text_w(label) + 24 > W - BODY_PAD and x > BODY_PAD + 56:
@@ -2468,7 +2494,7 @@ class OrgDiagram:
     # ---------------------------------------------------------------- outputs
     def svg(self, slug="biz"):
         sp = self.spec
-        return scene_svg(self.S, self.W, self.H, self.t, sp.get("title", "组织架构"), sp.get("desc", sp.get("title", "")),
+        return scene_svg(self.S, self.W, self.H, self.t, sp.get("title", tr(self.t, '组织架构')), sp.get("desc", sp.get("title", "")),
                          slug), self.W, self.H
 
     def wb(self, route_mode="fixed"):
@@ -2485,7 +2511,7 @@ class OrgDiagram:
 def _legend_sw(S, t, items, y, W):
     """items: (kind, label, opts). kind: box | diamond | dot | line. Wraps at the page edge; returns extra lines."""
     S.rect(BODY_PAD, y - 16, W - 2 * BODY_PAD, 1, fill=t["rule"], rx=0)
-    S.text(BODY_PAD + 8, y, 40, 20, "图例", FS, 600, t["soft"], "left")
+    S.text(BODY_PAD + 8, y, 40, 20, tr(t, '图例'), FS, 600, t["soft"], "left")
     x0 = BODY_PAD + 56
     x, line = x0, 0
     for kind, label, o in items:
@@ -2528,14 +2554,15 @@ class _SceneDiagram:
     def _f(self, code, msg):
         self.findings.append((code, f"[{code}] {msg}"))
 
-    def _notes(self, y):
-        for k, line in enumerate(self.notes):
+    def _notes(self, y, width):
+        lines = [line for note in self.notes for line in _wrap_w(note, width - 2 * BODY_PAD - 64)]
+        for k, line in enumerate(lines):
             self.S.text(BODY_PAD + 56, y + k * 22, max(240, text_w(line) + 16), 20, line, FS, 400, self.t["muted"], "left")
-        return y + 22 * len(self.notes)
+        return y + 22 * len(lines)
 
     def svg(self, slug="biz"):
         sp = self.spec
-        title = sp.get("title", self.default_title)
+        title = sp.get("title", tr(self.t, self.default_title))
         return scene_svg(self.S, self.W, self.H, self.t, title, sp.get("desc", title), slug), self.W, self.H
 
     def wb(self, route_mode="fixed"):
@@ -2641,22 +2668,22 @@ class FishboneDiagram(_SceneDiagram):
         if len(roots) > MAX_CORE:
             self._f("F1", f"标了 {len(roots)} 个根因，上限 {MAX_CORE}：根因多于 3 个，说明还没找到真正的根因")
         if roots:
-            self.notes.append(f"已验证根因 {len(roots)} 个：{'；'.join(roots)}")
+            self.notes.append(tr(self.t, '已验证根因 {0} 个：{1}', len(roots), '；'.join(roots)))
             per = {}
             for r in roots:
                 per[r.split(' / ')[0]] = per.get(r.split(' / ')[0], 0) + 1
             if len(per) == 1 and len(roots) > 1:
-                self.notes.append(f"根因全部集中在『{next(iter(per))}』：先在这一类上做对策")
+                self.notes.append(tr(self.t, '根因全部集中在『{0}』：先在这一类上做对策', next(iter(per))))
         else:
-            self.notes.append("尚未标出根因：现在这张图只是假设清单，逐条验证后用 root: true 标出（≤3 个）")
-        _titlebar(S, t, W, sp.get("title", self.default_title))
+            self.notes.append(tr(self.t, '尚未标出根因：现在这张图只是假设清单，逐条验证后用 root: true 标出（≤3 个）'))
+        _titlebar(S, t, W, sp.get("title", tr(self.t, self.default_title)))
         ly = bottom + 48
-        legend = [("box", "原因大类", {"fill": t["hub"]}), ("box", "可能原因", {"fill": t["node"]})]
+        legend = [("box", tr(self.t, '原因大类'), {"fill": t["hub"]}), ("box", tr(self.t, '可能原因'), {"fill": t["node"]})]
         if roots:
-            legend.append(("box", "已验证根因", {"fill": t["accent_tint"], "stroke": t["accent"]}))
-        legend.append(("box", "问题（结果）", {"fill": t["accent_tint"], "stroke": t["accent"], "rx": 6}))
+            legend.append(("box", tr(self.t, '已验证根因'), {"fill": t["accent_tint"], "stroke": t["accent"]}))
+        legend.append(("box", tr(self.t, '问题（结果）'), {"fill": t["accent_tint"], "stroke": t["accent"], "rx": 6}))
         extra = _legend_sw(S, t, legend, ly, W)
-        end = self._notes(ly + 36 + extra * 32)
+        end = self._notes(ly + 36 + extra * 32, W)
         self.W, self.H = W, end + 16
         self.ncause = sum(len(c["causes"]) for c in cats)
         self.ncat = len(cats)
@@ -2775,7 +2802,7 @@ class TimelineDiagram(_SceneDiagram):
                 if x >= x0 - 0.5:
                     S.rect(x - 0.5, axis_y - 8, 1, 6, fill=t["muted"], rx=0, z=1)
                     lab = (f"{d.year} Q{(d.month - 1) // 3 + 1}" if quarter else
-                           (f"{d.year}.{d.month:02d}" if first or d.month == 1 else f"{d.month}月"))
+                           (f"{d.year}.{d.month:02d}" if first or d.month == 1 else (str(d.month) if self.t['language'] == 'en' else f'{d.month}月')))
                     lw = text_w(lab) + 8
                     S.text(x - lw / 2, axis_y - 28, lw, 16, lab, FS, 400, t["soft"])   # above the axis: leaders run below
                     first = False
@@ -2829,7 +2856,7 @@ class TimelineDiagram(_SceneDiagram):
                 days = (m["d"] - m["p"]).days
                 sy = axis_y - 44
                 S.conn([(px, sy), (x, sy)], t["ink"], 1.2, "5,4", end=True, z=3)
-                sl = f"{'+' if days > 0 else ''}{days}天"   # free text above the arrow: a board label would hide a short arrow
+                sl = tr(self.t, '{0}{1}天', '+' if days > 0 else '', days)   # free text above the arrow: a board label would hide a short arrow
                 S.text((px + x) / 2 - (text_w(sl) + 8) / 2, sy - 22, text_w(sl) + 8, 16, sl, FS, 600, t["ink"], mask=t["paper"], z=5)
                 if abs(x - px) < MIN_END:
                     self._f("A1", f"里程碑 '{lab}' 的偏移只有 {abs(days)} 天，箭头画不出来：拉长时间轴或去掉 plan")
@@ -2839,46 +2866,46 @@ class TimelineDiagram(_SceneDiagram):
             if start <= today <= end:
                 tx = X(today)
                 S.conn([(tx, TOP_TITLE + 30), (tx, row_bottom + 8)], t["accent"], 1.2, "5,4", end=False, z=1)
-                lab = f"今天 {today.strftime('%m-%d')}"
+                lab = tr(self.t, '今天 {0}', today.strftime('%m-%d'))
                 S.text(tx - (text_w(lab) + 8) / 2, TOP_TITLE + 12, text_w(lab) + 8, 16, lab, FS, 600, t["accent"],
                        mask=t["paper"], z=5)
             else:
                 self._f("TL1", f"today {today} 不在时间轴内")
         # notes: progress + slips
         if ms:
-            line = f"里程碑 {len(ms)} 个"
+            line = tr(self.t, '里程碑 {0} 个', len(ms))
             if today or any(m.get("status") for m in ms):
-                line += f" · 已完成 {done_n} 个"
+                line += tr(self.t, ' · 已完成 {0} 个', done_n)
             if unknown_n:
-                line += f" · 状态待确认 {unknown_n} 个"
+                line += tr(self.t, ' · 状态待确认 {0} 个', unknown_n)
             if overdue_n:
-                line += f" · 到期未完成 {overdue_n} 个"
+                line += tr(self.t, ' · 到期未完成 {0} 个', overdue_n)
             self.notes.append(line)
         if slips:
             late = [m for m in slips if m["d"] > m["p"]]
             if late:
                 worst = max(late, key=lambda m: (m["d"] - m["p"]).days)
                 tot = sum((m["d"] - m["p"]).days for m in late)
-                self.notes.append(f"延期 {len(late)} 个，累计 {tot} 天；最大：{worst['label']} +{(worst['d'] - worst['p']).days} 天")
+                self.notes.append(tr(self.t, '延期 {0} 个，累计 {1} 天；最大：{2} +{3} 天', len(late), tot, worst['label'], (worst['d'] - worst['p']).days))
                 after = [m for m in ms if m["d"] > worst["d"] and not m["p"]]
                 if after:
-                    self.notes.append(f"{worst['label']} 之后还有 {len(after)} 个节点没写 plan：是否顺延需核实依赖与缓冲")
-        _titlebar(S, t, W, sp.get("title", self.default_title))
+                    self.notes.append(tr(self.t, '{0} 之后还有 {1} 个节点没写 plan：是否顺延需核实依赖与缓冲', worst['label'], len(after)))
+        _titlebar(S, t, W, sp.get("title", tr(self.t, self.default_title)))
         ly = row_bottom + 48
-        legend = [("diamond", "已完成", {"fill": t["ink"]}), ("diamond", "未完成", {"fill": t["paper"], "stroke": t["ink"]})]
+        legend = [("diamond", tr(self.t, '已完成'), {"fill": t["ink"]}), ("diamond", tr(self.t, '未完成'), {"fill": t["paper"], "stroke": t["ink"]})]
         if unknown_n:
-            legend.append(("diamond", "待确认", {"fill": t["paper"], "stroke": t["ink"], "dash": "3,3"}))
+            legend.append(("diamond", tr(self.t, '待确认'), {"fill": t["paper"], "stroke": t["ink"], "dash": "3,3"}))
         if cores:
-            legend.append(("diamond", "关键节点", {"fill": t["accent"]}))
+            legend.append(("diamond", tr(self.t, '关键节点'), {"fill": t["accent"]}))
         if ph:
-            legend.append(("box", "阶段", {"fill": t["paper"], "stroke": t["frame"]}))
+            legend.append(("box", tr(self.t, '阶段'), {"fill": t["paper"], "stroke": t["frame"]}))
         if slips:
-            legend.append(("diamond", "原计划", {"fill": t["paper"], "stroke": t["muted"], "dash": "2,2"}))
-            legend.append(("line", "计划 → 预测", {"color": t["ink"], "dash": "5,4"}))
+            legend.append(("diamond", tr(self.t, '原计划'), {"fill": t["paper"], "stroke": t["muted"], "dash": "2,2"}))
+            legend.append(("line", tr(self.t, '计划 → 预测'), {"color": t["ink"], "dash": "5,4"}))
         if today:
-            legend.append(("line", "今天", {"color": t["accent"], "dash": "5,4", "arrow": False}))
+            legend.append(("line", tr(self.t, '今天'), {"color": t["accent"], "dash": "5,4", "arrow": False}))
         extra = _legend_sw(S, t, legend, ly, W)
-        endy = self._notes(ly + 36 + extra * 32)
+        endy = self._notes(ly + 36 + extra * 32, W)
         self.W, self.H = W, endy + 16
         self.nms, self.nph = len(ms), len(ph)
 
@@ -2939,12 +2966,12 @@ class QuadrantDiagram(_SceneDiagram):
         # axes
         S.conn([(px, py + size + 20), (px + size + 8, py + size + 20)], t["ink"], 1.5, end=True, z=1)
         S.conn([(px - 20, py + size), (px - 20, py - 8)], t["ink"], 1.5, end=True, z=1)
-        for v, s_, al in ((0, ax.get("low", "低"), "left"), (10, ax.get("high", "高"), "right")):
+        for v, s_, al in ((0, ax.get("low", tr(self.t, '低')), "left"), (10, ax.get("high", tr(self.t, '高')), "right")):
             w = text_w(s_) + 8
             S.text(X(v) - (0 if al == "left" else w), py + size + 26, w, 16, s_, FS, 400, t["soft"], al)
         xl = ax["label"]
         S.text(px + half - (text_w(xl, 14) + 8) / 2, py + size + 44, text_w(xl, 14) + 8, 20, xl, 14, 600, t["header"])
-        for v, s_ in ((0, ay.get("low", "低")), (10, ay.get("high", "高"))):
+        for v, s_ in ((0, ay.get("low", tr(self.t, '低'))), (10, ay.get("high", tr(self.t, '高')))):
             w = text_w(s_) + 8
             S.text(px - 28 - w, Y(v) - (16 if v == 0 else 0), w, 16, s_, FS, 400, t["soft"], "right")
         yl = ay["label"]
@@ -2964,7 +2991,7 @@ class QuadrantDiagram(_SceneDiagram):
                 if not 0 <= v <= 10:
                     self._f("Q1", f"事项 '{lab}' 的 {k}={v} 超出 0–10")
                 if abs(v - 5) < 0.25:
-                    self._f("Q3", f"事项 '{lab}' 正好压在分界线上（{k}={v}）：四象限的价值就是逼你选边，挪到一侧")
+                    self._f("Q3", tr(self.t, "事项 '{0}' 正好压在分界线上（{1}={2}）：四象限的价值就是逼你选边，挪到一侧", lab, k, v))
             if wide_len(lab) > 10:
                 self._f("T1", f"事项 '{lab}' 过长：精简到 10 个字以内")
             q = ("q1" if it["x"] >= 5 else "q2") if it["y"] >= 5 else ("q4" if it["x"] >= 5 else "q3")
@@ -3002,20 +3029,20 @@ class QuadrantDiagram(_SceneDiagram):
             self.notes.append(" · ".join(f"{named[q]} {counts[q]}" for q in ("q1", "q2", "q3", "q4")))
             heavy = max(counts, key=counts.get)
             if counts[heavy] / len(items) >= 0.6 and len(items) >= 4:
-                self.notes.append(f"{counts[heavy]}/{len(items)} 个事项挤在『{named[heavy]}』：评分可能没拉开，复核打分标准")
+                self.notes.append(tr(self.t, '{0}/{1} 个事项挤在『{2}』：评分可能没拉开，复核打分标准', counts[heavy], len(items), named[heavy]))
         if moves:
-            self.notes.append(f"现状 → 目标迁移 {moves} 项")
-        _titlebar(S, t, W, sp.get("title", self.default_title))
+            self.notes.append(tr(self.t, '现状 → 目标迁移 {0} 项', moves))
+        _titlebar(S, t, W, sp.get("title", tr(self.t, self.default_title)))
         ly = py + size + 96
-        legend = [("dot", "事项", {"fill": t["ink"]})]
+        legend = [("dot", tr(self.t, '事项'), {"fill": t["ink"]})]
         if cores:
-            legend.append(("dot", "重点事项", {"fill": t["accent"]}))
+            legend.append(("dot", tr(self.t, '重点事项'), {"fill": t["accent"]}))
         if focus:
-            legend.append(("box", "优先象限", {"fill": t["accent_zone"], "stroke": t["rule"], "rx": 0}))
+            legend.append(("box", tr(self.t, '优先象限'), {"fill": t["accent_zone"], "stroke": t["rule"], "rx": 0}))
         if moves:
-            legend.append(("line", "现状 → 目标", {"color": t["muted"], "dash": "5,4"}))
+            legend.append(("line", tr(self.t, '现状 → 目标'), {"color": t["muted"], "dash": "5,4"}))
         extra = _legend_sw(S, t, legend, ly, W)
-        endy = self._notes(ly + 36 + extra * 32)
+        endy = self._notes(ly + 36 + extra * 32, W)
         self.W, self.H = W, endy + 16
         self.nitems = len(items)
 
@@ -3110,9 +3137,9 @@ class IDEF0Diagram(_SceneDiagram):
             a["R"] = [("out", r) for r in out_fb_c + outs + fwd_oc + fwd_oi + out_fb_i]
             a["B"] = [("mech", m) for m in mechs if a in m["to"]]
             if not a["T"]:
-                self._f("ID1", f"活动 '{a['label']}' 没有控制：IDEF0 要求每个活动至少一个控制（制度、标准、计划、审批规则）——没有约束的活动就是失控点")
+                self._f("ID1", tr(self.t, "活动 '{0}' 没有控制：IDEF0 要求每个活动至少一个控制（制度、标准、计划、审批规则）——没有约束的活动就是失控点", a['label']))
             if not a["R"]:
-                self._f("ID2", f"活动 '{a['label']}' 没有输出：没有产出的活动要么多余，要么漏画了结果")
+                self._f("ID2", tr(self.t, "活动 '{0}' 没有输出：没有产出的活动要么多余，要么漏画了结果", a['label']))
             for side, length in (("L", I0_H), ("R", I0_H), ("T", I0_W), ("B", I0_W)):
                 if (len(a[side]) + 1) * I0_PORT > length:
                     self._f("ID5", f"活动 '{a['label']}' 的{'左右上下'['LRTB'.index(side)]}侧有 {len(a[side])} 个箭头，挤不下：拆分活动，或把同类输入合并成一条")
@@ -3292,39 +3319,39 @@ class IDEF0Diagram(_SceneDiagram):
                     self._f("L3", f"标签 '{labels[i][2]}' 与 '{labels[j][2]}' 重叠")
 
         # ---- insight notes
-        self.notes.append(f"活动 {n} 个 · 控制 {len(ctrls)} 条 · 机制 {len(mechs)} 个 · 内部流转 {sum(1 for r in arrows if r['t'] == 'flow')} 条")
+        self.notes.append(tr(self.t, '活动 {0} 个 · 控制 {1} 条 · 机制 {2} 个 · 内部流转 {3} 条', n, len(ctrls), len(mechs), sum(1 for r in arrows if r['t'] == 'flow')))
         for m in mechs:
             if n >= 3 and len(m["to"]) / n >= 0.6:
-                self.notes.append(f"『{m['label']}』支撑 {len(m['to'])}/{n} 个活动：它一停，整条链就停")
+                self.notes.append(tr(self.t, '『{0}』支撑 {1}/{2} 个活动：它一停，整条链就停', m['label'], len(m['to']), n))
         bare = [a["label"] for a in acts if not a["B"]]
         if bare:
-            self.notes.append(f"未标机制：{'、'.join(bare)}——谁来做、用什么做没说清")
+            self.notes.append(tr(self.t, '未标机制：{0}——谁来做、用什么做没说清', join_labels(self.t, bare)))
         back = [r for r in arrows if r["t"] == "flow" and r["back"]]
         if back:
-            self.notes.append(f"回路 {len(back)} 条（{'、'.join(r['label'] or '未命名' for r in back)}）：每条回路都是潜在的返工，会拉长周期")
+            self.notes.append(tr(self.t, '回路 {0} 条（{1}）：每条回路都是潜在的返工，会拉长周期', len(back), join_labels(self.t, (r['label'] or tr(self.t, '未命名') for r in back))))
         only_fb = [a["label"] for a in acts if a["T"] and all(it[0] == "in" for it in a["T"])]
         if only_fb:
-            self.notes.append(f"{'、'.join(only_fb)} 只受上游结果约束、没有制度控制：标准靠人记，最容易走样")
+            self.notes.append(tr(self.t, '{0} 只受上游结果约束、没有制度控制：标准靠人记，最容易走样', join_labels(self.t, only_fb)))
 
-        _titlebar(S, t, W, (f"{node} " if sp.get("node") else "") + sp.get("title", self.default_title))
+        _titlebar(S, t, W, (f"{node} " if sp.get("node") else "") + sp.get("title", tr(self.t, self.default_title)))
         bottom = y_chip + 28 if mechs else last["b"] + 24 + 12 * n_fb_i
         ly = bottom + 44
-        legend = [("box", "活动", {"fill": t["hub"]})]
+        legend = [("box", tr(self.t, '活动'), {"fill": t["hub"]})]
         if cores:
-            legend.append(("box", "核心活动", {"fill": t["accent_tint"], "stroke": t["accent"]}))
-        legend += [("line", "输入 / 输出", {"color": t["ink"]})]
+            legend.append(("box", tr(self.t, '核心活动'), {"fill": t["accent_tint"], "stroke": t["accent"]}))
+        legend += [("line", tr(self.t, '输入 / 输出'), {"color": t["ink"]})]
         if ctrls or any(r["t"] == "flow" and r["as"] == "control" for r in arrows):
-            legend.append(("line", "控制（制度 / 规则）", {"color": t["muted"], "dash": "5,4"}))
+            legend.append(("line", tr(self.t, '控制（制度 / 规则）'), {"color": t["muted"], "dash": "5,4"}))
         if mechs:
-            legend.append(("line", "机制（谁做 / 用什么做）", {"color": t["muted"], "dash": "2,3"}))
+            legend.append(("line", tr(self.t, '机制（谁做 / 用什么做）'), {"color": t["muted"], "dash": "2,3"}))
         if "sys" in used:
-            legend.append(("box", "内部系统", {"fill": t["sys_int"], "rx": 6}))
+            legend.append(("box", tr(self.t, '内部系统'), {"fill": t["sys_int"], "rx": 6}))
         if "ext" in used:
-            legend.append(("box", "外部系统", {"fill": t["sys_ext"], "rx": 6}))
+            legend.append(("box", tr(self.t, '外部系统'), {"fill": t["sys_ext"], "rx": 6}))
         if "people" in used:
-            legend.append(("box", "部门 / 岗位", {"fill": t["node"], "rx": 8}))
+            legend.append(("box", tr(self.t, '部门 / 岗位'), {"fill": t["node"], "rx": 8}))
         extra = _legend_sw(S, t, legend, ly, W)
-        endy = self._notes(ly + 36 + extra * 32)
+        endy = self._notes(ly + 36 + extra * 32, W)
         self.W, self.H = W, endy + 16
         self.nacts = n
 
@@ -3342,9 +3369,9 @@ LAYOUTS = {"layers": LayersDiagram, "er": ERDiagram, "org": OrgDiagram,
            "fishbone": FishboneDiagram, "timeline": TimelineDiagram, "quadrant": QuadrantDiagram, "idef0": IDEF0Diagram}
 
 
-def render_html(svg, W, title):
+def render_html(svg, W, title, language="zh-CN"):
     return f"""<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="{esc(language)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)}</title>
 <style>
 :root{{--bg:#F5F6F7}}
@@ -3449,6 +3476,8 @@ INIT_ALIAS = {"arch": "1-arch", "flow": "2-flow", "paths": "3-paths", "swim": "4
 
 def build_spec(spec, theme=None, brand=None, titlebar=None, orient=None, slug="biz"):
     validate_spec(spec)
+    spec = _copy.deepcopy(spec)
+    spec.pop("_special", None)
     lay = spec.get("layout") or "stages"
     if lay in LAYOUTS:
         d = LAYOUTS[lay](spec, theme, brand, titlebar, orient)
@@ -3520,7 +3549,7 @@ def verify_flow(d):
         V = {}
     out, inc = _flow_graph(d)
     if not out:
-        return [("P2", "[P2] verify 需要流程连线（kind: flow / return 或 paths），这张图没有")], []
+        return [("P2", tr(d.t, '[P2] verify 需要流程连线（kind: flow / return 或 paths），这张图没有'))], []
     def ref(r, ctx):
         nid = d.resolve(r, f"verify.{ctx}").id
         if nid not in out:
@@ -3533,12 +3562,12 @@ def verify_flow(d):
     L = lambda n: d.nodes[n].label
     found, ok = [], []
     if V.get("nodes"):
-        ok.append(f"验证范围：指定的 {len(out)} 个步骤；未列入的节点与跨范围连线不验证")
+        ok.append(tr(d.t, '验证范围：指定的 {0} 个步骤；未列入的节点与跨范围连线不验证', len(out)))
     reach = _bfs(out, starts)
     if V.get("reachable", True):
         miss = [n for n in out if n not in reach]
         for n in miss:
-            found.append(("P2", f"[P2] 步骤『{L(n)}』从起点（{'、'.join(L(s) for s in starts)}）走不到"))
+            found.append(("P2", tr(d.t, '[P2] 步骤『{0}』从起点（{1}）走不到', L(n), join_labels(d.t, (L(s) for s in starts)))))
     if V.get("terminates", True):
         rev = {}
         for u, vs in out.items():
@@ -3547,17 +3576,17 @@ def verify_flow(d):
         back = _bfs(rev, ends)
         for n in reach:
             if n not in back:
-                found.append(("P3", f"[P3] 死路：{_trace(reach, n, d)} 之后走不到任何终点（{'、'.join(L(e) for e in ends)}）"))
+                found.append(("P3", tr(d.t, '[P3] 死路：{0} 之后走不到任何终点（{1}）', _trace(reach, n, d), join_labels(d.t, (L(e) for e in ends)))))
     for n in out:
         if d.nodes[n].kind == "decision" and len(set(out[n])) < 2:
-            found.append(("P4", f"[P4] 判断『{L(n)}』只有 {len(set(out[n]))} 个出口"))
+            found.append(("P4", tr(d.t, '[P4] 判断『{0}』只有 {1} 个出口', L(n), len(set(out[n])))))
     if not [f for f in found if f[0] in ("P2", "P3")] and V.get("reachable", True) and V.get("terminates", True):
-        ok.append(f"已验证：{len(out)} 个步骤都能从起点到达，也都能走到终点")
+        ok.append(tr(d.t, '已验证：{0} 个步骤都能从起点到达，也都能走到终点', len(out)))
     for m in V.get("must_pass") or []:
         tgt = ref(m["before"], "must_pass.before")
         thr = [ref(x, "must_pass.through") for x in lst(m["through"])]
         if tgt not in reach:
-            found.append(("P1", f"[P1] 目标『{L(tgt)}』从起点不可达，无法确认控制点必经关系"))
+            found.append(("P1", tr(d.t, '[P1] 目标『{0}』从起点不可达，无法确认控制点必经关系', L(tgt))))
             continue
         miss, ex = [], None
         for y in thr:
@@ -3566,9 +3595,9 @@ def verify_flow(d):
                 miss.append(y)
                 ex = ex or _trace(par, tgt, d)
         if miss:
-            found.append(("P1", f"[P1] 可以绕过 {'、'.join('『' + L(y) + '』' for y in miss)} 到达『{L(tgt)}』，例如：{ex}"))
+            found.append(("P1", tr(d.t, '[P1] 可以绕过 {0} 到达『{1}』，例如：{2}', join_labels(d.t, (L(y) for y in miss), quoted=True), L(tgt), ex)))
         else:
-            ok.append(f"已验证：到达『{L(tgt)}』之前必经 {'、'.join('『' + L(y) + '』' for y in thr)}")
+            ok.append(tr(d.t, '已验证：到达『{0}』之前必经 {1}', L(tgt), join_labels(d.t, (L(y) for y in thr), quoted=True)))
     for pair in V.get("separate") or []:
         a, b = ref(pair[0], "separate"), ref(pair[1], "separate")
         def actor(n):
@@ -3581,11 +3610,11 @@ def verify_flow(d):
             return None
         aa, ab = actor(a), actor(b)
         if not aa or not ab:
-            found.append(("P5", f"[P5] 『{L(a)}』与『{L(b)}』的执行角色待确认，不能由排版列推断岗位分离"))
+            found.append(("P5", tr(d.t, '[P5] 『{0}』与『{1}』的执行角色待确认，不能由排版列推断岗位分离', L(a), L(b))))
         elif aa == ab:
-            found.append(("P5", f"[P5] 『{L(a)}』与『{L(b)}』都由『{aa}』执行，违反岗位分离"))
+            found.append(("P5", tr(d.t, '[P5] 『{0}』与『{1}』都由『{2}』执行，违反岗位分离', L(a), L(b), aa)))
         else:
-            ok.append(f"已验证：『{L(a)}』与『{L(b)}』声明了不同角色（{aa} / {ab}）；实际权限另行核验")
+            ok.append(tr(d.t, '已验证：『{0}』与『{1}』声明了不同角色（{2} / {3}）；实际权限另行核验', L(a), L(b), aa, ab))
     return found, ok
 
 
@@ -3632,22 +3661,17 @@ def report(layout, finds, accepted, ok, hints=True):
         print("  " + line)
 
 
-def note_lines(accepted, ok):
+def note_lines(accepted, ok, context=None):
+    context = context or {}
     lines = list(ok)
     for code, msg, a in accepted:
         body = _re.sub(r"^\[\w+\]\s*", "", msg)
-        lines.append(f"已确认的发现（{code}）：{body}" + (f"。说明：{a['note']}" if a.get("note") else ""))
+        lines.append(tr(context, "已确认的发现（{0}）：{1}", code, body) + (tr(context, "。说明：{0}", a["note"]) if a.get("note") else ""))
     return lines
 
 
 def _wrap(s, n):
-    out, cur = [], ""
-    for ch in s:
-        cur += ch
-        if text_w(cur) > n:
-            out.append(cur[:-1])
-            cur = "    " + ch
-    return out + [cur] if cur.strip() else out
+    return _wrap_w(s, n)
 
 
 def add_notes_svg(svg, W, H, t, lines):
@@ -3663,7 +3687,7 @@ def add_notes_svg(svg, W, H, t, lines):
     parts = [f'<rect x="0" y="{H:.0f}" width="{W:.0f}" height="{extra:.0f}" fill="{t["paper"]}"/>',
              f'<line x1="{BODY_PAD}" y1="{H + 4:.0f}" x2="{W - BODY_PAD:.0f}" y2="{H + 4:.0f}" stroke="{t["rule"]}"/>']
     for k, r in enumerate(rows):
-        col = t["ink"] if r.startswith("已确认") else t["muted"]
+        col = t["ink"] if r.startswith(("已确认", "Confirmed finding")) else t["muted"]
         parts.append(f'<text x="{BODY_PAD + 8}" y="{H + 28 + 22 * k:.0f}" fill="{col}" font-size="12">{esc(r)}</text>')
     i = svg.rindex("</svg>")
     return svg[:i] + "".join(parts) + svg[i:], H2
@@ -3676,7 +3700,7 @@ def add_notes_wb(dsl, W, H, t, lines):
     for k, r in enumerate(rows):
         dsl["nodes"].append({"type": "text", "id": f"note_{k}", "x": BODY_PAD + 8, "y": round(H + 14 + 22 * k),
                              "width": round(W - 2 * BODY_PAD - 16), "height": 20, "text": r, "fontSize": 12,
-                             "textColor": t["ink"] if r.startswith("已确认") else t["muted"],
+                             "textColor": t["ink"] if r.startswith(("已确认", "Confirmed finding")) else t["muted"],
                              "textAlign": "left", "verticalAlign": "middle"})
     return dsl
 
@@ -3820,8 +3844,9 @@ def selftest():
 
 # ---------------------------------------------------------------- 入口
 def main():
-    ap = argparse.ArgumentParser(description="saan-diagram v1.1.0: YAML spec -> HTML/SVG/PNG/whiteboard DSL")
+    ap = argparse.ArgumentParser(description="saan-diagram v1.2.0: YAML spec -> HTML/SVG/PNG/whiteboard DSL")
     ap.add_argument("spec", nargs="?")
+    ap.add_argument("--language", choices=["en", "zh-CN"], help="Language of generated captions; overrides spec.language, does not translate input labels")
     ap.add_argument("--result-json", help="保存机器可读的校验与产物状态（出图默认写 <slug>.result.json）")
     ap.add_argument("--all", action="store_true", help="一次完成：校验 → HTML + PNG + 画板 DSL（推荐）")
     ap.add_argument("--outdir", help="--all 的输出目录（默认与 spec 同目录）")
@@ -3878,6 +3903,8 @@ def main():
 
     try:
         spec = load_spec(a.spec)
+        if a.language:
+            spec["language"] = a.language
         d, svg, W, H = build_spec(spec, a.theme, a.brand, a.titlebar, a.orient, slug)
         layout, finds, accepted, ok = collect(d)
     except SpecError as ex:
@@ -3885,13 +3912,14 @@ def main():
         result["errors"].append(str(ex))
         return finish(3, "invalid_spec")
     report(layout, finds, accepted, ok)
+    result["language"] = d.t["language"]
     result["validation"] = "failed" if layout or finds else "passed"
     result["findings"] = {"layout": layout, "unconfirmed": finds, "accepted": accepted, "verified": ok}
     size = d.stats() if hasattr(d, "stats") else f"{len(d.nodes)} 节点 · {len(d.edges)} 连线"
     if a.lint or layout or finds:
         print(f"{'FAIL' if layout or finds else 'PASS'}: 排版 {len(layout)} 条 · 发现 {len(finds)} 条（已确认 {len(accepted)}） · {size}")
         return finish(1 if layout else 2 if finds else 0, "validation_failed" if layout or finds else "validated")
-    notes = note_lines(accepted, ok)
+    notes = note_lines(accepted, ok, d.t)
     svg, H2 = add_notes_svg(svg, W, H, d.t, notes)
     out = Path(a.out) if a.out else outdir / f"{slug}.html"
 
@@ -3919,7 +3947,7 @@ def main():
             if tmp and tmp.exists():
                 tmp.unlink()
 
-    produce("html", out, lambda p: p.write_text(render_html(svg, W, d.spec.get("title", "diagram")), encoding="utf-8"))
+    produce("html", out, lambda p: p.write_text(render_html(svg, W, d.spec.get("title", "diagram"), d.t["language"]), encoding="utf-8"))
     if a.svg:
         produce("svg", a.svg, lambda p: p.write_text(svg, encoding="utf-8"))
     png = a.png or (str(outdir / f"{slug}.png") if a.all else None)

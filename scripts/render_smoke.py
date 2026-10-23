@@ -21,6 +21,10 @@ def main():
     examples = sorted((skill / "assets").glob("*.yaml"))
     if len(examples) != 14:
         raise RuntimeError(f"Expected 14 shipped examples, found {len(examples)}")
+    english = sorted((skill / "assets/en").glob("*.yaml"))
+    if len(english) != 3:
+        raise RuntimeError(f"Expected 3 English examples, found {len(english)}")
+    examples += english
     for spec in examples:
         stem = spec.stem
         svg, wb = out / f"{stem}.svg", out / f"{stem}.wb.json"

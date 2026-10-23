@@ -1,0 +1,16 @@
+# Fictional plan. Completion is explicitly declared, never inferred from dates.
+language: en
+layout: timeline
+title: Platform release milestones
+desc: Pilot timing differs from its baseline; release readiness is still unknown.
+width: 1200
+start: 2026-01
+end: 2026-07
+today: 2026-04-15
+phases:
+  - {label: Discovery, from: 2026-01-01, to: 2026-02-28}
+  - {label: Build and test, from: 2026-03-01, to: 2026-05-31}
+milestones:
+  - {label: Scope agreed, date: 2026-02-01, status: done}
+  - {label: Pilot ready, date: 2026-04-01, plan: 2026-03-15, status: pending}
+  - {label: Launch, date: 2026-06-01, status: unknown, core: true}

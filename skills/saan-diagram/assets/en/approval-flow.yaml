@@ -1,0 +1,26 @@
+# Fictional expense approval; adapt the roles and controls to the actual process.
+language: en
+title: Expense approval
+desc: A request is reviewed before payment; rejected requests return for revision.
+column_semantics: roles
+columns:
+  - {id: requester, label: Requester, lanes: 2}
+  - {id: reviewer, label: Reviewer, lanes: 2}
+  - {id: finance, label: Finance, lanes: 2}
+nodes:
+  - {id: submit, label: Submit request, kind: hub, col: requester, row: 0.5}
+  - {id: check, label: Check budget, col: reviewer, row: 2.5, control: K1, risk: Unbudgeted spending}
+  - {id: decision, label: "Approved?", kind: decision, col: reviewer, row: 4.5}
+  - {id: pay, label: Release funds, kind: hub, col: finance, row: 6.5, core: true}
+edges:
+  - {from: submit, to: check, kind: flow, route: vh}
+  - {from: check, to: decision, kind: flow}
+  - {from: decision, to: pay, kind: flow, route: vh, label: "Yes", label_at: start}
+  - {from: decision, to: submit, kind: return, route: ll, offset: 36, label: Revise}
+verify:
+  start: [submit]
+  end: [pay]
+  must_pass:
+    - {before: pay, through: [check, decision]}
+  separate:
+    - [submit, pay]

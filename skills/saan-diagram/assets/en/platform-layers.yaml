@@ -1,0 +1,30 @@
+# Fictional platform; English words stay intact in narrow capability chips.
+language: en
+layout: layers
+title: Service delivery platform
+desc: Business services, delivery capabilities, and infrastructure share common security and policy controls.
+width: 1600
+rails:
+  left: [Security, Operations]
+  right: [Policies, Standards]
+layers:
+  - id: channels
+    label: Channels
+    blocks:
+      - {items: [Web portal, Mobile app, Analytics]}
+  - id: services
+    label: Services
+    blocks:
+      - title: Delivery workflow
+        stages:
+          - {title: Intake, steps: [Register request, Check scope]}
+          - {title: Execution, core: true, steps: [Assign owner, Deliver service]}
+          - {title: Closure, steps: [Review outcome, Archive record]}
+  - id: platform
+    label: Platform
+    blocks:
+      - {title: Shared services, items: [Identity, Workflow, Messaging, Audit trail]}
+  - id: infrastructure
+    label: Infrastructure
+    blocks:
+      - {items: [Compute, Database, Object storage, Recovery]}

@@ -4,7 +4,7 @@
 
 [介绍页与示例图库](https://saan-diagram.vercel.app/)
 
-把业务描述、需求文档、白板截图，转成同一套规范下的中文业务图示。
+把业务描述、需求文档、白板截图，转成同一套规范下的中英文业务图示。
 
 > **统一的是约束语言，不是具体方案。** 不同项目画的内容可以不同，但阶段、节点类型、线型、配色和校验规则都是同一套。
 
@@ -102,6 +102,25 @@ python3 scripts/render.py --selftest                  # 自测：示例全部通
 
 出图自动生成 `<slug>.result.json`，记录每个产物的状态。PNG 失败会返回 4，保留已生成的 HTML 和画板 DSL；若只需要 HTML/SVG，请显式使用对应参数。`--result-json PATH` 可指定结果文件，配合 `--lint` 也可取得机器可读结果。
 
+## 输出语言
+
+Agent 优先遵循用户明确指定的输出语言；未指定时，沿用用户请求的语言。技能说明和模板的语言不覆盖用户的选择。
+
+```yaml
+language: en  # en 或 zh-CN
+```
+
+`--language en` 可覆盖 spec 中的语言设置。渲染器切换自动生成的图例、业务发现和验证注释，不翻译输入的名称、标签和备注；这些由 Agent 改写，同时保持 id 与引用一致。旧 spec 省略 `language` 时仍使用中文。详细指南及部分 CLI 诊断暂时保留中文。
+
+英文示例：[审批流程](skills/saan-diagram/assets/en/approval-flow.yaml)、[分层架构](skills/saan-diagram/assets/en/platform-layers.yaml)、[发布里程碑](skills/saan-diagram/assets/en/release-timeline.yaml)。
+
+```bash
+cd skills/saan-diagram
+python3 scripts/render.py assets/en/approval-flow.yaml --all --outdir out
+```
+
+YAML 标签中的 `"Yes"`、`"No"`、`"On"`、`"Off"` 等要加引号，避免被解析成布尔值。英文按词换行，保留技术标识符；长标签应在不丢失业务含义的前提下精简。
+
 ## 流程路径验证
 
 ```yaml
@@ -145,7 +164,7 @@ python3 scripts/wb_publish.py pay.wb.json --token <wbcn…> --verify-only
 | 业务主流程 / 数据集成 / 配置依赖 | 实线 / 点线 / 紫色虚线 |
 | 标题栏 | 默认白底线框，可选 `gray` / `brand` / `dark` |
 
-完整规则见 [SKILL.md](skills/saan-diagram/SKILL.md)。
+英文统一入口见 [SKILL.md](skills/saan-diagram/SKILL.md)，中文阅读版见 [中文技能说明](docs/SKILL.zh-CN.md)。
 
 ## 写飞书画板的规矩（写在脚本里）
 
@@ -164,11 +183,18 @@ python3 scripts/wb_publish.py pay.wb.json --token <wbcn…> --verify-only
 ```bash
 python3 skills/saan-diagram/scripts/render.py --selftest
 python3 -m unittest discover -s tests -v
-python3 scripts/render_smoke.py            # 14 个示例：校验、SVG、画板 DSL
+python3 scripts/render_smoke.py            # 14 个原示例 + 3 个英文示例：校验、SVG、画板 DSL
 python3 scripts/render_smoke.py --png      # 另做实际浏览器 PNG 导出
 ```
 
 GitHub Actions 运行 Python 版本矩阵、行为回归测试和浏览器导出检查。自测的 49/49 是规则触发覆盖，不代表全部分支、视觉效果或实际业务权限都已验证。飞书发布测试使用模拟子进程，不访问用户画板。
+
+### 从 v1.1 升级
+
+- 技能入口和插件发现描述改为英文，明确输出语言优先级。
+- 英文图示设置 `language: en`；已有中文 spec 保持默认行为。
+- 英文按词换行，分层图能力节点和侧栏根据拉丁文本宽度布局。
+- `--selftest` 仍验证 14 份原模板与 49 条规则；回归测试覆盖 14 类图示的语言行为，出图检查另含 3 份实际英文示例。
 
 ### 从 v1.0 升级
 
@@ -186,7 +212,7 @@ GitHub Actions 运行 Python 版本矩阵、行为回归测试和浏览器导出
 
 ## 致谢
 
-排版规则参考 [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design)（图示类型选择、正交连线、标签留白、焦点色预算、4px 网格），并改成适合中文业务图的版本。
+排版规则参考 [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design)（图示类型选择、正交连线、标签留白、焦点色预算、4px 网格），并适配为中英文业务图示。
 
 ## 许可
 

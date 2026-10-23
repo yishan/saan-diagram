@@ -4,7 +4,7 @@
 
 [Introduction & example gallery (中文)](https://saan-diagram.vercel.app/)
 
-Turn business descriptions, requirements documents, and whiteboard screenshots into Chinese business diagrams with a consistent visual language.
+Turn business descriptions, requirements documents, and whiteboard screenshots into business diagrams in English or Chinese with a consistent visual language.
 
 > **Standardize the rules, not the solution.** Each project can have different content while sharing the same stages, node types, line styles, colors, and validation rules.
 
@@ -17,7 +17,7 @@ Saan Diagram is an agent skill for Claude Code, Codex, and other compatible agen
 - **Reserve color for systems and core functions:** business nodes use neutral gray, with at most three core highlights per diagram.
 - **Choose your output:** HTML, SVG, PNG, or Feishu/Lark whiteboard publishing through the bundled script. Whiteboard instructions are loaded only when needed.
 
-The skill instructions and example labels are currently in Chinese. This English README explains installation and use; it does not change the diagram language.
+The canonical `SKILL.md` is in English. The agent follows the output language you specify, or the language of your request when you do not specify one. Chinese templates remain available alongside English examples.
 
 ![Layered architecture example](docs/img/biz-platform.png)
 
@@ -105,6 +105,27 @@ Exit codes: `0` requested operation succeeded · `1` layout issues · `2` unconf
 
 Rendering also writes `<slug>.result.json` with the status of each artifact. A PNG export failure returns `4` while preserving successfully generated HTML and whiteboard DSL. Request HTML/SVG explicitly when PNG is not needed. Use `--result-json PATH` to choose a result file; this option also provides machine-readable results with `--lint`.
 
+## Output language
+
+The agent uses your explicitly requested output language; otherwise it follows the language of your request. The language of the skill instructions or starter template does not override your choice.
+
+```yaml
+language: en  # en or zh-CN
+```
+
+`--language en` overrides the spec for renderer-generated captions. The renderer does not translate input labels, names, or notes; the agent adapts those while preserving identifiers and references. Existing specs without `language` retain Chinese captions. Generated legends, business findings, and verification annotations support both locales; detailed guides and some CLI diagnostics remain in Chinese.
+
+English examples: [approval flow](skills/saan-diagram/assets/en/approval-flow.yaml), [layered architecture](skills/saan-diagram/assets/en/platform-layers.yaml), and [release timeline](skills/saan-diagram/assets/en/release-timeline.yaml).
+
+```bash
+cd skills/saan-diagram
+python3 scripts/render.py assets/en/approval-flow.yaml --all --outdir out
+```
+
+Quote YAML labels such as `"Yes"`, `"No"`, `"On"`, and `"Off"` so the YAML parser does not treat them as booleans. English labels wrap at word boundaries. Keep technical identifiers intact and shorten long labels without losing their meaning.
+
+![English approval flow](docs/img/en/approval-flow.png)
+
 ## Process path verification
 
 ```yaml
@@ -148,7 +169,7 @@ Publishing results are saved to `<slug>.wb.publish.json`. Successful readback an
 | Business flow / data integration / configuration dependency | Solid / dotted / purple dashed line |
 | Title bar | White with an outline by default; optional `gray`, `brand`, or `dark` |
 
-See [SKILL.md](skills/saan-diagram/SKILL.md) for the full rules in Chinese.
+See [SKILL.md](skills/saan-diagram/SKILL.md) for the canonical instructions, or the [Chinese reading version](docs/SKILL.zh-CN.md).
 
 ## Whiteboard publishing safeguards
 
@@ -167,11 +188,18 @@ Run from the repository root:
 ```bash
 python3 skills/saan-diagram/scripts/render.py --selftest
 python3 -m unittest discover -s tests -v
-python3 scripts/render_smoke.py            # Validate all 14 examples and their SVG/whiteboard DSL output
+python3 scripts/render_smoke.py            # Validate 14 original + 3 English examples and their SVG/whiteboard DSL output
 python3 scripts/render_smoke.py --png      # Also export PNGs in a real browser
 ```
 
 GitHub Actions runs a Python version matrix, behavioral regression tests, and browser export checks. The self-test's 49/49 count measures rule-trigger coverage, not complete branch coverage, visual correctness, or actual business permissions. Whiteboard publishing tests use mocked subprocesses and do not access user boards.
+
+### Upgrading from v1.1
+
+- The skill entry point and plugin discovery descriptions are now in English, with explicit output-language precedence.
+- Set `language: en` for English captions. Existing Chinese specs retain their default behavior.
+- English wrapping preserves words. Capability chips and architecture rails account for Latin text width.
+- `--selftest` still checks the 14 original templates and 49 rule triggers. Regression tests check both locales across all 14 diagram types; smoke rendering also includes 3 realistic English examples.
 
 ### Upgrading from v1.0
 
@@ -189,7 +217,7 @@ Run `python3 scripts/sync_page.py` after updating the skill examples or preview 
 
 ## Acknowledgments
 
-Layout rules draw on [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design): diagram selection, orthogonal connectors, label spacing, accent-color budgets, and a 4 px grid. They have been adapted for Chinese business diagrams.
+Layout rules draw on [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design): diagram selection, orthogonal connectors, label spacing, accent-color budgets, and a 4 px grid. They have been adapted for business diagrams in English and Chinese.
 
 ## License
 

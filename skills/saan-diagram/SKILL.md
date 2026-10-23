@@ -1,129 +1,117 @@
 ---
 name: "saan-diagram"
-description: "将业务描述、需求文档或白板截图转成统一视觉规范的中文业务图示。适用于业务架构、流程、角色交接、关系与里程碑表达；输出 HTML/SVG/PNG，按用户要求写入飞书画板。时序图、状态机、物理表结构和甘特图不适用。"
+description: "Create consistent business diagrams from descriptions, requirements, or whiteboard screenshots. Use for business architecture, process flows, role handoffs, data relationships, and milestones in English or Chinese. Render HTML/SVG/PNG; publish to a Feishu/Lark whiteboard when requested. Not for sequence diagrams, state machines, physical database schemas, or task-level Gantt charts."
 metadata:
   author: "Yishan"
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
-# Saan Diagram（saan-diagram）
+# Saan Diagram
 
-> 作者：Yishan · 版本 v1.1.0
+Turn business information into diagrams with a consistent visual language. Write a YAML spec using stages, lanes, and rows. `scripts/render.py` owns coordinates, routing, colors, typography, legends, and validation. Standardize the rules, not the business solution.
 
-把业务描述、需求文档、白板截图转成**统一规范的业务图示**。模型只写 YAML spec（用阶段 / 泳道 / 行定位，不写像素和颜色），坐标、走线、配色、图例都由 `render.py` 计算，校验不通过不能交付。
+## Output language
 
-**核心原则：统一的是约束语言，不是具体方案。**
+**Follow the user's explicitly requested output language. Otherwise, use the language of the user's request.** The language of this file, a template, or a source document must not override that choice.
 
-本文只放每次都要用的内容。某类图的详细写法用 `python3 scripts/render.py --guide <主题>` 按需读取，不要一次读全。
+- Use the selected language for titles, labels, edge captions, explanatory notes, and the delivery response. Preserve proper names, identifiers, and any original wording the user asks to retain.
+- Set `language: en` for English or `language: zh-CN` for Chinese in the spec. `--language en|zh-CN` overrides the spec. Omission retains the renderer's Chinese default for existing specs; do not rely on that default when creating an English diagram.
+- Quote YAML labels such as `"Yes"`, `"No"`, `"On"`, and `"Off"` so they remain strings, not booleans.
+- The renderer localizes its own legends and generated annotations. It does **not** translate user-provided spec content. Adapt template text to the requested language and keep IDs and references consistent. Stable IDs help avoid breaking edges when labels change.
+- English examples are in `assets/en/`. Most other templates and detailed guides are in Chinese; read only the relevant guide and explain findings in the user's language. Some CLI diagnostics remain in Chinese; that does not require a Chinese deliverable.
+- English and Chinese are the currently implemented caption locales. Do not claim another locale is supported or silently substitute it; explain the limitation if a different language is requested.
 
----
+## Choose a diagram
 
-## 0. 选图示类型
+When a user requests a diagram, proceed. For an explanation-only request, use this skill only if a diagram materially helps communicate relationships.
 
-用户明确要求图示时直接执行。用户只要求解释时，先判断文字或表格是否足够；仅在图示能帮助理解关系时采用本 skill。
-
-| 你要表达的是 | 图示 | 起步模板 `--init` | 详细写法 `--guide` |
+| What the user needs | Diagram | `--init` | `--guide` |
 |---|---|---|---|
-| 各阶段有哪些模块，接哪些系统 | 架构视图 | `arch` | `stages` |
-| 一条主流程，含判断和回退 | 主流程视图 | `flow` | `stages` |
-| 几种方式各走过哪些阶段 | 路径对比视图 | `paths` | `stages` |
-| 多个角色之间的交接 | 泳道图 | `swim` | `stages` |
-| 数据从哪来、经过哪些处理、存到哪 | 数据流图 | `dfd` | `profile` |
-| 单据与关键控制点（内控、审计） | 审计流程图 | `audit` | `profile` + `verify` |
-| 哪些环节不增值 | 机会流程图 | `opportunity` | `profile` |
-| 平台由哪些层组成、对外接什么 | 分层架构图 | `layers` | `layers` |
-| 业务对象及其关系、几对几 | 实体关系图 | `er` | `er` |
-| 谁管谁，谁能看到谁的数据 | 组织架构图 + 数据隔离 | `org` | `org` |
-| 一个结果背后有哪些原因 | 鱼骨图 | `fishbone` | `fishbone` |
-| 关键节点什么时候到、偏了多少 | 里程碑时间线 | `timeline` | `timeline` |
-| 两个维度上该先做哪个 | 四象限图 | `quadrant` | `quadrant` |
-| 每个活动受什么约束、靠谁完成 | IDEF0 功能模型 | `idef0` | `idef0` |
-| 时序交互、状态流转、物理表结构、甘特图 | **不用本 skill** | — | 用 Mermaid 或数据库建模工具 |
+| Modules by stage and connected systems | Architecture view | `arch` | `stages` |
+| Main process with decisions and returns | Process flow | `flow` | `stages` |
+| Different approaches across common stages | Path comparison | `paths` | `stages` |
+| Handoffs between roles | Swimlane | `swim` | `stages` |
+| Data sources, processing, and storage | Data flow | `dfd` | `profile` |
+| Documents and controls | Audit flow | `audit` | `profile`, `verify` |
+| Value-adding versus other steps | Opportunity flow | `opportunity` | `profile` |
+| Platform layers and integrations | Layered architecture | `layers` | `layers` |
+| Entities, relationships, and cardinality | Entity relationship | `er` | `er` |
+| Reporting lines and declared access scopes | Organization and data isolation | `org` | `org` |
+| Causes behind an outcome | Fishbone | `fishbone` | `fishbone` |
+| Milestones and schedule variance | Timeline | `timeline` | `timeline` |
+| Priorities across two dimensions | Quadrant | `quadrant` | `quadrant` |
+| Activity inputs, controls, outputs, and mechanisms | IDEF0 | `idef0` | `idef0` |
 
-两种都想用时挑主轴：阶段是主轴用架构视图，步骤先后是主轴用主流程，角色交接是主轴用泳道图，技术分层是主轴用分层架构图。泳道、路径视图、重点能力（浅橙色）都不是必备的，材料里有才画。
+For sequence diagrams, state machines, physical database schemas, or task-level Gantt charts, choose a suitable tool such as Mermaid or a database modeler. For mixed needs, choose the main organizing axis: stages, step order, roles, or technical layers. Do not add swimlanes, alternate paths, or highlighted capabilities when the source does not call for them.
 
----
+## Establish necessary context
 
-## 1. 确认必要信息
+Infer the diagram type from the request and source. Unless specified, use horizontal orientation, the default blue brand color, an outlined title bar, and HTML + PNG delivery. Ask only when missing information changes business meaning, the delivery target, or the scope of an external write. Reuse existing authorization and preferences.
 
-从请求和材料推断图型。方向、配色没有要求时用横向、飞书蓝、线框标题栏；交付方式没有要求时用 HTML + PNG。只在信息缺失会改变业务含义、交付目标或外部写入范围时提问。已有授权和偏好直接沿用。
+- Do not invent core functions, controls, completion states, role permissions, or other missing business facts.
+- Only when whiteboard delivery is selected, run `python3 scripts/wb_publish.py --probe` and read `guides/feishu.md`. Local rendering does not require a Feishu probe.
+- A supplied board target and append instruction authorize that write. Overwriting existing content requires explicit approval. Without an external target, deliver local files and clarify the destination if publishing is still needed.
 
-- 需要澄清时，用当前平台的提问工具或普通消息一次说明关键问题；不依赖特定工具名称。
-- 仅在用户选择飞书交付时运行 `python3 scripts/wb_publish.py --probe`，读取 `guides/feishu.md`。本地出图不探测飞书。
-- 材料没有说明的核心业务、重点能力、制度控制、完成状态和角色权限不得自行补造。
-- 用户明确给出画板目标和追加方式时直接按授权执行；覆盖已有内容必须有明确授权。未指定外部目标时先交付本地图，并澄清目标。
+## Workflow
 
----
-
-## 2. 工作流
+Run commands from the installed skill root, or use absolute paths to its scripts and resources.
 
 ```bash
-python3 scripts/render.py --init audit > pay.yaml        # ① 从最接近的模板起步，改内容，不从零写
-python3 scripts/render.py --guide stages                 # ② 只在拿不准写法时读对应主题
-python3 scripts/render.py pay.yaml --all                 # ③ 校验 + 路径验证 + HTML + PNG + 画板 DSL，一条命令
+python3 scripts/render.py --init audit > pay.yaml
+python3 scripts/render.py --guide verify
+# Edit the spec content and set its output language before rendering.
+python3 scripts/render.py pay.yaml --all
 ```
 
-1. **抽取**材料里的阶段、主线步骤、模块、内外部系统、连线、判断、核心业务；材料是图片就逐项读出来。
-2. **起步**：`--init <模板>` 输出一份能通过校验的完整示例，在它上面改。
-3. **精简**：删除冗余装饰和重复描述，保留业务节点、分支、角色与控制关系；不能为了排版或通过校验删掉业务事实。
-4. **出图**：`--all`。失败时每条问题后面都附了修法，按修法改 spec 再跑。
-5. **查看生成图**：用当前平台的图像工具检查 PNG 的遮挡、文字和走线。PNG 失败时先修依赖；用户同意改交 HTML/SVG 后，仍需用可用的预览工具查看。只通过脚本校验不等于视觉验收。
-6. **交付**：按 §5。
+For an English starting point, copy a matching file from `assets/en/`, such as `approval-flow.yaml`, `platform-layers.yaml`, or `release-timeline.yaml`. These are examples, not business rules.
 
----
+1. Extract stages, steps, modules, systems, edges, decisions, roles, and controls from the source. Read screenshot content explicitly.
+2. Start with the nearest template and adapt its content and language.
+3. Remove redundant decoration and repeated wording. Preserve business steps, branches, roles, and controls; never remove facts to fit the layout or pass validation.
+4. Run `--all`. Fix layout errors using the reported guidance, then rerun. Handle business findings as described below.
+5. Inspect the generated PNG with the available image tool for overlaps, text, and routing. If PNG generation fails, fix its dependencies, or agree on HTML/SVG delivery and inspect that output. Passing script checks is not visual acceptance.
+6. Deliver the requested artifacts and their editable spec.
 
-## 3. 几条不能破的规矩
+## Visual constraints
 
-- **颜色只留给"系统"和"核心"**：业务节点一律中性灰；系统块用 VI 主色（内部实心、外部提亮）；核心底色全图 ≤3 处；浅橙色只给"重点能力"一类（`kind: special`，名称在 `special: {label: AI 能力}` 里声明），一张图只突出一类。
-- **字不缩**：节点名 ≤10 字、连线标签 ≤8 字，放不下就精简措辞；中文最小 12px。
-- **线是正交的**：不画斜线，不穿节点，不叠线，箭头前要有可见的线段。
-- **标题栏默认白底线框**，不占颜色预算。
-- **原图里的穿线、错色不要照搬**，交付说明里写"原图 X 处已按规则修正"。
+- Business nodes are neutral gray. Internal systems use the brand color; external systems use a lighter tint. Use no more than three core highlights. Pale orange highlights one capability category, named by `special: {label: ...}` with `kind: special`.
+- Never shrink text to force a fit. Node labels have a 10-unit width budget; ordinary edge labels have 8 units. A CJK character counts as 1 unit and a typical Latin character as 0.5. These are width budgets, not English word limits. Keep English words intact; abbreviate only when meaning remains clear. Use the layout's measured fit checks and inspect the result.
+- Connectors are orthogonal, do not cross nodes or share overlapping strokes, and retain a visible segment before the arrowhead.
+- The default title bar is white with an outline and does not consume a core highlight.
+- Correct problematic routing or colors in source diagrams and identify substantive corrections in the delivery notes.
 
-完整的文字与配色规则：`--guide style`；全部校验规则与修法：`--guide lint`。
+Read `--guide style` for detailed visual rules and `--guide lint` for rule-specific fixes.
 
----
+## Validation and business findings
 
-## 4. 两类校验：排版类可以改，业务发现不许改
+`--all` distinguishes two categories:
 
-`--all` 把问题分成两组输出：
-
-- **排版问题**（线穿节点、标签重叠、字太长……）：改 spec 直到通过。
-- **业务发现**（IDEF0 活动没有制度控制、数据只进不出、数据域交叉、四象限压线、控制点被绕过、岗位未分离……）：**不许为了通过而改图**。删一条绕过控制点的连线、把节点挪到别的列、编一个不存在的制度，都等于把问题藏起来。正确做法：
-  1. 把发现原样告诉用户（脚本已经给出业务语言的描述和反例路径）；
-  2. 是图画错了 → 按用户说的改；
-  3. 现实就是如此 → 用户确认后写进 `accept`，图例下方会如实写出"已确认的发现"：
+- **Layout errors:** adjust the spec until checks pass.
+- **Business findings:** report the finding and its counterexample. Do not hide missing controls, bypasses, data sinks, overlapping access scopes, or conflicting duties by removing edges, moving actors, or inventing policies. Correct a misrepresented diagram from user clarification; if the user confirms the current process, record the finding in `accept` with its rule code, a matching phrase, and the user's explanation.
 
 ```yaml
 accept:
-  - {code: P1, match: 紧急付款审批, note: 紧急付款经总经理书面特批，事后补审}
+  - code: P1
+    match: Emergency approval
+    note: Emergency payments have written authorization and a later review.
 ```
 
-**流程路径验证**：审计流程图、审批流、泳道图建议加 `verify`。`verify: {}` 开启默认检查；业务步骤没有连线也会检查。岗位分离使用节点 `actor`，或显式 `column_semantics: roles` 的角色列。只验证图上声明，不证明现实系统权限。详见 `--guide verify`。
+Use the actual finding text for `match`; keep it aligned if labels or language change. Confirming a finding does not mean its risk has been resolved.
 
-退出码：0 本次请求通过 · 1 排版问题 · 2 未确认的业务发现 · 3 spec 输入错误 · 4 产物生成失败或不完整。出图同时生成 `<slug>.result.json`，逐项记录校验和产物状态；不能只看终端是否出现文件路径。
+For approval, audit, and swimlane flows, consider `verify`. `verify: {}` enables default checks, including disconnected business steps. Separation of duties uses node `actor` values or explicitly declared `column_semantics: roles`; stage columns do not imply roles. Verification checks declarations in the graph, not real system permissions. Read `--guide verify` when needed.
 
----
+Renderer exit codes: `0` success, `1` layout errors, `2` unconfirmed business findings, `3` invalid spec, `4` failed or incomplete artifacts. `<slug>.result.json` records validation and artifact statuses; a printed file path alone is not evidence of successful generation.
 
-## 5. 交付
+## Delivery
 
-- **HTML + PNG**：先确认结果文件中 HTML、PNG 均为 `generated`。`--all` 还会生成 `<slug>.wb.json`。把 PNG 发给用户，并告诉用户 spec 在哪：以后改图就是改 spec；换方向或主色加 `--orient` / `--brand` 重跑即可。
-- **飞书画板**：**只能通过 `wb_publish.py` 写入，不要直接拼 lark-cli 写入命令。** 安全规矩写在脚本里，绕开脚本就等于绕开规矩。先读 `--guide feishu`，然后照脚本的退出码行事：
-  - **20**：脚本等待写入方式。先确认现有画板截图导出成功；失败时重试读取，不能把读取失败当空画板。空画板可追加；非空且没有明确写入方式时才问用户，**没有用户明确同意不得覆盖**；
-  - **10**：lark-cli 的高风险确认门禁。把提示原样告诉用户。只有提示要求 `--yes` 且用户同意后，才使用 `--pass=--yes`；其他参数不透传；
-  - **21**：写入成功但核验图导出失败。用 `--verify-only` 重试回读，不能重试写入；
-  - **0**：按结果文件区分仅转换、仅回读和写入后回读。核验图已导出仍需查看，不能宣称已完成业务验收。
-  - 用户没给目标画板或文档时，问用户；**不要自己新建文档**。
-- **两者都要**：先发 PNG 给用户看，再走飞书。
+- **HTML + PNG:** confirm both artifact statuses are `generated`. `--all` also creates `<slug>.wb.json`. Show the PNG and provide the spec location. Future edits belong in the spec; `--orient` and `--brand` change presentation.
+- **Feishu/Lark:** use `scripts/wb_publish.py`; do not construct direct write commands. Read `--guide feishu` first. Exit `20` means review the exported existing board and choose a write mode; a failed read is not an empty board. Exit `10` is a confirmation gate: relay it and use `--pass=--yes` only when requested by the gate and authorized by the user. Exit `21` means the write succeeded but readback failed: retry with `--verify-only`, not another write. Exit `0` still requires distinguishing conversion, readback-only, and write-plus-readback in the result JSON, then inspecting the exported image. Do not create a document when the user has not supplied a target.
+- **Both:** deliver the PNG first, then follow the authorized whiteboard workflow.
 
-交付前确认：校验 PASS；只看主线节点、核心底色和实线能说出业务主干；每个系统块都有连线；交付说明写明假设、默认值和已确认的发现。
+Before delivery: validation passes, the main process is understandable from its main nodes and solid edges, systems have connections, and assumptions and confirmed findings are disclosed in the selected language.
 
----
+## Runtime boundaries
 
-## 附录：运行与安装边界
+Install the entire skill directory, including `scripts/`, `guides/`, and `assets/`. Guides and templates are loaded on demand from their source files; do not load them all or reconstruct a missing renderer from memory.
 
-以下命令均从完整 skill 根目录运行；也可以用实际安装目录的绝对路径调用 `scripts/render.py`。不要依赖 Agent 当前工作目录恰好位于脚本目录。
-
-本 skill 必须完整安装：`scripts/`、`guides/`、`assets/` 都属于运行包。`--guide` 和 `--init` 直接读取指南与示例文件，它们是唯一维护源。无需读取全部源码或全部指南。
-
-Python 依赖见 `requirements.txt`，PNG 依赖见 `requirements-png.txt`。缺少运行包时按 README 重新安装；不能凭记忆重写渲染器。首次安装或更新后运行 `python3 scripts/render.py --selftest`。自测验证示例与规则触发，不替代当前产物的视觉检查或飞书回读。
+Python dependencies are in `requirements.txt`; PNG dependencies are in `requirements-png.txt`. After installation or updates, run `python3 scripts/render.py --selftest`. Self-tests validate examples and rule triggers; they do not replace inspection of the current diagram or whiteboard readback.
