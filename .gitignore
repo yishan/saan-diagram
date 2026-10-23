@@ -8,3 +8,9 @@ __pycache__/
 *.openapi.json
 *.board.png
 out/
+
+.venv/
+*.result.json
+*.publish.json
+*.before.png
+*.wb.png

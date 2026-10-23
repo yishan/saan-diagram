@@ -1,6 +1,6 @@
 # 分层架构图
 
-> 用 `python3 render.py --guide layers` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `python3 scripts/render.py --guide layers` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 分层架构图（`layout: layers`）
 参照 diagram-design 的 layer stack（层叠）与 high-level（贯穿竖条）两种类型，改成中文平台总体架构的版式。从左到右五条轨道：

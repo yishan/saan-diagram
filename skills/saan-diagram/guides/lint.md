@@ -1,6 +1,6 @@
 # 校验规则与修法
 
-> 用 `python3 render.py --guide lint` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `python3 scripts/render.py --guide lint` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 两类规则
 

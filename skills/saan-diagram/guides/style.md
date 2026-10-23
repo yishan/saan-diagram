@@ -1,6 +1,6 @@
 # 文字与配色
 
-> 用 `python3 render.py --guide style` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `python3 scripts/render.py --guide style` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 文字
 | 角色 | 字号 / 字重 | 规则 |

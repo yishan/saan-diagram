@@ -2,6 +2,7 @@
 title: 合同付款审批审计流程
 desc: 合同付款从业务部门申请、采购部门核对验收、财务审核发票与三单匹配到出纳支付的审计流程，标出 4 个关键控制点及其防范的风险。
 profile: audit
+column_semantics: roles  # 明确声明列代表角色，供岗位分离验证使用
 columns:
   - {id: biz, label: 业务部门, lanes: 2}
   - {id: buy, label: 采购部门, lanes: 2}

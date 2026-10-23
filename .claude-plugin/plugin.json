@@ -1,7 +1,7 @@
 {
   "name": "saan-diagram",
   "displayName": "Saan Diagram",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "按统一规范绘制中文业务图示：架构图、流程图、泳道图、数据流图、审计/机会流程图、分层架构图、实体关系图、组织架构与数据隔离、鱼骨图、里程碑时间线、四象限图与 IDEF0。YAML spec + lint 校验，含流程路径验证；可写入飞书画板或输出 HTML/SVG/PNG。",
   "author": {
     "name": "Yishan"

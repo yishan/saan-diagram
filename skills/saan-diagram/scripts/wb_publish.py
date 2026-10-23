@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""saan-diagram v1.0 · 飞书画板写入：把画板 DSL（*.wb.json）安全地写进飞书画板。
+"""saan-diagram v1.1.0 · 飞书画板写入：把画板 DSL（*.wb.json）安全地写进飞书画板。
 
 模型只能通过本脚本写画板，不要直接拼 lark-cli 写入命令。
 
@@ -9,9 +9,9 @@
   · 没有 --mode 就不写：先导出现有画板预览，退出码 20，由模型看图、问用户；
   · overwrite 只在 --mode overwrite 时才加，且必须是用户明确同意过；
   · lark-cli 退出码 10（高风险确认门禁）原样返回 10，不自动追加任何参数；
-  · 幂等 token 由内容哈希生成，重试自动复用同一个。
+  · 幂等 token 由目标、写入方式和内容生成，重试自动复用同一个。
 
-退出码：0 成功 · 2 环境不满足 · 3 DSL 校验失败 · 10 需要用户确认（lark-cli 门禁）· 20 需要决定写入方式 · 1 其他失败
+退出码：0 转换完成或写入并导出核验图 · 21 已写入但核验图导出失败 · 2 环境不满足 · 3 DSL 校验失败 · 10 需要用户确认（lark-cli 门禁）· 20 需要决定写入方式 · 1 其他失败
 """
 import argparse, hashlib, json, os, re, shutil, subprocess, sys, time
 from pathlib import Path
@@ -28,7 +28,7 @@ def sh(cmd, timeout=120):
     except FileNotFoundError:
         return 127, f"未找到命令：{cmd[0]}"
     except subprocess.TimeoutExpired:
-        return 124, f"超时：{' '.join(cmd)}"
+        return 124, f"命令超时：{Path(cmd[0]).name}"
 
 
 def wb_cmd():
@@ -64,7 +64,7 @@ def summary(r):
     if not r["logged_in"]:
         return "已安装 lark-cli，但未登录：选飞书需要先登录（lark-cli auth login）"
     if not r["whiteboard_cli"]:
-        return "已登录飞书，但没有 Node.js：只能用 SVG 降级写法（文字与形状分离）"
+        return "已登录飞书，但没有 whiteboard-cli / npx：请安装转换依赖，或先交付本地图"
     return "已检测到 lark-cli 并已登录，可直接写入画板"
 
 
@@ -85,38 +85,92 @@ def resolve_doc(url, create=False):
 
 
 def export(token, path):
-    return sh(["lark-cli", "whiteboard", "+export", "--whiteboard-token", token,
-               "--output-type", "preview", "--output", str(path), "--as", "user"])
+    import tempfile
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="saan-export-", dir=path.parent) as td:
+        fresh = Path(td) / "preview.png"
+        code, out = sh(["lark-cli", "whiteboard", "+export", "--whiteboard-token", token,
+                       "--output-type", "preview", "--output", str(fresh), "--as", "user"])
+        if code:
+            return code, out
+        if not fresh.is_file() or not fresh.stat().st_size:
+            return 1, "命令返回成功，但没有生成新的核验图"
+        fresh.replace(path)
+        return 0, out
 
 
-def publish(a):
+def _publish(a, result):
     wb = Path(a.wb)
     slug = wb.name.replace(".wb.json", "").replace(".json", "")
     outdir = wb.parent
+    if a.dry_run and a.verify_only:
+        result["error"] = "--dry-run 与 --verify-only 不能同时使用"
+        print(result["error"])
+        return 3
+    if any(flag != "--yes" for flag in (a.passthrough or [])):
+        print("参数错误：--pass 只允许 --yes；目标、来源和写入方式必须使用专用参数")
+        result["error"] = "不允许的透传参数"
+        return 3
+    if a.verify_only:
+        after = outdir / f"{slug}.board.png"
+        code, out = export(a.token, after)
+        result["readback"] = {"status": "exported" if code == 0 and after.is_file() and after.stat().st_size else "failed", "path": str(after)}
+        print(f"核验图：{after}" if result["readback"]["status"] == "exported" else "核验图导出失败：" + out[-400:])
+        return 0 if result["readback"]["status"] == "exported" else 21
+    if not wb.is_file():
+        print(f"输入错误：找不到画板 DSL {wb}")
+        return 3
     r = probe()
-    if not (r["lark_cli"] and r["logged_in"]):
+    if not a.dry_run and not (r["lark_cli"] and r["logged_in"]):
         print("ENV:", summary(r))
         return 2
     if not r["whiteboard_cli"]:
-        print("ENV: 没有 Node.js，无法转换画板 DSL。改用 render.py --svg 输出 SVG，再 lark-cli whiteboard +update --input_format svg（文字与形状分离，需向用户说明）")
+        print("ENV: 没有 Node.js，无法转换画板 DSL。请安装 Node.js 后重试，或交付本地 HTML/SVG；不要绕过脚本直接写入")
         return 2
     W = wb_cmd()
     # ① 校验
     code, out = sh(W + ["-i", str(wb), "--check"], 180)
     errs = re.findall(r'"errors?"\s*:\s*(\[[^\]]*\]|"[^"]*"|\d+)', out)
     if code != 0 or any(e not in ('""', "[]", "0") for e in errs):
+        result["validation"] = "failed"
         print("CHECK FAIL:\n" + out.strip()[-1500:])
         return 3
+    result["validation"] = "passed"
     # ② 转换：画板引擎预览图 + openapi，两条并行
     oa, pv = outdir / f"{slug}.openapi.json", outdir / f"{slug}.wb.png"
-    p1 = subprocess.Popen(W + ["-i", str(wb), "-o", str(pv)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    with open(oa, "w") as fh:
-        p2 = subprocess.Popen(W + ["-i", str(wb), "--to", "openapi", "--format", "json"], stdout=fh, stderr=subprocess.PIPE, text=True)
-        _, err2 = p2.communicate(timeout=180)
-    p1.wait(timeout=180)
-    if p2.returncode != 0 or oa.stat().st_size == 0:
-        print("CONVERT FAIL:\n" + (err2 or "")[-800:])
+    result["conversion"] = {"status": "failed"}  # replaced only after both outputs exist
+    import tempfile
+    procs = []
+    try:
+        with tempfile.TemporaryDirectory(prefix="saan-convert-", dir=outdir) as td:
+            temp_pv, temp_oa = Path(td) / "preview.png", Path(td) / "openapi.json"
+            with open(temp_oa, "w", encoding="utf-8") as fh:
+                p1 = subprocess.Popen(W + ["-i", str(wb), "-o", str(temp_pv)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                procs.append(p1)
+                p2 = subprocess.Popen(W + ["-i", str(wb), "--to", "openapi", "--format", "json"], stdout=fh, stderr=subprocess.PIPE, text=True)
+                procs.append(p2)
+                _, err2 = p2.communicate(timeout=180)
+                p1.wait(timeout=180)
+            if p1.returncode != 0 or not temp_pv.is_file() or not temp_pv.stat().st_size:
+                print("CONVERT FAIL：画板引擎没有生成预览图")
+                return 1
+            if p2.returncode != 0 or not temp_oa.stat().st_size:
+                print("CONVERT FAIL：" + (err2 or "")[-800:])
+                return 1
+            json.loads(temp_oa.read_text(encoding="utf-8"))
+            temp_pv.replace(pv)
+            temp_oa.replace(oa)
+    except (OSError, ValueError, subprocess.TimeoutExpired) as ex:
+        print(f"CONVERT FAIL：{ex.__class__.__name__}: {ex}")
+        result["error"] = str(ex)
         return 1
+    finally:
+        for proc in procs:
+            if proc.poll() is None:
+                proc.kill()
+                proc.communicate()
+    result["conversion"] = {"status": "generated", "preview": str(pv), "openapi": str(oa)}
     print(f"画板引擎预览：{pv}")
     if a.dry_run:
         print(f"DRY RUN：已生成 {oa}，未写入飞书")
@@ -125,34 +179,69 @@ def publish(a):
     if not a.mode:
         before = outdir / f"{slug}.before.png"
         code, out = export(a.token, before)
+        result["before"] = {"status": "exported" if code == 0 else "failed", "path": str(before)}
         print(f"NEEDS_DECISION：现有画板预览已导出到 {before}" if code == 0 else f"NEEDS_DECISION：导出现有画板失败（{out.strip()[-200:]}）")
         print("  看图：空画板 → 用 --mode append 重跑；非空 → 问用户追加（append）还是覆盖（overwrite，整板重建、不可撤回）")
         return 20
     # ④ 写入（幂等 token 由内容决定，重试自动复用）
-    key = "saan-" + hashlib.sha1((a.token + oa.read_text()).encode()).hexdigest()[:16]
+    key = "saan-" + hashlib.sha256((a.token + "\n" + a.mode + "\n" + oa.read_text(encoding="utf-8")).encode()).hexdigest()[:16]
     cmd = ["lark-cli", "whiteboard", "+update", "--whiteboard-token", a.token, "--input_format", "raw",
            "--source", f"@{oa}", "--idempotent-token", key, "--as", "user"]
     if a.mode == "overwrite":
         cmd.append("--overwrite")
-    cmd += a.passthrough or []
+    if a.passthrough:
+        cmd.append("--yes")
+    result["operation"] = {"target": a.token, "mode": a.mode, "idempotent_token": key}
     for attempt in (1, 2):
+        result["write"] = "attempted"
         code, out = sh(cmd, 300)
         if code == 10:
-            print("CONFIRM_REQUIRED（lark-cli 高风险确认门禁）：停下来把下面的提示原样告诉用户，用户同意后用 --pass 追加它要求的参数重跑。")
+            result["write"] = "confirmation_required"
+            print("CONFIRM_REQUIRED（lark-cli 高风险确认门禁）：把下面的提示原样告诉用户。只有提示要求 --yes 且用户同意后，才用 --pass=--yes 重跑。")
             print(out.strip()[-1200:])
             return 10
         if code == 0:
             break
         if attempt == 2:
             print(f"WRITE FAIL（重试 1 次后仍失败，幂等 token {key}）：\n{out.strip()[-1200:]}")
+            result["write"] = "outcome_unknown"
             return 1
         time.sleep(2)
+    result["write"] = "succeeded"
     # ⑤ 核验
     after = outdir / f"{slug}.board.png"
     code, out = export(a.token, after)
     print(f"OK 已写入画板 {a.token}（{a.mode}，token {key}）")
-    print(f"  写入后核验图：{after}" if code == 0 else f"  写入成功，但导出核验图失败：{out.strip()[-200:]}")
-    return 0
+    verified = code == 0 and after.is_file() and after.stat().st_size > 0
+    result["readback"] = {"status": "exported" if verified else "failed", "path": str(after)}
+    print(f"  写入后核验图：{after}（待人工/图像工具查看）" if verified else f"  写入成功，但导出核验图失败：{out.strip()[-200:]}；用 --verify-only 重试回读，不要重写")
+    return 0 if verified else 21
+
+
+def publish(a):
+    result = {"schema_version": 1, "validation": "not_run", "conversion": {"status": "not_run"},
+              "write": "not_attempted", "readback": {"status": "not_run"}, "visual_review": "not_performed"}
+    try:
+        code = _publish(a, result)
+    except (OSError, ValueError) as ex:
+        result["error"] = f"{ex.__class__.__name__}: {ex}"
+        print(result["error"])
+        code = 21 if result["write"] == "succeeded" else 1
+        if code == 21:
+            result["readback"] = {"status": "failed", "error": result["error"]}
+    result["exit_code"] = code
+    result["status"] = ({0: "converted" if a.dry_run else "readback_exported", 2: "environment_unavailable",
+                         3: "invalid_input", 10: "confirmation_required", 20: "decision_required",
+                         21: "written_unverified" if result["write"] == "succeeded" else "readback_failed"}).get(code, "failed")
+    path = Path(a.result_json) if a.result_json else Path(a.wb).with_suffix(".publish.json")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"结果：{path}")
+    except OSError as ex:
+        print(f"结果文件写入失败：{ex}")
+        return 1
+    return code
 
 
 def main():
@@ -160,7 +249,9 @@ def main():
     ap.add_argument("wb", nargs="?", help="render.py --all 生成的 <slug>.wb.json")
     ap.add_argument("--token", help="目标画板 token（wbcn…）")
     ap.add_argument("--mode", choices=["append", "overwrite"], help="写入方式；不给就先导出现有画板并停下（退出码 20）")
-    ap.add_argument("--pass", dest="passthrough", action="append", help="lark-cli 门禁要求追加的参数（用户确认后才加）")
+    ap.add_argument("--result-json", help="保存机器可读状态（默认 <slug>.wb.publish.json）")
+    ap.add_argument("--verify-only", action="store_true", help="只重新导出目标画板，不转换或写入")
+    ap.add_argument("--pass", dest="passthrough", action="append", help="仅允许 --pass=--yes（lark-cli 门禁提示且用户确认后）")
     ap.add_argument("--dry-run", action="store_true", help="只校验和转换，不写入")
     ap.add_argument("--probe", action="store_true", help="探测环境（结果缓存 12 小时）")
     ap.add_argument("--fresh", action="store_true", help="忽略探测缓存")

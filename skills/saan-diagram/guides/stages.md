@@ -1,6 +1,6 @@
 # 阶段类图示：架构视图 / 主流程 / 路径对比 / 泳道图
 
-> 用 `python3 render.py --guide stages` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `python3 scripts/render.py --guide stages` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 画布与方向
 **泳道是可选的。** `columns` 永远是排版网格；画不画成可见泳道（列框和列头）由 `swimlane` 决定：

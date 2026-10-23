@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""saan-diagram renderer v1.0 (stages | layers | er | org | fishbone | timeline | quadrant | idef0): YAML spec -> HTML / SVG / PNG / Feishu whiteboard DSL.
+"""saan-diagram renderer v1.1.0 (stages | layers | er | org | fishbone | timeline | quadrant | idef0): YAML spec -> HTML / SVG / PNG / Feishu whiteboard DSL.
 
 Usage:
   python3 render.py spec.yaml [-o out.html] [--svg out.svg] [--png out.png]
@@ -17,7 +17,9 @@ from pathlib import Path
 try:
     import yaml
 except ImportError:  # pragma: no cover
-    sys.exit("需要 PyYAML: pip install pyyaml --break-system-packages")
+    sys.exit("需要 PyYAML：请在虚拟环境中安装 requirements.txt")
+
+from spec_validation import SpecError, load_spec, validate_spec
 
 # ---------------------------------------------------------------- tokens
 # Semantic roles (never inline hex elsewhere). Neutrals are fixed; everything that
@@ -137,8 +139,6 @@ def up4(v):
     return int(math.ceil(v / 4.0) * 4)
 
 
-class SpecError(Exception):
-    pass
 
 
 # ---------------------------------------------------------------- model
@@ -323,7 +323,7 @@ class Diagram:
                 rr, ll = divmod(i, gcols)
                 box = self._make_node(nid, label, kind, col, lane + ll, row + rr * step, sub=it.get("sub"),
                                       container=cid, main=bool(it.get("main")), core=bool(it.get("core")),
-                                      control=it.get("control"), risk=it.get("risk"))
+                                      control=it.get("control"), risk=it.get("risk"), actor=it.get("actor"))
                 if kind in ("system", "external"):
                     self.warnings.append(f"[R3] 系统节点 '{label}' 被放进分组 '{cid}'：系统节点应在分组外，用点线接入")
                 self._register(box)
@@ -357,7 +357,7 @@ class Diagram:
             box = self._make_node(n.get("id") or label, label, kind, n["col"],
                                   float(n.get("lane", 0)), float(n.get("row", 0)), sub=n.get("sub"),
                                   container=None, main=False, core=bool(n.get("core")),
-                                  control=n.get("control"), risk=n.get("risk"))
+                                  control=n.get("control"), risk=n.get("risk"), actor=n.get("actor"))
             self._register(box)
 
     # -- paths: 路径对比视图 / 单条主流程视图（可选）
@@ -378,7 +378,7 @@ class Diagram:
             if tag_col:
                 self._register(self._make_node(f"{name}#tag", name, "hub", tag_col,
                                                float(p.get("tag_lane", P.get("tag_lane", 0))), r,
-                                               container=None, main=False, path=name))
+                                               container=None, main=False, path=name, path_tag=True))
             prev = None
             for s in p.get("steps") or []:
                 if isinstance(s, str):
@@ -387,11 +387,11 @@ class Diagram:
                 box = self._make_node(sid, s["label"], s.get("kind", "module"), s["col"],
                                       float(s.get("lane", 0)), r + float(s.get("drow", 0)), sub=s.get("sub"),
                                       container=None, main=False, path=name, core=bool(s.get("core")),
-                                      control=s.get("control"), risk=s.get("risk"))
+                                      control=s.get("control"), risk=s.get("risk"), actor=s.get("actor"))
                 self._register(box)
                 if prev and not s.get("break"):
                     self.path_edges.append({"from": prev, "to": sid, "kind": p.get("edge_kind", ek),
-                                            "label": s.get("in_label")})
+                                            "label": s.get("in_label"), "path_step": True})
                 prev = sid
             r += float(p.get("height", 1)) + 0.4
         self.path_edges += list(P.get("edges") or [])
@@ -2783,7 +2783,7 @@ class TimelineDiagram(_SceneDiagram):
         # milestones: diamonds on the axis, labels below in greedy rows (a leader never crosses an earlier label)
         placed = []
         row_bottom = axis_y + 36
-        done_n = 0
+        done_n = unknown_n = overdue_n = 0
         for m in sorted(ms, key=lambda m: m["d"]):
             x = X(m["d"])
             lab = m["label"]
@@ -2804,17 +2804,21 @@ class TimelineDiagram(_SceneDiagram):
             placed.append((cx, r, w))
             if r + 1 > MAX_TL_ROWS:
                 self._f("TL2", f"里程碑 '{lab}' 排到了第 {r + 1} 行：太密了，合并相邻节点或拉长时间轴（width）")
-            done = m.get("status") == "done" or (m.get("status") is None and today and m["d"] <= today)
+            done = m.get("status") == "done"
+            unknown = m.get("status", "unknown") == "unknown"
             done_n += bool(done)
+            unknown_n += bool(unknown)
+            overdue_n += bool(m.get("status") == "pending" and today and m["d"] < today)
             if m.get("core"):
-                dfill, dstroke, cfill, cstroke, wt = t["accent"], None, t["accent_tint"], t["accent"], 600
+                dfill, dstroke = (t["accent"], None) if done else (t["paper"], t["accent"])
+                cfill, cstroke, wt = t["accent_tint"], t["accent"], 600
                 cores.append(lab)
             elif done:
                 dfill, dstroke, cfill, cstroke, wt = t["ink"], None, t["node"], None, 400
             else:
                 dfill, dstroke, cfill, cstroke, wt = t["paper"], t["ink"], t["paper"], t["frame"], 400
             S.conn([(x, axis_y + 8), (x, y)], t["frame"], 1.2, end=False, z=1)
-            S.rect(x - 8, axis_y - 8, 16, 16, fill=dfill, stroke=dstroke, shape="diamond", z=3)
+            S.rect(x - 8, axis_y - 8, 16, 16, fill=dfill, stroke=dstroke, dash="3,3" if unknown else None, shape="diamond", z=3)
             S.rect(cx, y, w, TL_CHIP_H, fill=cfill, stroke=cstroke, rx=4, z=2)
             S.text(cx, y + 3, w, 16, lab, FS, wt, t["node_text"], z=3)
             S.text(cx, y + 19, w, 14, m["d"].strftime("%m-%d"), 9, 400, t["soft"], mono=True, z=3)
@@ -2845,6 +2849,10 @@ class TimelineDiagram(_SceneDiagram):
             line = f"里程碑 {len(ms)} 个"
             if today or any(m.get("status") for m in ms):
                 line += f" · 已完成 {done_n} 个"
+            if unknown_n:
+                line += f" · 状态待确认 {unknown_n} 个"
+            if overdue_n:
+                line += f" · 到期未完成 {overdue_n} 个"
             self.notes.append(line)
         if slips:
             late = [m for m in slips if m["d"] > m["p"]]
@@ -2854,10 +2862,12 @@ class TimelineDiagram(_SceneDiagram):
                 self.notes.append(f"延期 {len(late)} 个，累计 {tot} 天；最大：{worst['label']} +{(worst['d'] - worst['p']).days} 天")
                 after = [m for m in ms if m["d"] > worst["d"] and not m["p"]]
                 if after:
-                    self.notes.append(f"{worst['label']} 之后还有 {len(after)} 个节点没写 plan：它们大概率也会顺延，先确认缓冲")
+                    self.notes.append(f"{worst['label']} 之后还有 {len(after)} 个节点没写 plan：是否顺延需核实依赖与缓冲")
         _titlebar(S, t, W, sp.get("title", self.default_title))
         ly = row_bottom + 48
         legend = [("diamond", "已完成", {"fill": t["ink"]}), ("diamond", "未完成", {"fill": t["paper"], "stroke": t["ink"]})]
+        if unknown_n:
+            legend.append(("diamond", "待确认", {"fill": t["paper"], "stroke": t["ink"], "dash": "3,3"}))
         if cores:
             legend.append(("diamond", "关键节点", {"fill": t["accent"]}))
         if ph:
@@ -3347,16 +3357,8 @@ html,body{{margin:0;background:var(--bg)}}
 
 
 def build(spec_path, theme=None, brand=None, titlebar=None, orient=None):
-    spec = yaml.safe_load(Path(spec_path).read_text(encoding="utf-8"))
-    lay = spec.get("layout") or "stages"
-    if lay in LAYOUTS:
-        d = LAYOUTS[lay](spec, theme, brand, titlebar, orient)
-    elif lay == "stages":
-        d = Diagram(spec, theme, brand, titlebar, orient)
-    else:
-        raise SpecError(f"layout '{lay}' 无效，可选 stages（默认）| layers | er | org | fishbone | timeline | quadrant | idef0")
-    svg, W, H = d.svg(Path(spec_path).stem.replace(".", "-") or "biz")
-    return d, svg, W, H
+    return build_spec(load_spec(spec_path), theme, brand, titlebar, orient,
+                      Path(spec_path).stem.replace(".", "-") or "biz")
 
 
 def snapshot(html_path, png_path, scale=1.5):
@@ -3371,45 +3373,6 @@ def snapshot(html_path, png_path, scale=1.5):
         pg.set_viewport_size({"width": int(w) + 64, "height": 900})
         pg.locator("svg").first.screenshot(path=png_path)
         b.close()
-
-
-def main():
-    ap = argparse.ArgumentParser(description="saan-diagram: YAML spec -> HTML/SVG/PNG/whiteboard DSL")
-    ap.add_argument("spec")
-    ap.add_argument("-o", "--out", help="输出 HTML（默认与 spec 同名）")
-    ap.add_argument("--svg", help="另存纯 SVG")
-    ap.add_argument("--png", help="另存 PNG（需要 playwright）")
-    ap.add_argument("--scale", type=float, default=1.5)
-    ap.add_argument("--theme", choices=sorted(PRESETS), help="兼容旧版：gray=飞书蓝主色，blue=汇报蓝主色")
-    ap.add_argument("--brand", help="VI 主色 #RRGGBB；内部系统=主色，外部服务=主色提亮，核心底色=主色浅调")
-    ap.add_argument("--titlebar", choices=TITLEBARS, help="标题栏：outline（默认白底线框）| gray（浅灰底）| brand（主色）| dark")
-    ap.add_argument("--orient", choices=["horizontal", "vertical"], help="横向（阶段从左到右）或竖向（阶段从上到下）")
-    ap.add_argument("--lint", action="store_true", help="只校验，有问题时退出码 1")
-    ap.add_argument("--wb", help="另存飞书画板 DSL（JSON），交给 whiteboard-cli 转 openapi 后用 lark-cli 写入")
-    ap.add_argument("--wb-route", choices=["fixed", "auto"], default="fixed",
-                    help="画板连线：fixed=沿用本图走线；auto=交给画板引擎自动绕线")
-    a = ap.parse_args()
-    try:
-        d, svg, W, H = build(a.spec, a.theme, a.brand, a.titlebar, a.orient)
-    except SpecError as ex:
-        sys.exit(f"SPEC 错误: {ex}")
-    found = d.lint() if hasattr(d, "lint") else lint(d)
-    for _, msg in found:
-        print(msg)
-    if a.lint:
-        size = d.stats() if hasattr(d, "stats") else f"{len(d.nodes)} 节点 · {len(d.edges)} 连线"
-        print(f"{'FAIL' if found else 'PASS'}: {len(found)} 条问题 · {size}")
-        sys.exit(1 if found else 0)
-    out = Path(a.out or Path(a.spec).with_suffix(".html"))
-    out.write_text(render_html(svg, W, d.spec.get("title", "diagram")), encoding="utf-8")
-    if a.svg:
-        Path(a.svg).write_text(svg, encoding="utf-8")
-    if a.png:
-        snapshot(out, a.png, a.scale)
-    if a.wb:
-        Path(a.wb).write_text(json.dumps(d.wb(a.wb_route) if hasattr(d, "wb") else to_wb_dsl(d, a.wb_route), ensure_ascii=False, indent=1), encoding="utf-8")
-    size = d.stats() if hasattr(d, "stats") else f"{len(d.nodes)} 节点, {len(d.edges)} 连线"
-    print(f"OK {out} ({W:.0f}x{H:.0f}, {size}, {len(found)} 条 lint)")
 
 
 # ================================================================ CLI：--all / --init / --guide / --selftest
@@ -3473,8 +3436,10 @@ FIX = {
     "P5": "不相容的两个步骤由同一角色执行：岗位分离问题，报告用户，不要挪列让它通过。",
 }
 
-GUIDES = {'er': '# 实体关系图\n\n> 用 `python3 render.py --guide er` 输出本文；起步模板用 `--init <示例名>`。\n\n## 实体关系图（`layout: er`）\n参照 diagram-design 的 ER / data model：讲"业务对象是什么、几对几"，不讲物理表结构。\n- **实体**：表头（实体名，浅灰底 14px 600）+ 字段列表（12px）。字段前缀 `#` = 主键，右侧显示 `PK` 标签；`→` = 外键，显示 `FK`。**只列主键、外键和讲故事需要的字段，每个实体 ≤8 个**（F2）。\n- **位置**：`col / row` 网格（列距 104px、行距 72px，行高按内容），renderer 计算坐标。把关系最密的实体放中间，让多数关系是直线。\n- **关系**：`relations: [{from, to, card: [\'1\', \'N\'], label}]`。线是中性灰细线、不带箭头；两端都要标基数（C1），写法统一用 `1 / N / 0..1 / 1..*`；标签写动词（立项、划分、递交），≤8 字。同一边多条关系自动错开接点。\n- **焦点**：`core: true` 标聚合根（如"采购项目"），最多 2 个（F1）。\n- **业务域**：`groups: [{label, members}]` 画虚线框，表示限界上下文（如"评审域"）。\n- **预算**：一张图 ≤8 个实体（D2），超出按业务域拆图。\n\n**实体关系图写法**（完整示例见 `assets/procurement-er.yaml`）：\n\n```yaml\nlayout: er\ntitle: 采购核心数据模型\nentities:\n  - {id: project, label: 采购项目, col: 1, row: 0, core: true, fields: ["#项目编号", "→计划编号", 项目名称, 采购方式]}\n  - {id: lot,     label: 标段,     col: 2, row: 0, fields: ["#标段编号", "→项目编号", 最高限价]}\ngroups:\n  - {label: 评审域, members: [expert, score]}\nrelations:\n  - {from: project, to: lot, card: ["1", "N"], label: 划分}\n```\n', 'feishu': '# 写入飞书画板\n\n> 用 `python3 render.py --guide feishu` 输出本文。写入只能通过 `scripts/wb_publish.py`，**不要直接拼 lark-cli 写入命令**：安全规矩写在脚本里，绕开脚本就等于绕开规矩。\n\n```bash\npython3 wb_publish.py --probe                                   # 探测环境（缓存 12 小时）\npython3 wb_publish.py --resolve-doc <文档链接>                    # 列出文档里已有的画板 token\npython3 wb_publish.py pay.wb.json --token <wbcn…>                # 首次：校验转换 + 导出现有画板，停下（退出码 20）\npython3 wb_publish.py pay.wb.json --token <wbcn…> --mode append  # 确认后写入，写后导出核验图\n```\n\n## 流程\n\n1. **探测**：`--probe`。没装 lark-cli 或没登录 → 问用户一次："现在登录，还是先只要 HTML + PNG？"。用户选登录时，按 lark-cli 的授权流程执行 `lark-cli auth login`，授权链接配二维码一起展示。\n2. **找画板**：\n   - 用户给了画板 token（`wbcn…`）→ 直接用；\n   - 给了文档链接 → `--resolve-doc <链接>`；有多块画板时问用户写哪一块；\n   - 文档里没有画板 → 用户同意后 `--resolve-doc <链接> --create-board`，在**该文档**末尾追加一块空画板；\n   - **什么都没给 → 问用户写进哪个文档。不要自己新建文档。** 用户不想指定，就只交付 HTML + PNG，并说明原因。\n3. **首次运行不带 `--mode`**：脚本校验画板数据（错误必须为 0）、用画板引擎渲染预览（`<slug>.wb.png`）、转换格式，然后导出现有画板到 `<slug>.before.png`，以**退出码 20** 停下。用 Read 看这张图：\n   - 空画板 → `--mode append` 重跑；\n   - 非空 → 问用户：追加，还是覆盖（`--mode overwrite`，整板重建、不可撤回）。**用户没有明确同意，不得覆盖。**\n   - 刚用 `--create-board` 新建的画板是空的，可以直接 `--mode append`。\n4. **写入**：\n   - **退出码 10** 是 lark-cli 的高风险确认门禁，不是报错。把脚本打印的提示原样告诉用户，用户同意后用 `--pass <它要求的参数>` 重跑。脚本不会自己追加任何参数。\n   - 写入编号由内容哈希生成，重试自动复用同一个；网络失败脚本会自动重试 1 次。\n5. **核验**：成功后脚本导出 `<slug>.board.png`。用 Read 看过再回复用户。\n\n退出码：0 成功 · 2 环境不满足 · 3 画板数据校验失败 · 10 需要用户确认 · 20 需要决定写入方式 · 1 其他失败。连续失败 2 次就停下，如实说明卡在哪一步，改为交付 HTML + PNG。第一次在新环境使用，可以先加 `--dry-run`（只校验转换，不写入）。\n\n## 其他\n\n- **没有 Node.js**：画板数据转换不了。改用 `render.py <spec> --svg <slug>.svg` 输出 SVG，再 `lark-cli whiteboard +update --input_format svg`（这是唯一允许直接调用 lark-cli 写入的情况，同样要先导出现有画板、确认后再写）。代价是文字与形状分离、连线不绑定节点，交付时要说明。\n- **提速**：`npm i -g @larksuite/whiteboard-cli@^0.2.13` 装一次，脚本会优先用全局命令，省掉每次 npx 解析（首次约 10 秒）。是否安装由用户决定。\n- 环境里有官方 `lark-whiteboard` / `lark-shared` skill 时，写入前先读它们对 `+update` 的说明；与本文冲突时，以更严格的那条为准。\n\n## 把"只能通过脚本"变成硬限制（可选，由用户自己设置）\n\n说明文字只能约束模型，权限设置才能真正拦住。在 Claude Code 的 `.claude/settings.json`（项目级）或 `~/.claude/settings.json`（个人级）里加：\n\n```json\n{\n  "permissions": {\n    "deny": [\n      "Bash(lark-cli whiteboard +update *)",\n      "Bash(lark-cli docs +update *)"\n    ]\n  }\n}\n```\n\n这样模型在命令行里直接调用这两条写入命令会被拒绝；`wb_publish.py` 在脚本内部调用 lark-cli，不受影响。权限规则检查的是模型直接发出的命令，不检查脚本内部启动的子进程，所以这条规则正好只拦"绕开脚本"的那条路。\n', 'fishbone': '# 鱼骨图\n\n> 用 `python3 render.py --guide fishbone` 输出本文；起步模板用 `--init <示例名>`。\n\n## 鱼骨图（`layout: fishbone`）\n讲"一个结果背后有哪些原因"。右侧是问题（主色浅底），一条主骨，原因大类交替排在上下，每类的原因挂在各自的骨上。\n- **骨是正交的**（梳状）：竖骨垂直接入主骨，原因用短横线挂在竖骨左侧，不画斜线，与全局连线规则一致。\n- **effect 写成现象**（"评标周期平均 32 天"），不要写成目标或对策。\n- **大类**常用 6M（人 / 机 / 料 / 法 / 环 / 测），但**不要为了凑齐 6 类硬造原因**：没有原因的大类直接删（FB1）。≤6 类、每类 ≤6 个原因。\n- **根因**：验证过的原因加 `root: true`（主色浅底），≤3 个。图例下方自动列出根因；一个都没标时会提示"这张图现在只是假设清单"；根因都在同一类时会点出"先在这一类上做对策"。\n- **洞察用法**：鱼骨图最大的误用是把头脑风暴当结论。没有 root 的鱼骨图只能用于讨论，不能用于汇报。\n\n**鱼骨图 / 时间线 / 四象限写法**（完整示例见 `assets/bid-fishbone.yaml`、`assets/platform-timeline.yaml`、`assets/ai-quadrant.yaml`）：\n\n```yaml\nlayout: fishbone\neffect: 评标周期平均 32 天\ncategories:\n  - {label: 人, causes: [专家临时回避, {label: 评委同时评多个项目, root: true}]}\n  - {label: 法, causes: [{label: 澄清环节无时限, root: true}, 复核需线下签字]}\n```\n', 'idef0': '# IDEF0 功能模型\n\n> 用 `python3 render.py --guide idef0` 输出本文；起步模板用 `--init <示例名>`。\n\n## IDEF0 功能模型（`layout: idef0`）\n讲"一项业务由哪些活动组成，每个活动**受什么约束、靠什么完成**"。和流程图的区别：流程图讲顺序，IDEF0 讲每个活动的四个接口（ICOM）。\n- **四个方向是固定语法**：输入（Input）从左进，控制（Control）从上进，输出（Output）从右出，机制（Mechanism）从下进。活动框按阶梯从左上排到右下，右下角自动编号（A1、A2…；写 `node: A2` 时编号为 A21、A22…）。\n- **活动**：`activities: [{id, label, core}]`，动词 + 宾语（"组织招标采购"），≤10 字；一张图 3–6 个（ID3），多了就分解成子图。\n- **边界箭头**：`inputs: [{to, label}]` 从图左边进来，`outputs: [{from, label}]` 从右边出去。\n- **内部流转**：`flows: [{from, to, label, as: input | control}]`。上游的输出可以成为下游的输入，也可以成为下游的**控制**（如"采购计划"约束招标）。指向更早活动的流转自动画成回路：控制回路从上方绕回，输入回路从下方绕回。\n- **控制** `controls: [{label, to: [...]}]`：制度、法规、标准、审批规则。从顶部一条虚线总线分到各个活动。\n- **机制** `mechanisms: [{label, owner, to: [...]}]`：谁来做、用什么做。`owner: internal / external` 画成 VI 系统块（与其他图示一致），不写 owner 是部门或岗位（灰色圆角块）。从底部总线接入。\n- **硬规则**：每个活动至少一个控制（ID1）、至少一个输出（ID2）。没有控制的活动就是失控点，这是 IDEF0 最有价值的检查。\n- **洞察用法**：图例下方自动给出：某个机制支撑 ≥60% 的活动（"它一停，整条链就停"）；没有标机制的活动；回路数量（潜在返工）；只受上游结果约束、没有制度控制的活动（"标准靠人记"）。\n- **飞书画板**：箭头都是自由折线并带全部拐点，标签是独立文本，可以在画板里拖动微调。\n\n**IDEF0 写法**（完整示例见 `assets/proc-idef0.yaml`）：\n\n```yaml\nlayout: idef0\nnode: A0\ntitle: 采购执行\nactivities:\n  - {id: plan, label: 编制采购计划}\n  - {id: bid, label: 组织招标采购, core: true}\n  - {id: eval, label: 评审与定标}\ninputs:  [{to: plan, label: 项目物资需求}]\noutputs: [{from: eval, label: 中标通知}]\nflows:\n  - {from: plan, to: bid, label: 采购计划}\n  - {from: bid, to: eval, label: 投标文件}\n  - {from: eval, to: bid, as: control, label: 澄清要求}   # 回路\ncontrols:\n  - {label: 集团采购管理制度, to: [plan, bid, eval]}\nmechanisms:\n  - {label: 招采平台, owner: internal, to: [bid, eval]}\n  - {label: 采购部, to: [plan]}\n```\n', 'layers': '# 分层架构图\n\n> 用 `python3 render.py --guide layers` 输出本文；起步模板用 `--init <示例名>`。\n\n## 分层架构图（`layout: layers`）\n参照 diagram-design 的 layer stack（层叠）与 high-level（贯穿竖条）两种类型，改成中文平台总体架构的版式。从左到右五条轨道：\n\n| 轨道 | 写法 | 渲染 |\n|---|---|---|\n| 左侧贯穿栏 | `rails.left: [安全保障体系, 运维支撑体系, …]` | 每个关注点一段竖排文字，交替浅灰；贯穿全部层，说明"每一层都受它约束" |\n| 层名列 | `layers[].label` | 浅灰圆角块，14px 600 |\n| 主体 | `layers[].blocks` | 每层一条浅底带，区块按 `w` 权重分宽，同层区块等高 |\n| 右侧列 | `side[].sections` | 集成平台、内外部系统等跨层元素；`span: [起始层, 结束层]` 对齐到层，不写 span 就按条目数分配高度 |\n| 右侧贯穿栏 | `rails.right` | 同左侧，常放法规制度 |\n\n区块（block）的几种写法：\n- **普通区块**：`{title, items, cols, w}`。条目是浅灰圆角块；`cols` 不写时按宽度自动排；条目写 `……` 会画成虚线"可扩展"块。\n- **工作台区块**：加 `tab: 业务工作台`，在区块顶部加一条角色入口标签（深一档灰），下面是该角色的服务。\n- **能力链区块**：写 `stages: [{title, steps: [...]}, …]`。每个阶段是一个子面板，步骤是窄竖块（每行 2 字，`step_wrap` 可改），步骤间小箭头 `›`，阶段间实心 ▶ 表示流程推进。这是把"主流程"嵌进分层图的方式。\n- **重点能力区块**：`kind: special`，浅橙底，图例名称取 `special.label`；声明了 `special.prefix` 时，标题以它开头（R5）。\n\n配色仍然遵守统一配色纪律（`--guide style`）：业务条目一律中性灰，**只有系统和核心带颜色**——\n- 右侧 section 写 `owner: internal` → 条目是 VI 主色实心块；`owner: external` → 主色提亮块。所以内部系统、外部系统一眼可分。\n- `core: true` 可以加在区块、工作台、能力链阶段或单个条目上，全图 ≤3 处（F1）。示例里给了"业务工作台"和"合同执行"两处。\n- `vertical: true` 的 section 条目竖排（如集成平台的应用/数据/接口/消息集成）。\n\n连线：分层图默认不画层间连线（层叠本身就表达了依赖）。只有跨列集成关系才用 `links`，例如集成平台 ↔ 外部系统的双向"集成"箭头：`{from: integ, to: ext, kind: bidir, label: 集成}`。端点可以是层 id、带 id 的区块、side 列或 section id，两端必须左右相对、间距 ≥40px（K1，renderer 会自动给有连线的两列留 56px）。\n\n预算（diagram-design layer stack）：**最多 6 层**（D2），每个区块 ≤12 个条目（D1），超出就拆成"总图 + 分层子图"。`width` 默认 1600，内容多时加大，不缩字号。\n\n**分层架构图写法**（完整示例见 `assets/biz-platform.yaml`）：\n\n```yaml\nlayout: layers\ntitle: 企业业务协同平台\nwidth: 1760                       # 默认 1600\nspecial: {label: AI 能力}          # 重点能力在本图里表示 AI\nrails:\n  left:  [安全保障体系, 运维支撑体系, 数据标准, 接口标准]\n  right: [国家法律法规, 企业管理制度]\nlayers:                           # 自上而下，≤6 层\n  - id: ui\n    label: 展示层\n    blocks:\n      - {w: 3, items: [电脑端, 手机端, 轻应用]}\n      - {w: 2, items: [驾驶舱, BI 看板]}\n  - id: svc\n    label: 服务层\n    blocks:\n      - {tab: 业务工作台, title: 核心业务服务, core: true, w: 1.4, cols: 2, items: [流程配置, 规则配置, ……]}\n      - {tab: 客户门户, title: 客户服务, items: [在线申请, 进度查询, ……]}\n  - id: cap\n    label: 能力层\n    blocks:\n      - title: 业务中台\n        stages:\n          - {title: 需求受理, steps: [需求登记, 需求评估, 立项审批]}\n          - {title: 合同执行, core: true, steps: [合同签订, 过程跟踪]}\n  - id: tech\n    label: 技术层\n    blocks:\n      - {title: 统一技术底座, items: [流程引擎, 组织权限, ……]}\n      - {title: AI 能力平台, kind: special, items: [智能问答, 智能审核]}\nside:                             # 跨层的右侧列\n  - id: integ\n    w: 96\n    sections:\n      - {title: 集成平台, vertical: true, span: [ui, tech], items: [应用集成, 数据集成, 开放接口]}\n      - {title: 第三方AI能力, kind: special, span: [infra, infra]}\n  - id: ext\n    w: 184\n    sections:\n      - {title: 企业内部系统, owner: internal, items: [企业 OA, 财务系统]}\n      - {title: 外部系统, owner: external, items: [CA 电子签章, 银行系统]}\nlinks:\n  - {from: integ, to: ext, kind: bidir, label: 集成}\n```\n', 'lint': '# 校验规则与修法\n\n> 用 `python3 render.py --guide lint` 输出本文；起步模板用 `--init <示例名>`。\n\n## 两类规则\n\n| 类别 | 编号 | 处理 |\n|---|---|---|\n| **排版类** | 除下一行以外的全部 | 改 spec 直到通过。`--all` 失败时会在每条后面给出修法 |\n| **业务发现类** | ID1 ID2 DF1 DF2 DF3 AU1 AU2 O1 O2 Q3 C1 P1–P5 | **不许为了通过而改图**。它报的是业务问题（失控点、绕过控制、数据黑洞、权限交叉……），要原样报告用户。用户确认现状如此后，写进 spec 的 `accept`，图例下方会如实写出"已确认的发现" |\n\n```yaml\naccept:\n  - {code: P1, match: 紧急付款, note: 紧急付款经总经理书面特批，事后补审}   # match 是报错信息里的片段，可省略\n```\n\n`accept` 只能确认业务发现类；写排版类编号会直接报错（ACC）。退出码：0 通过 · 1 有排版问题 · 2 只剩未确认的业务发现 · 3 spec 写错。\n\n## 建模约束与 lint 编号\n\n| 编号 | 规则 |\n|---|---|\n| **R1** | `type: process` 分组要标 main；跨组的 `flow` 只挂在 main 上 |\n| **R2** | 节点放在哪个阶段，看它服务哪个阶段，不看它属于哪个系统（泳道图里看谁执行） |\n| **R3** | 系统块不放进分组，只在分组外用点线接入 |\n| **R4** | 系统节点必须声明 `owner` |\n| **R5** | 重点能力：声明了 `special.prefix`（旧写法 `kind: ai` 默认为 "AI"）时，标签以它开头 |\n| **R6** | 路径行只能沿阶段向前推进 |\n| **E3** | `meta` 连线必须带标签 |\n| **F1** | 核心底色 ≤ 3 处 |\n| **B1** | 无框分组不能当连线端点 |\n| **A1** | 箭头末段 ≥ 24px，其余段 ≥ 12px |\n| **G1** | 节点（含系统块）不重叠 |\n| **G2** | 连线不穿过非端点节点 |\n| **G3** | 两条连线不叠在同一条线上 |\n| **G4** | 可见分组（有框或底色）不交叠 |\n| **L1 / L2 / L3** | 连线标签 ≤8 字，不压住节点，标签之间也不互相重叠 |\n| **T1** | 节点名 ≤10 字；分层图条目、实体字段要放得进自己的格子（不缩字号） |\n| **S1** | 副标签不写中文 |\n| **D1** | 单个阶段的节点数 ≤ 泳道数 × 12；分层图单个区块 ≤12 个条目。超出就拆成"全景 + 子图" |\n| **D2** | 分层图 ≤6 层；实体关系图 ≤8 个实体；组织架构图 ≤24 个组织、≤4 层；鱼骨图 ≤6 个大类；时间线 ≤15 个里程碑、≤8 个阶段；四象限 ≤20 个事项；IDEF0 3–6 个活动（ID3） |\n| **V1** | 竖排文字（贯穿栏、竖排条目）和 side 列条目要放得下 |\n| **W1** | 能力链总宽不超过所在区块 |\n| **K1** | 分层图 `links` 两端左右相对、间距 ≥40px |\n| **F2** | 实体字段 ≤8 个 |\n| **C1** | 实体关系两端都标基数 |\n| **DF1–DF3** | 数据流图：数据必须经过处理才能流转；处理不能只进不出或只出不进；存储要有写有读 |\n| **AU1 / AU2** | 审计流程图：控制点必须写风险；单据必须有连线 |\n| **O1** | 组织架构图：两个数据域只能嵌套或并列，不能部分交叉 |\n| **O2** | 数据域的框不能框住不属于它的组织 |\n| **O3** | 授权要写 kind 和标签；外层域本来就能看到内层，不用再画"外→内只读" |\n| **O4** | 域名要放得进自己的框 |\n| **FB1** | 鱼骨图：每个大类至少有一个原因 |\n| **TL1 / TL2 / TL3** | 时间线：日期要在轴的范围内；标签错行不超过 3 行；阶段开始不能晚于结束 |\n| **Q1 / Q2 / Q3** | 四象限：坐标在 0–10 之内；标签要放得下；事项不能压在分界线上 |\n| **ID1 / ID2** | IDEF0：每个活动至少一个控制、至少一个输出 |\n| **ID5** | IDEF0：一个活动的同一侧箭头太多放不下 |\n| **P1–P5** | 流程路径验证（`verify`）：控制点被绕过 / 步骤走不到 / 死路 / 判断只有一个出口 / 岗位未分离，见 `--guide verify` |\n\n## 修复 lint\n\n- **A1 箭头没地方**：拉开两端元素的 `row`（上下相连差 ≥1.4，进出菱形差 ≥1.6）或 `lane`；分组内用 `row_step`；U 形回线加大 `offset`；指定了 `mid_x` / `mid_row` 的，把拐点往起点挪。\n- **G2 线穿节点**：先改 `mid_x` / `mid_row`，让拐点走空白泳道或阶段间缝隙。不行就用 `port_a` 换出线位置。最后才挪节点。\n- **G3 线叠线**：给其中一条加 `mid_x` / `mid_row` 偏移 ≥12px。如果它们本来就该共用起点，用 `bus: true`。\n- **G1 系统块与节点重叠**：系统块比旧版的圆宽，挪开 `lane`，或者把系统块移到对应节点正下方 / 正右方，用直线接入。\n- **L2 标签压节点**：用 `label_at: start / end` 把标签挪到另一段，那一段要经过空白区域。\n- **T1 / L1 字太多**：精简措辞，例如"招标/询比/谈判"改成"招标询比谈判"。**不缩字号。**\n- **B1**：改连分组里的主线节点，或者确认这个框值得画，再加 `frame: true`。\n- **F1**：只保留真正的核心。其余可以用 hub 表示主线，不用底色。\n- **主流程穿过兄弟节点**：把主干节点挪到单独一行，细节放下方。\n- **换方向后出错**：通常是 A1 或 L2。按上面的方法微调，两个方向都 PASS 后再交付。\n- **分层图 T1 条目放不下**：精简措辞，或给该区块减 `cols`、加 `w`，或加大 `width`。**W1 能力链太宽**：合并阶段、减少步骤，或把能力层区块单独占满一层。**V1 竖排放不下**：贯穿栏精简到 4–6 个关注点，side 列给 section 加 `span` 或减条目。\n- **L3 标签互相重叠**：多半是几条线在同一片空白里转弯。数据流图用"处理/存储交替排行 + `label_at: 1`"；其他图先删掉能从布局看出来的标签（如单据连线），再拉开行距。\n- **DF1**：在两个存储或实体之间补一个处理过程（谁在搬运数据，就把谁画出来）。**DF2 / DF3**：补上漏画的输入、输出、写入或读取，或者删掉多余的节点。\n- **O1 / O2**：用 `exclude` 把不该包含的子树排除出去，或者把交叉的部分拆成独立的域。**O3**：删掉多余的外→内只读授权。**O4**：缩短域名（如"A 公司数据域"），说明文字放进 desc。\n- **FB1**：删掉空的大类。**TL2**：合并相邻里程碑、只留需要决策的节点，或加大 `width`。**TL1**：调整 `start` / `end`。**Q2**：把挤在一起的事项坐标微调 0.3–0.5，或缩短名称。**Q3**：把压线的事项挪到一侧，并说清理由。\n- **ID1**：补上约束这个活动的制度或标准；确实找不到，就把它当成管理漏洞写进交付说明，不要编一个控制。**ID3**：把活动合并或分解成子图。**ID5 / L3**：把同类箭头合并（如多份文件合成"投标文件"），或调整 spec 里 controls / mechanisms 的顺序。\n- **R5**：把标签改成以 `special.prefix` 开头；如果这张图不需要强制前缀，删掉 `prefix`。\n- **AU1**：给控制点补 `risk`；说不出防什么风险的控制点，多半不是关键控制，删掉。\n- **ER 的 G2 关系穿过实体**：调整 `col/row`，把关系多的实体放中间；仍然交叉就按业务域拆图。\n- **原图里的穿线、错色问题不要照搬**，在交付说明里写一句"原图 X 处已按规则修正"。\n', 'org': '# 组织架构图 + 数据隔离\n\n> 用 `python3 render.py --guide org` 输出本文；起步模板用 `--init <示例名>`。\n\n## 组织架构图 + 数据隔离边界（`layout: org`）\n普通组织架构图只回答"谁管谁"。这里多回答一个问题：**谁能看到谁的数据**。管理关系和数据边界经常不一致，比如集团管控的子公司却是独立数据域，或者兄弟公司之间要共享供应商库。这类不一致正是要画出来给人看的。\n\n- **组织树**：`orgs` 嵌套写 `children`，renderer 按树形自动排版，用直角折线连接。`kind: hq` 表示总部/上级（深一档灰），`unit`（默认）表示组织单元，`virtual` 表示临时或虚拟组织（如项目部，白底虚线框）；`core: true` 表示核心单元（主色浅底，≤3 个）。`sub` 写组织编码（只写拉丁字符）。\n- **叶子多时竖排**：某个节点的子节点都是叶子且超过 3 个时，自动改成父节点下方的竖排列表（左侧一条竖线），避免图被拉得很宽。可以用 `stack: true / false` 强制开或关。\n- **数据域** `scopes`：每个域写 `members`（默认包含整棵子树）和可选的 `exclude`（把某棵子树排除出去）。规则只有两条：**嵌套 = 外层可以看到内层**（集团汇总下级），**并列 = 互相隔离**。`kind: shared` 的域用主色浅底，表示汇总/共享；默认 `isolated` 只画虚线框。域名写在框内左下角。\n- **跨域授权** `grants`：`{from, to, kind: read | write | delegate, label}`，分别表示只读、读写、委托（代办）。同一行、相邻且放得下标签时，画一条主色虚线箭头，标签直接写在线上；否则在节点右下角打 `A1 / A2 …` 角标，图例下方列出授权清单，并统计"跨数据域授权 X 条（其中读写 / 委托 Y 条）"。\n- **洞察用法**：读写和委托类授权越多，隔离边界就越像"纸面隔离"。某个独立域只出不进（只有报送），说明它是真隔离；如果兄弟域之间授权成网，就该考虑合并成共享域。\n- **预算**：≤24 个组织、≤4 层（D2），超出就按子公司拆成子图。\n- **飞书画板**：树的连线导出为带全部拐点的自由折线；授权箭头的标签挂在连接线上，跨框也不会溢出。\n\n**组织架构图写法**（完整示例见 `assets/group-org.yaml`）：\n\n```yaml\nlayout: org\ntitle: 集团采购组织与数据隔离\norgs:\n  - id: group\n    label: 甲集团\n    kind: hq\n    children:\n      - {id: center, label: 集采中心, core: true}\n      - {id: coa, label: A 建设公司, children: [{label: 第一工程分公司}, {label: 项目部（临时）, kind: virtual}]}\n      - {id: coc, label: C 材料公司}\nscopes:\n  - {id: g,  label: 集团数据域, members: [group], exclude: [coc], kind: shared}\n  - {id: a, label: A 公司数据域, members: [coa]}\n  - {id: c, label: C 公司独立域, members: [coc]}\ngrants:\n  - {from: center, to: coa, kind: delegate, label: 代理集中采购}\n  - {from: coc, to: group,  kind: read,     label: 报送采购统计}\n```\n', 'profile': '# 流程分析三件套：数据流图 / 审计流程图 / 机会流程图\n\n> 用 `python3 render.py --guide profile` 输出本文；起步模板用 `--init <示例名>`。\n\n## 流程分析三件套（`profile`）\n同一个 stages 引擎，加一个 `profile` 打开对应的校验规则。规则是这几种图的"约束语言"，比画法更重要。\n\n**数据流图 `profile: dfd`**（参照 diagram-design data-flow 与 Gane-Sarson 记法）\n- 默认不画泳道；列只用来排位，可以写成"外部实体 / 处理过程 / 数据存储 / 结果去向"四列方便定位。外部实体用 `system`（`owner` 决定深浅），处理过程用 `module`（`sub: P1` 编号），存储用 `kind: store`（`sub: D1` 编号）。\n- 连线全部用 `kind: data`，标签写**数据名**（加密标书、报价清单），不写动作。\n- 处理与存储**交替排行**（P1 → D1 → P2 → D2 …，行距 1.2），连线标签放竖段（`label_at: 1`），不会挤在一起。\n- 规则：DF1 数据只能经过处理才能流转，存储↔存储、实体↔存储、实体↔实体不能直连；DF2 处理不能只进不出（黑洞）或只出不进（奇迹）；DF3 存储必须既有写入又有读取。\n\n**审计流程图 `profile: audit`**（泳道 + 单据 + 控制点）\n- 列写部门或岗位；每个步骤旁边放它产生或依赖的单据（`kind: doc`，步骤在 `lane: 0.05`，单据在 `lane: 1.15`），单据与步骤用 `data` 连线，箭头方向即"产生 / 附带"，一般不用再写标签。\n- 关键步骤加 `control: K1` 和 `risk`；判断节点也可以是控制点（如"三单一致？"）。图例下方自动生成控制点清单。\n- 规则：AU1 每个控制点必须写风险，且审计图至少要有一个控制点；AU2 每张单据都要有连线（谁产生、流向谁）。\n- 洞察用法：数一数每个部门有几个控制点。控制点全挤在最后一个环节（比如出纳），说明前面是"先放行再把关"。\n\n**机会流程图 `profile: opportunity`**\n- 只放两列：`{id: va, label: 增值环节, value: true}` 和 `{id: nva, label: 非增值环节, value: false}`，步骤按时间往下排，在两列之间来回走（`route: vh`）。\n- 图例下方自动写出"增值环节 X 个 · 非增值环节 Y 个（占 Z%）"。\n- 最该优化的非增值环节用 `core: true` 标出（≤3 处），这就是给决策者看的"机会点"。\n\n**数据流图 / 审计流程图 / 机会流程图写法**（完整示例见 `assets/bid-dfd.yaml`、`assets/payment-audit.yaml`、`assets/vendor-opportunity.yaml`）：\n\n```yaml\nprofile: audit                    # dfd | audit | opportunity\ncolumns:\n  - {id: buy, label: 采购部门, lanes: 2}\n  - {id: fin, label: 财务部门, lanes: 2}\nnodes:\n  - {label: 核对合同验收, col: buy, lane: 0.05, row: 2.0, control: K1, risk: 未验收即付款}\n  - {label: 验收单, kind: doc, col: buy, lane: 1.15, row: 2.0}\n  - {id: match, label: 三单一致？, kind: decision, col: fin, lane: 0.05, row: 5.2, control: K3, risk: 三单不一致}\n  - {label: 投标文件库, kind: store, col: store, lane: 0.5, row: 1.8, sub: D1}     # dfd\nedges:\n  - {from: 验收单, to: 核对合同验收, kind: data}\n```\n\n路径验证（控制点不可绕过、岗位分离等）见 `--guide verify`。\n', 'quadrant': '# 四象限图\n\n> 用 `python3 render.py --guide quadrant` 输出本文；起步模板用 `--init <示例名>`。\n\n## 四象限图（`layout: quadrant`）\n讲"在两个维度上，这些事项该先做哪个"。\n- **坐标轴**：`x` / `y` 写 `{label, low, high}`，事项坐标都用 0–10 打分。象限编号：q1 右上、q2 左上、q3 左下、q4 右下。每个象限可以写 `{label, note}`，`note` 写行动建议（"优先做"）。\n- **焦点**：`focus: q1` 给优先象限铺主色浅底；`core: true` 标重点事项（主色圆点），≤3 个。\n- **迁移**：事项写 `from: [x, y]` 就画出"现状 → 目标"的虚线箭头，适合讲"通过什么投入把它从攻坚区推到优先区"。\n- **标签**：自动在圆点右 / 左 / 上 / 下找空位，并保持在象限内。四周都放不下时报 Q2。\n- **选边规则（Q3）**：事项坐标正好落在 5（分界线）上会报错。四象限的价值就在于逼人做取舍，压线等于没打分。\n- **洞察用法**：60% 以上的事项挤在同一个象限时，图例下方会提示"评分可能没拉开"。这通常说明打分标准有问题，而不是事项真的都一样重要。\n\n```yaml\nlayout: quadrant\nx: {label: 落地可行性, low: 难, high: 易}\ny: {label: 业务价值, low: 低, high: 高}\nfocus: q1\nquadrants:\n  q1: {label: 优先做, note: 价值高、好落地}\n  q2: {label: 攻坚储备, note: 价值高、难度大}\nitems:\n  - {label: 招标文件智能生成, x: 7.5, y: 8.2, core: true}\n  - {label: 智能辅助评审, x: 3.2, y: 8.8, from: [2.0, 8.6]}\n```\n', 'stages': '# 阶段类图示：架构视图 / 主流程 / 路径对比 / 泳道图\n\n> 用 `python3 render.py --guide stages` 输出本文；起步模板用 `--init <示例名>`。\n\n## 画布与方向\n**泳道是可选的。** `columns` 永远是排版网格；画不画成可见泳道（列框和列头）由 `swimlane` 决定：\n\n| 图示 | 默认 | 理由 |\n|---|---|---|\n| 泳道图、审计流程图（列 = 角色 / 部门） | 画 | 列就是"谁来做"，是图的主轴 |\n| 架构视图、路径对比（列 = 生命周期阶段） | 画 | 强阶段控制，读者要按阶段对齐看 |\n| 机会流程图（列 = 增值 / 非增值） | 画 | 两列的分界就是结论 |\n| 单条主流程（只有一行 `paths`） | 不画 | 箭头已经表达先后，列框只会切碎流程 |\n| 数据流图（`profile: dfd`） | 不画 | 符号（实体 / 处理 / 存储）已经说明角色 |\n\n需要时用 `swimlane: true | false` 覆盖默认值。**不画泳道时，列只是网格，节点要等距排**：单条流程用一个宽列（如 `lanes: 9`），节点 `lane` 按固定步长递增（如 0、1.5、3 …），别沿用"每阶段一列"的写法，否则间距会忽大忽小。\n\n- 顶部是标题栏，默认**白底线框**（`titlebar: outline`：1px 中性灰边框、深色字，不占用颜色预算）。也可以用 `gray`（浅灰底）、`brand`（VI 主色底，文字黑白自动按对比度选）或 `dark`（深色底）。\n- **横向**（默认）：阶段从左到右成列，列头在顶部，`row` 往下走。\n- **竖向**（`orientation: vertical`）：阶段从上到下成带，阶段名在左侧表头，`row` 往右走。同一份 spec 两个方向都能出图：`lane` 永远沿阶段宽度方向，`row` 永远跨阶段方向，走线方向（`h`↔`v`、`hv`↔`vh`、`ll`↔`tt`…）自动转置。换方向后要重新跑 `--lint`，个别间距可能需要微调。\n- 所有结构尺寸都在 **4px 网格**上：泳道 112×48、节点高 28（带副标签 40）、系统块高 36、连线圆角 8。\n- 图例自动生成，放在底部横条，只列图中实际用到的类型，放不下自动换行。\n\n## 节点\n| kind | 样式 | 用于 |\n|---|---|---|\n| `hub` | 深一档灰底，字重 600 | 主线节点、汇聚点 |\n| `module`（默认） | 浅灰底 | 功能模块、业务对象 |\n| `decision` | 白底菱形、细线描边 | 判断点，标签以"？"结尾，出线标"是 / 否" |\n| `optional` | 白底虚线框 | 可选或条件触发的环节 |\n| `system` + `owner: internal` | **VI 主色圆角矩形**（圆角 8），白字 | 内部系统 |\n| `system` + `owner: external` | **VI 主色提亮 45%** 的圆角矩形，文字按对比度自动选黑白 | 外部服务（R4：深浅由归属决定，不由画图人决定） |\n| `special`（旧写法 `ai`） | 浅橙底 | **重点能力**：这张图想特别突出的一类能力，最常见的是新增的 AI 能力（可选，见「叠加层」） |\n| `doc` | 白底、底边波浪 | 单据 / 文档（申请单、验收单、发票、凭证），审计流程图用 |\n| `store` | 右侧开口的矩形，左侧编号格（`sub: D1`） | 数据存储，数据流图用 |\n\n**控制点 `control: K1` + `risk: 风险描述`**（任何节点都可加）：节点右上角出现深色编号标签，图例下方自动列出"控制点 → 防范的风险"清单。审计读者真正要看的是这张清单，所以 `risk` 必填（AU1）。\n\n系统块是全图唯一用实心主色的元素，所以它们一眼就能和业务节点区分开。业务节点保持中性灰，颜色只留给"系统"和"核心"两种信号。\n\n**核心业务底色 `core: true`**（节点和分组都可以用）：主色浅调底加主色描边，字重 600。\n- 规则同 diagram-design 的焦点色：**全图最多 3 处**（F1）。超过 3 处就等于没有重点，先想清楚哪些才是真核心。\n- 分组 `core: true` 会给整个区域铺浅底，用来标出"这一片是核心业务域"。\n\n**副标签 `sub`**：只写技术值（协议、端口、技术栈，如 `SHA-256`、`MySQL`），用等宽字体 9px。**不写中文**（S1）。\n\n## 分组与方框\n`groups` 只是一种排版手段：把若干条目按网格摆在一起。**默认不画框。**\n\n只有框本身能说明问题时，才加 `frame: true`：\n- 这些条目共享同一个触发或边界，例如"都消费同一个事件""同一套数据隔离""同一个外部平台"；\n- 原图里方框代表一个业务域，读者需要按域来理解。\n\n如果只是"同一阶段的几个功能"，阶段本身已经说明了归属，再加框是重复，不加。\n\n规则：\n- 无框分组不可见，所以**不能当连线端点**（B1），要连就连它里面的主线节点。\n- 两个可见分组不能交叠（G4）。\n- `type: process` 的分组需要标 `main`，跨组的主流程只挂在 main 上（R1）。\n- 主干节点推荐单独放一行（同一个 `row`），细节分组放在各自阶段下方。这样主流程是一条直线，不会穿过兄弟节点。\n- 分组内部要画上下箭头时，用 `row_step: 1.3` 拉开组内行距。\n\n## 连线（对应 diagram-design 的连线规则）\n| kind | 样式 | 语义 |\n|---|---|---|\n| `flow` | 深色实线 1.5px | 业务主流程，有强先后关系 |\n| `data` | 灰色点线 | 数据下发、系统集成、消息推送 |\n| `return` | 灰色点线 | 回退、重做（用 `rr` / `ll` / `tt` 绕开主线） |\n| `bidir` | 双向点线 | 双方交互 |\n| `meta` | 紫色虚线，**必须带标签**（E3） | 配置依赖、受托关系，不是业务流 |\n| 任意 kind + `emphasis: true` | 主色 2px | 关键路径，**全图只标一条路径** |\n\n硬规则（lint 检查）：\n1. **只用正交折线**，拐角是半径 8 的圆角，不画斜线。\n2. **标签放在线旁，不压在线上**：横线的标签在线上方，竖线的标签在线右侧，都留 6px 间隙，并有白色遮罩。\n3. **两条线不叠在一起**（G3）：平行段至少错开 12px。多条线共用一个起点做总线时，用 `bus: true` 显式声明。\n4. **同一条边上的多个接点自动错开**（间距 12px）。\n5. **线不穿过非端点节点**（G2）：先改走线绕开。\n6. **标签不压住节点**（L2）。\n7. **箭头要有地方显示**（A1）：带箭头的末段 ≥ 24px，其余每段 ≥ 12px。有箭头相连的两个元素要拉开间距：\n   - 上下相连：`row` 至少差 **1.4**；判断菱形较高，进出菱形的上下连线至少差 **1.6**。\n   - 左右相连：两个节点宽度都超过 88px（6 字以上）时，`lane` 至少差 1.2，或者精简措辞。\n   - 走线的中间拐点没指定时，renderer 会自动把拐点往起点挪，给箭头段留够 24px。\n\n## 叠加层（可选）\n- `kind: special`（旧写法 `kind: ai`，两者等价）：浅橙铺底，标出**重点能力**。\n  - 在 spec 顶层给它命名：`special: {label: AI 能力, prefix: AI}`。`label` 是图例名称，不写时默认"重点能力"。`prefix` 可选，写了就要求所有重点能力的标签以它开头（R5）。\n  - 旧 spec 只写了 `kind: ai`、没声明 `special` 时，按 `{label: AI 能力, prefix: AI}` 处理，老图不用改。\n  - 一张图只突出一类能力。AI 和数据能力都想突出，说明重点没想清楚：拆成两张图，或者二选一。\n- `kind: scope`：虚线描边、不填色，用来标"二期范围""试点单位"等。\n- 叠加层只覆盖它真正作用的范围。铺多了就等于没标。\n- 标签默认在右下角；附近有连线标签时，用 `title_pos: top` 放到顶部。\n\n## 路径视图 / 主流程视图（可选）\n- `paths.rows` 每行是一个流程，步骤对齐到阶段。各行跳过了哪些阶段，一眼可见（R6：只能向前推进，要回头必须用 `break: true` 换行）。\n- 放在架构视图下方时会自动画分隔线；**单独使用时**只写 `paths`，不写 `nodes` / `groups`，就是一张主流程图。\n- 单条主流程默认不画泳道（见本文「画布与方向」），节点按固定步长等距排。\n- `edge_kind: flow` 让主流程用实线（默认是点线，表示"示意路径"）。步骤上写 `in_label` 可以给进入这一步的线加标签，例如判断的"否"。\n\n## Spec 写法\n\n```yaml\ntitle: 网盘上传与存储流程\ndesc: 一句话说明内容（无障碍描述）\norientation: horizontal           # horizontal（默认）| vertical\nswimlane: true                    # 画不画泳道；不写按「画布与方向」的默认值\nbrand: "#3370FF"                  # VI 主色，可省略\ntitlebar: outline                 # outline（默认，白底线框）| gray | brand | dark\nspecial: {label: AI 能力, prefix: AI}   # 可选：重点能力的名称（默认"重点能力"）和标签前缀\ncolumns:                          # 阶段：横向时从左到右，竖向时从上到下（泳道图里写角色）\n  - {id: pre,  label: 上传预处理, lanes: 3}\n  - {id: tran, label: 传输与接入, lanes: 3}\nnodes:                            # 主干推荐放同一 row\n  - {label: 计算文件哈希, kind: hub, col: pre, lane: 0.5, row: 0.8, sub: SHA-256}\n  - {label: 秒传命中？, kind: decision, col: pre, lane: 2, row: 0.8, core: true}\n  - {label: 分片并行上传, kind: hub, col: tran, lane: 1, row: 0.8, core: true}\n  - {label: 用户中心, kind: system, owner: internal, col: pre, lane: 0.5, row: 4.4}\n  - {label: CDN 分发, kind: system, owner: external, col: tran, lane: 1, row: 4.4}\ngroups:                           # 默认无框；frame/core 按需开启\n  - {id: pre_detail, col: pre, lane: 0.5, row: 2.2, grid: 2, items: [分片切割, 空间配额校验, 获取上传凭证]}\n  - {id: post_async, frame: true, col: post, lane: 0.5, row: 2.6, grid: 2, items: [预览转码, 病毒扫描]}\n  - id: award                     # 流程型分组：有主线；组内有上下箭头时拉开行距\n    type: process\n    frame: true\n    col: proc\n    lane: 0\n    row: 2\n    row_step: 1.3\n    grid: 3\n    items: [{label: 定标, main: true}, 成交候选人, "", "", 确定成交人, ""]   # "" = 空格子\nedges:                            # from/to：唯一 label、节点 id、或有框/底色的分组 id\n  - {from: 计算文件哈希, to: 秒传命中？, kind: flow}\n  - {from: 秒传命中？, to: 分片并行上传, kind: flow, label: 否}\n  - {from: 用户中心, to: 获取上传凭证, kind: data, label: 签发令牌}\noverlays:                         # 可选\n  - {kind: scope, label: 二期范围, targets: [post_async], title_pos: top}\npaths:                            # 可选；单独使用 = 主流程图\n  row: 11\n  label: 上传方式路径\n  tag_col: client                 # 行名标签所在阶段（主流程图可省略）\n  edge_kind: data                 # 主流程图用 flow\n  rows:\n    - name: 秒传\n      height: 2\n      steps:\n        - {label: 计算哈希, col: pre, lane: 0.5}\n        - {id: hit, label: 秒传命中？, kind: decision, col: pre, lane: 1.8}\n        - {label: 分片上传, col: tran, lane: 1, in_label: 否}\n        - {label: 引用计数+1, col: proc, lane: 1, drow: 1.6, break: true}\n  edges:                          # 路径节点只能用 id 引用：<行名>.<id 或 label>\n    - {from: 秒传.hit, to: 秒传.引用计数+1, kind: flow, route: vh, label: 是, label_at: start}\n```\n\n**泳道图写法**：`columns` 写角色（每个 `lanes: 1`），节点按时间顺序放 `row: 0.4, 2.0, 3.6 …`（步长 1.6），跨角色交接用 `route: vh` 或 `vhv`，回退用 `ll`（`offset ≥ 16`）。\n\n**走线 `route`**（按横向描述，竖向时自动转置）：\n- `auto`（默认）\n- `h` / `v`：直线\n- `hvh` 配 `mid_x`，`vhv` 配 `mid_row`\n- `hv` / `vh`：一个拐角\n- `ll` / `rr` / `tt` / `bb`：U 形绕行，配 `offset`（`ll` / `rr` 也可以配 `mid_x`，`tt` / `bb` 配 `mid_row`）\n\n**其他参数**：\n- `mid_x` 可以写 `"阶段id:泳道"`（负数或小数表示阶段间缝隙）\n- `port_a` / `port_b`：端点沿边平移（px）\n- `label_at`：`start | end | longest | 段号`\n- `bus`、`emphasis`、`no_arrow`\n\n**命令行**：`--orient horizontal|vertical`、`--brand "#RRGGBB"`、`--titlebar outline|gray|brand|dark` 覆盖 spec 里的同名设置。`--orient` 只对 stages 布局有效；`--brand` / `--titlebar` / `--wb` 所有布局都支持。\n', 'style': '# 文字与配色\n\n> 用 `python3 render.py --guide style` 输出本文；起步模板用 `--init <示例名>`。\n\n## 文字\n| 角色 | 字号 / 字重 | 规则 |\n|---|---|---|\n| 图标题 | 16px / 600 | 只写图名 |\n| 阶段名 | 14px / 600 | 阶段名或角色名 |\n| 节点名 | 12px / 400（hub、core 为 600，系统块为 500） | **≤10 字（T1）**；放不下就精简措辞，**不缩字号**（中文最小 12px） |\n| 连线标签 | 12px / 500，次级灰 | **≤8 字（L1）**，写动作或数据名（"签发令牌""是""否"） |\n| 副标签 | 9px 等宽 | 只写拉丁字符的技术值 |\n\n中文不用等宽字体、不全大写、不加字距。等宽字体只给技术值用。\n\n## VI 配色\nspec 里只写一个主色，其余颜色都从它推导，**不在 spec 里写其他颜色**：\n\n```yaml\nbrand: "#0F7B6C"      # VI 主色；不写 = 飞书蓝 #3370FF\ntitlebar: outline     # outline（默认，白底线框）| gray | brand | dark\n```\n\n| 用途 | 推导方式 |\n|---|---|\n| 内部系统块、关键路径、核心描边 | 主色 |\n| 外部服务块 | 主色向白色提亮 45% |\n| 核心节点底色 | 主色向白色提亮 86% |\n| 核心区域底色 | 主色向白色提亮 94% |\n| 系统块和标题栏上的文字 | 按 WCAG 对比度自动选白色或深色 |\n\n业务节点、阶段线、连线始终是中性灰，不随主色变化，这样换任何 VI 都不会花。命令行 `--brand` / `--titlebar` 可以临时覆盖 spec 里的值。旧 spec 的 `theme: gray / blue` 仍然可用，等于预设主色。\n', 'timeline': '# 里程碑时间线\n\n> 用 `python3 render.py --guide timeline` 输出本文；起步模板用 `--init <示例名>`。\n\n## 里程碑时间线（`layout: timeline`）\n讲"关键节点什么时候到、现在走到哪、偏了多少"。阶段是轴上方的条，里程碑是轴上的菱形，名称和日期挂在轴下方，放不下时自动错行。\n- **刻度**：月份标签在轴上方；跨度超过 18 个月自动改为季度。`start` / `end` 不写就按内容自动取整到月。\n- **状态**：写了 `today` 就画今天线，并自动区分已完成（实心）和未完成（空心）；也可以用 `status: done` 手动指定。`core: true` 标关键节点（主色），≤3 个。\n- **计划 vs 预测**：里程碑同时写 `plan`（原计划）和 `date`（实际或预测）时，画出原计划的虚线菱形和带天数的偏移箭头。图例下方会汇总"延期 N 个，累计 X 天，最大是哪个"；如果最大延期之后的节点都没写 plan，还会提醒"它们大概率也会顺延"。这正是周报里最容易被藏起来的信息。\n- **预算**：≤15 个里程碑、≤8 个阶段，标签最多错 3 行（TL2）。超出说明这是排期表，不是里程碑，该用甘特图。\n\n```yaml\nlayout: timeline\nstart: 2026-03                    # 可省略：按内容自动取整到月\nend: 2027-03\ntoday: 2026-10-22                 # 可选：今天线 + 自动区分已完成 / 未完成\nphases:\n  - {label: 开发与集成, from: 2026-06, to: 2026-10}\n  - {label: 试点运行, from: 2026-11, to: 2027-01, core: true}\nmilestones:\n  - {label: 财务系统联调, date: 2026-09-25, plan: 2026-08-31}   # plan ≠ date → 画偏移\n  - {label: 试点上线, date: 2026-11-20, core: true}\n```\n', 'verify': '# 流程路径验证（verify）\n\n> 用 `python3 render.py --guide verify` 输出本文。\n\n流程图、泳道图、审计流程图画的其实是一个**业务声明**："付款前必须经过三单一致""审批和执行不是同一个人"。`verify` 把这些声明交给脚本，遍历图上**所有路径**去检查，而不是靠人看。几十毫秒，不用装任何东西。\n\n只支持阶段类图示（架构视图 / 主流程 / 泳道 / 审计流程图）。参与验证的是 `kind: flow` 和 `kind: return` 连线，以及 `paths` 里相邻的步骤；`data` 点线（单据、系统集成）不算流程。\n\n## 写法\n\n```yaml\nverify:\n  start: 提交付款申请          # 可省略：默认是没有流入（不算 return）的步骤\n  end: [执行支付]               # 可省略：默认是没有流出的步骤\n  must_pass:                    # 控制点不可绕过\n    - {before: 执行支付, through: [核对合同验收, 审核发票, match]}\n  separate:                     # 岗位分离：两步不能在同一列（角色）\n    - [提交付款申请, 执行支付]\n  # 以下默认开启，写 false 可关掉\n  reachable: true               # P2：每一步都能从起点走到\n  terminates: true              # P3：每一步都能走到终点\n```\n\n引用节点用 label 或 id；`paths` 里的步骤用 `<行名>.<id 或 label>`。\n\n## 规则（都属于业务发现类）\n\n| 编号 | 查什么 | 失败时输出 |\n|---|---|---|\n| **P1** | `must_pass`：从起点到 `before` 的每一条路径都经过 `through` 里的每一步 | 被绕过的控制点 + 一条反例路径，如"提交付款申请 → 紧急付款审批 → 执行支付" |\n| **P2** | 每一步都能从起点到达 | 走不到的步骤 |\n| **P3** | 每一步都能走到某个终点（没有死路，也没有出不去的回路） | 从起点到死路的路径 |\n| **P4** | 每个判断至少有两个出口 | 只有一个出口的判断 |\n| **P5** | `separate` 里的两步不在同一列 | 两步共同的角色 |\n\n通过的检查会写在图例下方，例如"已验证：到达『执行支付』之前必经『核对合同验收』『审核发票』『三单一致？』"。这一行是给读图人的信任信号，比"我们有控制点"更有说服力。\n\n## 发现问题时\n\n**不要为了通过而改图**：删掉那条绕过的连线、把节点挪到别的列，等于把流程漏洞藏起来。正确做法：\n\n1. 把反例路径原样告诉用户，问"这条路径现实中存在吗？"；\n2. 不存在 → 是图画错了，按用户说的改；\n3. 存在 → 这是真实的风险。用户确认后写进 `accept`，图例下方会写明"已确认的发现"和说明：\n\n```yaml\naccept:\n  - {code: P1, match: 紧急付款审批, note: 紧急付款经总经理书面特批，事后补审}\n```\n\n## 什么时候值得写 verify\n\n- **审计流程图**：几乎总该写 `must_pass`，控制点能被绕过就等于没有；\n- **审批流 / 泳道图**：写 `separate`，检查不相容岗位（申请与审批、经办与复核、记账与出纳）；\n- **主流程**：写空的 `verify: {}` 就能检查死路和单出口判断。\n\n路径验证解决的是"会不会走错路"。如果担心的是"同时发生会不会出事"（审批中途撤回、两个子公司同时改同一个供应商、超时自动通过与人工审批的竞态），那是并发问题，需要 TLA+ 之类的模型检查，超出本 skill 的范围，应向用户说明。\n'}     # splice 时由 guides/*.md 填入
-EXAMPLES = {'1-arch': '# 示例 1 · 架构视图：采购平台功能架构\ntitle: 采购平台功能架构\ndesc: 采购平台按需求计划、寻源采购、合同履约、结算评价四个阶段组织功能模块，并与预算、专家库、CA 签章、财务系统集成。\ncolumns:\n  - {id: plan,     label: 需求计划, lanes: 2}\n  - {id: source,   label: 寻源采购, lanes: 3}\n  - {id: contract, label: 合同履约, lanes: 3}\n  - {id: settle,   label: 结算评价, lanes: 3}\nnodes:\n  - {label: 采购需求, kind: hub, col: plan, lane: 0.5, row: 0.6}\n  - {label: 采购寻源, kind: hub, col: source, lane: 1, row: 0.6, core: true}\n  - {label: 合同签订, kind: hub, col: contract, lane: 0.3, row: 0.6}\n  - {label: 结算支付, kind: hub, col: settle, lane: 0.3, row: 0.6}\n  - {label: 预算系统, kind: system, owner: internal, col: plan, lane: 0.5, row: 6}\n  - {label: 专家库, kind: system, owner: internal, col: source, lane: 0.5, row: 6}\n  - {label: CA 签章, kind: system, owner: external, col: contract, lane: 1.8, row: 3}\n  - {label: 财务系统, kind: system, owner: internal, col: settle, lane: 1.8, row: 3}\ngroups:\n  - {id: plan_d, col: plan, lane: 0.5, row: 2, items: [需求填报, 计划汇总, 预算校验]}\n  - {id: methods, frame: true, col: source, lane: 0.5, row: 2, grid: 2, items: [公开招标, 询比采购, 竞争谈判, 单一来源]}\n  - {id: source_d, col: source, lane: 0.5, row: 4.4, grid: 2, items: [专家抽取, 在线评标]}\n  - {id: contract_d, col: contract, lane: 0.3, row: 2, items: [合同起草, 电子签章, 履约验收]}\n  - {id: settle_d, col: settle, lane: 0.3, row: 2, items: [发票校验, 付款申请, 供应商评价]}\nedges:\n  - {from: 采购需求, to: 采购寻源, kind: flow}\n  - {from: 采购寻源, to: 合同签订, kind: flow}\n  - {from: 合同签订, to: 结算支付, kind: flow}\n  - {from: 预算系统, to: 预算校验, kind: data, label: 预算额度}\n  - {from: 专家库, to: 专家抽取, kind: data, label: 随机抽取}\n  - {from: CA 签章, to: 电子签章, kind: bidir}\n  - {from: 付款申请, to: 财务系统, kind: data, label: 推送凭证}\noverlays:\n  - {kind: scope, label: 二期建设, targets: [settle_d], title_pos: top}\n', '2-flow': '# 主流程视图：单条流程，默认不画泳道（列只是排版网格），节点等距排列\ntitle: 采购业务主流程\ndesc: 一次采购从提交需求、预算判断、寻源评标到合同签订与付款的主流程，含预算不足的回退分支。\ncolumns:\n  - {id: f, lanes: 9}\npaths:\n  row: 0.6\n  edge_kind: flow\n  rows:\n    - name: 主流程\n      height: 2\n      steps:\n        - {label: 提交需求, col: f, lane: 0}\n        - {id: budget, label: 预算充足？, kind: decision, col: f, lane: 1.5}\n        - {label: 选择方式, col: f, lane: 3, in_label: 是}\n        - {label: 开标评标, col: f, lane: 4.5, core: true}\n        - {label: 签订合同, col: f, lane: 6}\n        - {label: 验收付款, kind: hub, col: f, lane: 7.5}\n        - {label: 调整预算, col: f, lane: 1.5, drow: 1.6, break: true}\n  edges:\n    - {from: 主流程.budget, to: 主流程.调整预算, kind: flow, route: v, label: 否}\n    - {from: 主流程.调整预算, to: 主流程.提交需求, kind: return, route: hv, label: 重新提交}\n\n# 路径验证：每一步都能从起点到达、都能走到终点；付款前必经开标评标\nverify:\n  must_pass:\n    - {before: 主流程.验收付款, through: [主流程.开标评标]}\n', '3-paths': '# 示例 3 · 路径对比视图：不同采购方式走过哪些阶段\ntitle: 采购方式路径对比\ndesc: 公开招标、询比采购、竞争谈判、单一来源四种方式在公告、响应、评审、定标、合同五个阶段上的路径差异。\ncolumns:\n  - {id: way,      label: 采购方式, lanes: 1}\n  - {id: notice,   label: 发布公告, lanes: 1}\n  - {id: respond,  label: 供应商响应, lanes: 1}\n  - {id: review,   label: 评审, lanes: 1}\n  - {id: award,    label: 定标, lanes: 1}\n  - {id: contract, label: 签订合同, lanes: 1}\npaths:\n  row: 0.4\n  tag_col: way\n  edge_kind: flow\n  rows:\n    - name: 公开招标\n      steps:\n        - {label: 招标公告, col: notice}\n        - {label: 投标, col: respond}\n        - {label: 专家评标, col: review, core: true}\n        - {label: 中标公示, col: award}\n        - {label: 合同, col: contract}\n    - name: 询比采购\n      steps:\n        - {label: 询价公告, col: notice}\n        - {label: 报价, col: respond}\n        - {label: 比价, col: review}\n        - {label: 合同, col: contract}\n    - name: 竞争谈判\n      steps:\n        - {label: 定向邀请, col: notice}\n        - {label: 多轮谈判, col: respond, core: true}\n        - {label: 成交确认, col: award}\n        - {label: 合同, col: contract}\n    - name: 单一来源\n      steps:\n        - {label: 论证公示, col: notice}\n        - {label: 价格协商, col: respond}\n        - {label: 合同, col: contract}\n', '4-swim': '# 示例 4 · 泳道图：列 = 角色，自上而下 = 时间\ntitle: 公开招标协作泳道\ndesc: 需求部门、采购部门、供应商、评审专家、财务部门在一次公开招标中的分工与交接。\ncolumns:\n  - {id: dept,   label: 需求部门, lanes: 1}\n  - {id: buy,    label: 采购部门, lanes: 1}\n  - {id: vendor, label: 供应商, lanes: 1}\n  - {id: expert, label: 评审专家, lanes: 1}\n  - {id: fin,    label: 财务部门, lanes: 1}\nnodes:\n  - {label: 提交需求, col: dept, row: 0.4}\n  - {label: 审核立项, kind: hub, col: buy, row: 2.0}\n  - {label: 发布公告, col: buy, row: 3.6}\n  - {label: 投标报价, col: vendor, row: 5.2}\n  - {label: 评审打分, col: expert, row: 6.8, core: true}\n  - {id: ok, label: 结果有效？, kind: decision, col: buy, row: 8.4}\n  - {label: 签订合同, col: vendor, row: 10.0}\n  - {label: 履约验收, col: dept, row: 11.6}\n  - {label: 支付货款, kind: hub, col: fin, row: 13.2}\nedges:\n  - {from: 提交需求, to: 审核立项, kind: flow, route: vh}\n  - {from: 审核立项, to: 发布公告, kind: flow}\n  - {from: 发布公告, to: 投标报价, kind: flow, route: vh}\n  - {from: 投标报价, to: 评审打分, kind: flow, route: vh}\n  - {from: 评审打分, to: ok, kind: flow, route: vhv}\n  - {from: ok, to: 签订合同, kind: flow, route: hv, label: 是, label_at: end}\n  - {from: ok, to: 发布公告, kind: return, route: ll, offset: 16, label: 否·重招}\n  - {from: 签订合同, to: 履约验收, kind: flow, route: vh}\n  - {from: 履约验收, to: 支付货款, kind: data, route: vh, label: 验收单}\n\n# 路径验证：评审与立项不能是同一角色；签合同前必经评审\nverify:\n  end: [履约验收]\n  must_pass:\n    - {before: 签订合同, through: [评审打分, ok]}\n  separate:\n    - [审核立项, 评审打分]\n', 'ai-quadrant': '# 四象限示例：AI 场景优先级（价值 × 落地难度）\nlayout: quadrant\ntitle: 招采 AI 场景优先级\nx: {label: 落地可行性, low: 难, high: 易}\ny: {label: 业务价值, low: 低, high: 高}\nfocus: q1\nquadrants:\n  q1: {label: 优先做, note: 价值高、好落地}\n  q2: {label: 攻坚储备, note: 价值高、难度大}\n  q3: {label: 暂不做, note: 投入产出比低}\n  q4: {label: 顺手做, note: 低成本快赢}\nitems:\n  - {label: 招标文件智能生成, x: 7.5, y: 8.2, core: true}\n  - {label: 清单自动匹配, x: 8.4, y: 6.8}\n  - {label: 智能辅助评审, x: 3.2, y: 8.8, from: [2.0, 8.6]}\n  - {label: 围串标识别, x: 2.4, y: 7.4}\n  - {label: 供应商画像, x: 6.2, y: 6.0}\n  - {label: 制度问答助手, x: 8.8, y: 3.6}\n  - {label: 合同条款比对, x: 6.8, y: 2.4}\n  - {label: 价格趋势预测, x: 2.6, y: 3.2}\n', 'bid-dfd': '# 数据流图示例（profile: dfd）：处理与存储交替，外部实体在两侧\ntitle: 电子投标数据流\ndesc: 供应商投标文件从递交、开标、评审到形成评标报告的数据流，含外部实体、处理过程与数据存储。\nprofile: dfd\ncolumns:\n  - {id: ext,   label: 外部实体, lanes: 1}\n  - {id: proc,  label: 处理过程, lanes: 2}\n  - {id: store, label: 数据存储, lanes: 2}\n  - {id: out,   label: 结果去向, lanes: 1}\nnodes:\n  - {label: 供应商,   kind: system, owner: external, col: ext, lane: 0, row: 0.6}\n  - {label: 评审专家, kind: system, owner: external, col: ext, lane: 0, row: 5.4}\n  - {label: 接收投标文件, col: proc, lane: 0.5, row: 0.6, sub: P1}\n  - {label: 解密开标,     col: proc, lane: 0.5, row: 3.0, sub: P2}\n  - {label: 评审打分,     col: proc, lane: 0.5, row: 5.4, sub: P3, core: true}\n  - {label: 生成评标报告, col: proc, lane: 0.5, row: 7.8, sub: P4}\n  - {label: 投标文件库, kind: store, col: store, lane: 0.5, row: 1.8, sub: D1}\n  - {label: 开标记录,   kind: store, col: store, lane: 0.5, row: 4.2, sub: D2}\n  - {label: 评分表,     kind: store, col: store, lane: 0.5, row: 6.6, sub: D3}\n  - {label: 采购人, kind: system, owner: internal, col: out, lane: 0, row: 7.8}\nedges:\n  - {from: 供应商, to: 接收投标文件, kind: data, label: 加密标书}\n  - {from: 接收投标文件, to: 投标文件库, kind: data, label: 存档, label_at: 1}\n  - {from: 投标文件库, to: 解密开标, kind: data, label: 读取, label_at: 1}\n  - {from: 解密开标, to: 开标记录, kind: data, label: 报价一览, label_at: 1}\n  - {from: 开标记录, to: 评审打分, kind: data, label: 报价清单, label_at: 1}\n  - {from: 评审专家, to: 评审打分, kind: data, label: 评分意见}\n  - {from: 评审打分, to: 评分表, kind: data, label: 写入得分, label_at: 1}\n  - {from: 评分表, to: 生成评标报告, kind: data, label: 汇总得分, label_at: 1}\n  - {from: 生成评标报告, to: 采购人, kind: data, label: 评标报告}\n', 'bid-fishbone': '# 鱼骨图示例：评标周期为什么超长\nlayout: fishbone\ntitle: 评标周期超长原因分析\neffect: 评标周期平均 32 天\ncategories:\n  - label: 人\n    causes: [专家抽取后临时回避, {label: 评委同时评多个项目, root: true}, 代理机构经验不足]\n  - label: 法\n    causes: [{label: 澄清环节无时限, root: true}, 复核需线下签字, 异议处理无标准时长]\n  - label: 机\n    causes: [评标系统不支持并行, 电子签章偶发失败]\n  - label: 料\n    causes: [招标文件评分项含糊, 投标文件格式不统一, 资质原件需现场核验]\n  - label: 环\n    causes: [评标室需提前预约, 跨地市专家差旅]\n  - label: 测\n    causes: [周期只统计到定标, 无分环节耗时数据]\n', 'biz-platform': '# 分层架构图示例：通用企业业务平台总体架构（虚构，仅示范写法）\nlayout: layers\ntitle: 企业业务协同平台\ndesc: 通用企业业务平台总体架构：展示层、服务层、能力层、技术层、设施层自上而下，右侧为集成平台与内外部系统，两侧为安全运维与法规制度体系。\nwidth: 1760\nspecial: {label: AI 能力}          # 重点能力：本图用来标 AI，图例显示"AI 能力"\n\nrails:\n  left:  [安全保障体系, 运维支撑体系, 业务标准, 数据标准, 接口标准, 技术标准]\n  right: [国家法律法规, 行业监管要求, 企业管理制度, 业务操作规范]\n\nlayers:\n  - id: ui\n    label: 展示层\n    blocks:\n      - {w: 3, items: [电脑端, 手机端, 小程序]}\n      - {w: 2, items: [管理驾驶舱, BI 看板]}\n\n  - id: svc\n    label: 服务层\n    blocks:\n      - {tab: 业务工作台, title: 核心业务服务, core: true, w: 1.4, cols: 2,\n         items: [流程配置, 规则配置, 客户管理, 合作方管理, 项目管理, ……]}\n      - {tab: 客户门户, title: 客户服务, items: [在线申请, 进度查询, 资料提交, ……]}\n      - {tab: 合作方门户, title: 合作方服务, items: [入驻登记, 信息维护, 协同处理, ……]}\n      - {tab: 运营工作台, title: 运营服务, items: [平台运营, 内容管理, 数据分析, ……]}\n      - {tab: 监督工作台, title: 监督服务, items: [异常监控, 风险预警, 审计追溯, ……]}\n\n  - id: cap\n    label: 能力层\n    blocks:\n      - title: 业务中台\n        stages:\n          - {title: 需求受理, steps: [需求登记, 需求评估, 立项审批]}\n          - {title: 方案制定, steps: [方案编制, 报价测算, 方案评审]}\n          - {title: 合同执行, core: true, steps: [合同签订, 过程跟踪]}\n          - {title: 交付验收, steps: [交付确认, 验收评价, 结算支付]}\n          - {title: 归档, steps: [资料归档]}\n\n  - id: tech\n    label: 技术层\n    blocks:\n      - {title: 统一技术底座, items: [流程引擎, 组织权限, 任务调度, ……]}\n      - {title: AI 能力平台, kind: special, w: 1.25, items: [智能问答, 文档生成, 智能审核, 风险识别, ……]}\n\n  - id: infra\n    label: 设施层\n    blocks:\n      - {items: [云计算, 数据库, 对象存储, 消息队列, 灾备服务, ……]}\n\nside:\n  - id: integ\n    w: 96\n    sections:\n      - {id: integ_p, title: 集成平台, vertical: true, span: [ui, tech], items: [应用集成, 数据集成, 开放接口, 消息集成]}\n      - {id: ai3, title: 第三方AI能力, kind: special, span: [infra, infra]}\n  - id: ext\n    w: 184\n    sections:\n      - {title: 企业内部系统, owner: internal, items: [企业 OA, 财务系统, 合同系统, 主数据]}\n      - {title: 外部系统, owner: external, items: [CA 电子签章, 工商信息, 银行系统, 短信服务]}\n      - {title: 生态系统, owner: external, items: [支付平台, 电子发票]}\n\nlinks:\n  - {from: integ, to: ext, kind: bidir, label: 集成}\n', 'group-org': '# 组织架构 + 数据隔离示例：嵌套 = 外层可见内层；并列 = 互相隔离；跨域访问画授权\nlayout: org\ntitle: 集团采购组织与数据隔离\ndesc: 甲集团下设集采中心与三家子公司，展示数据域的嵌套（上级汇总可见）与隔离，以及跨数据域的授权。\norgs:\n  - id: group\n    label: 甲集团\n    kind: hq\n    sub: T00\n    children:\n      - {id: center, label: 集采中心, core: true}\n      - id: coa\n        label: A 建设公司\n        sub: T01\n        children:\n          - {label: 第一工程分公司}\n          - {label: 第二工程分公司}\n          - {label: 第三工程分公司}\n          - {label: 项目部（临时）, kind: virtual}\n      - id: cob\n        label: B 投资公司\n        sub: T02\n        children:\n          - {label: 运营公司}\n          - {label: 贸易公司}\n      - {id: coc, label: C 材料公司, sub: T03}\nscopes:\n  - {id: g, label: 集团数据域 · 汇总可见下级, members: [group], exclude: [coc], kind: shared}\n  - {id: a, label: A 公司数据域, members: [coa]}\n  - {id: b, label: B 公司数据域, members: [cob]}\n  - {id: c, label: C 公司独立域, members: [coc]}\ngrants:\n  - {from: center, to: coa, kind: delegate, label: 代理集中采购}\n  - {from: cob, to: coa, kind: read, label: 共享供应商库}\n  - {from: coc, to: group, kind: read, label: 报送采购统计}\n', 'payment-audit': '# 审计流程图示例（profile: audit）：泳道 + 单据 + 控制点\ntitle: 合同付款审批审计流程\ndesc: 合同付款从业务部门申请、采购部门核对验收、财务审核发票与三单匹配到出纳支付的审计流程，标出 4 个关键控制点及其防范的风险。\nprofile: audit\ncolumns:\n  - {id: biz, label: 业务部门, lanes: 2}\n  - {id: buy, label: 采购部门, lanes: 2}\n  - {id: fin, label: 财务部门, lanes: 2}\n  - {id: pay, label: 出纳,     lanes: 2}\nnodes:\n  - {label: 提交付款申请, kind: hub, col: biz, lane: 0.05, row: 0.4}\n  - {label: 付款申请单, kind: doc, col: biz, lane: 1.15, row: 0.4}\n  - {label: 核对合同验收, col: buy, lane: 0.05, row: 2.0, control: K1, risk: 未验收即付款}\n  - {label: 验收单, kind: doc, col: buy, lane: 1.15, row: 2.0}\n  - {label: 审核发票, col: fin, lane: 0.05, row: 3.6, control: K2, risk: 发票不真实或金额不符}\n  - {label: 发票, kind: doc, col: fin, lane: 1.15, row: 3.6}\n  - {id: match, label: 三单一致？, kind: decision, col: fin, lane: 0.05, row: 5.2, control: K3, risk: 合同、验收、发票三者不一致}\n  - {label: 执行支付, kind: hub, col: pay, lane: 0.05, row: 6.8, control: K4, risk: 未经授权或重复付款, core: true}\n  - {label: 付款凭证, kind: doc, col: pay, lane: 1.15, row: 6.8}\nedges:\n  - {from: 提交付款申请, to: 付款申请单, kind: data}\n  - {from: 提交付款申请, to: 核对合同验收, kind: flow, route: vh}\n  - {from: 验收单, to: 核对合同验收, kind: data}\n  - {from: 核对合同验收, to: 审核发票, kind: flow, route: vh}\n  - {from: 发票, to: 审核发票, kind: data}\n  - {from: 审核发票, to: match, kind: flow}\n  - {from: match, to: 执行支付, kind: flow, route: vh, label: 是, label_at: start}\n  - {from: match, to: 提交付款申请, kind: return, route: ll, offset: 28, label: 否·退回}\n  - {from: 执行支付, to: 付款凭证, kind: data}\n\n# 路径验证：控制点不可绕过、岗位分离（见 --guide verify）\nverify:\n  end: [执行支付]\n  must_pass:\n    - {before: 执行支付, through: [核对合同验收, 审核发票, match]}\n  separate:\n    - [提交付款申请, 执行支付]\n', 'platform-timeline': '# 里程碑时间线示例：某平台二期\nlayout: timeline\ntitle: 某平台二期里程碑\nstart: 2026-03\nend: 2027-03\ntoday: 2026-10-22\nphases:\n  - {label: 需求与方案, from: 2026-03, to: 2026-05}\n  - {label: 开发与集成, from: 2026-06, to: 2026-10}\n  - {label: 试点运行, from: 2026-11, to: 2027-01, core: true}\n  - {label: 全面推广, from: 2027-02, to: 2027-03}\nmilestones:\n  - {label: 需求评审通过, date: 2026-04-28}\n  - {label: 方案定稿, date: 2026-05-30}\n  - {label: 财务系统联调, date: 2026-09-25, plan: 2026-08-31}\n  - {label: UAT 验收, date: 2026-10-30, plan: 2026-10-15}\n  - {label: 试点上线, date: 2026-11-20, core: true}\n  - {label: 试点复盘, date: 2027-01-20}\n  - {label: 全面上线, date: 2027-03-15}\n', 'proc-idef0': '# IDEF0 示例：采购执行（A0）——输入在左、控制在上、输出在右、机制在下\nlayout: idef0\nnode: A0\ntitle: 采购执行\nactivities:\n  - {id: plan, label: 编制采购计划}\n  - {id: bid, label: 组织招标采购, core: true}\n  - {id: eval, label: 评审与定标}\n  - {id: sign, label: 签订采购合同}\ninputs:\n  - {to: plan, label: 项目物资需求}\n  - {to: bid, label: 供应商名录}\noutputs:\n  - {from: sign, label: 采购合同}\n  - {from: eval, label: 中标通知}\nflows:\n  - {from: plan, to: bid, label: 采购计划}\n  - {from: bid, to: eval, label: 投标文件}\n  - {from: eval, to: sign, label: 定标结果}\n  - {from: eval, to: bid, as: control, label: 澄清要求}\ncontrols:\n  - {label: 集团采购管理制度, to: [plan, bid, eval]}\n  - {label: 招标投标法, to: [bid, eval]}\n  - {label: 合同管理办法, to: [sign]}\nmechanisms:\n  - {label: 招采平台, owner: internal, to: [bid, eval, sign]}\n  - {label: 评标专家, to: [eval]}\n  - {label: 采购部, to: [plan]}\n', 'procurement-er': '# 实体关系图示例：采购核心数据模型\nlayout: er\ntitle: 采购核心数据模型\ndesc: 采购计划、项目、标段、投标响应、评审、合同与供应商、专家之间的实体关系与基数。\nentities:\n  - {id: plan,    label: 采购计划, col: 0, row: 0, fields: ["#计划编号", 需求部门, 计划金额]}\n  - {id: project, label: 采购项目, col: 1, row: 0, core: true, fields: ["#项目编号", "→计划编号", 项目名称, 采购方式, 预算金额]}\n  - {id: lot,     label: 标段, col: 2, row: 0, fields: ["#标段编号", "→项目编号", 标段名称, 最高限价]}\n  - {id: ctr,     label: 合同, col: 3, row: 0, fields: ["#合同编号", "→标段编号", "→供应商编号", 合同金额]}\n  - {id: expert,  label: 评审专家, col: 0, row: 1, fields: ["#专家编号", 姓名, 专业类别]}\n  - {id: score,   label: 评审记录, col: 1, row: 1, fields: ["#记录编号", "→响应编号", "→专家编号", 得分]}\n  - {id: bid,     label: 投标响应, col: 2, row: 1, fields: ["#响应编号", "→标段编号", "→供应商编号", 报价, 递交时间]}\n  - {id: vendor,  label: 供应商, col: 3, row: 1, fields: ["#供应商编号", 统一信用代码, 供应商名称, 资质等级]}\ngroups:\n  - {label: 评审域, members: [expert, score]}\nrelations:\n  - {from: plan,    to: project, card: ["1", "N"], label: 立项}\n  - {from: project, to: lot,     card: ["1", "N"], label: 划分}\n  - {from: lot,     to: ctr,     card: ["1", "0..1"], label: 签订}\n  - {from: lot,     to: bid,     card: ["1", "N"], label: 接收}\n  - {from: vendor,  to: bid,     card: ["1", "N"], label: 递交}\n  - {from: vendor,  to: ctr,     card: ["1", "N"]}\n  - {from: bid,     to: score,   card: ["1", "N"], label: 被评审}\n  - {from: expert,  to: score,   card: ["1", "N"], label: 打分}\n', 'vendor-opportunity': '# 机会流程图示例：增值 / 非增值两列，自动统计非增值占比\ntitle: 供应商准入机会流程\ndesc: 供应商准入流程中增值环节与非增值环节（重复提交、等待、重复会签）的分布，用于识别优化机会。\nprofile: opportunity\ncolumns:\n  - {id: va,  label: 增值环节,   lanes: 2, value: true}\n  - {id: nva, label: 非增值环节, lanes: 2, value: false}\nnodes:\n  - {label: 提交准入申请, kind: hub, col: va, lane: 0.5, row: 0.4}\n  - {label: 纸质材料重复提交, col: nva, lane: 0.5, row: 2.0, core: true}\n  - {label: 资质审核, col: va, lane: 0.5, row: 3.6}\n  - {label: 等待线下盖章, col: nva, lane: 0.5, row: 5.2}\n  - {label: 准入评审, col: va, lane: 0.5, row: 6.8}\n  - {label: 多部门重复会签, col: nva, lane: 0.5, row: 8.4, core: true}\n  - {label: 入库并通知, kind: hub, col: va, lane: 0.5, row: 10.0}\nedges:\n  - {from: 提交准入申请, to: 纸质材料重复提交, kind: flow, route: vh}\n  - {from: 纸质材料重复提交, to: 资质审核, kind: flow, route: vh}\n  - {from: 资质审核, to: 等待线下盖章, kind: flow, route: vh}\n  - {from: 等待线下盖章, to: 准入评审, kind: flow, route: vh}\n  - {from: 准入评审, to: 多部门重复会签, kind: flow, route: vh}\n  - {from: 多部门重复会签, to: 入库并通知, kind: flow, route: vh}\n'}   # splice 时由 assets/*.yaml 填入
+RESOURCE_ROOT = Path(__file__).resolve().parent.parent
+GUIDES = {p.stem: p for p in sorted((RESOURCE_ROOT / "guides").glob("*.md"))}
+EXAMPLES = {p.stem: p.read_text(encoding="utf-8") for p in sorted((RESOURCE_ROOT / "assets").glob("*.yaml"))}
+
 INIT_ALIAS = {"arch": "1-arch", "flow": "2-flow", "paths": "3-paths", "swim": "4-swim",
               "dfd": "bid-dfd", "audit": "payment-audit", "opportunity": "vendor-opportunity",
               "layers": "biz-platform", "er": "procurement-er", "org": "group-org",
@@ -3483,6 +3448,7 @@ INIT_ALIAS = {"arch": "1-arch", "flow": "2-flow", "paths": "3-paths", "swim": "4
 
 
 def build_spec(spec, theme=None, brand=None, titlebar=None, orient=None, slug="biz"):
+    validate_spec(spec)
     lay = spec.get("layout") or "stages"
     if lay in LAYOUTS:
         d = LAYOUTS[lay](spec, theme, brand, titlebar, orient)
@@ -3490,7 +3456,7 @@ def build_spec(spec, theme=None, brand=None, titlebar=None, orient=None, slug="b
         d = Diagram(spec, theme, brand, titlebar, orient)
     else:
         raise SpecError(f"layout '{lay}' 无效，可选 stages（默认）| {' | '.join(LAYOUTS)}")
-    if spec.get("verify") and not isinstance(d, Diagram):
+    if spec.get("verify") is not None and spec.get("verify") is not False and not isinstance(d, Diagram):
         raise SpecError("verify 只支持阶段类图示（架构视图 / 主流程 / 泳道 / 审计流程图）")
     svg, W, H = d.svg(slug)
     return d, svg, W, H
@@ -3498,13 +3464,26 @@ def build_spec(spec, theme=None, brand=None, titlebar=None, orient=None, slug="b
 
 # ---------------------------------------------------------------- 流程路径验证（P1–P5）
 def _flow_graph(d):
-    out, inc = {}, {}
+    # Steps exist even when the author forgot all their connectors. Documents,
+    # systems, stores and path-row headings are not executable business steps.
+    V = d.spec.get("verify")
+    scope = V.get("nodes") if isinstance(V, dict) else None
+    if scope:
+        refs = scope if isinstance(scope, list) else [scope]
+        nodes = {d.resolve(n, "verify.nodes").id for n in refs}
+        if not nodes <= d.nodes.keys():
+            raise SpecError("verify.nodes: 只能引用步骤，不能引用分组")
+    else:
+        nodes = {n.id for n in d.nodes.values()
+                 if n.kind in ("module", "hub", "decision", "optional", "ai", "special") and not getattr(n, "path_tag", False)}
+    out, inc = {n: [] for n in d.nodes if n in nodes}, {n: [] for n in d.nodes if n in nodes}
     for e in d.edges:
         a, b = e["a"], e["b"]
         if not (hasattr(a, "cx") and a.id in d.nodes and b.id in d.nodes):
             continue
-        is_path = bool(getattr(a, "path", None) and getattr(b, "path", None))
-        if e["kind"] in ("flow", "return") or is_path:
+        if a.id not in nodes or b.id not in nodes:
+            continue
+        if e["kind"] in ("flow", "return") or e.get("path_step"):
             out.setdefault(a.id, []).append(b.id)
             out.setdefault(b.id, [])
             inc.setdefault(b.id, []).append((a.id, e["kind"]))
@@ -3535,20 +3514,26 @@ def _trace(par, x, d):
 def verify_flow(d):
     """Return (findings, verified_notes). Graph = flow / return edges + consecutive path steps."""
     V = d.spec.get("verify")
-    if not V:
+    if V is None or V is False:
         return [], []
     if V is True:
         V = {}
     out, inc = _flow_graph(d)
     if not out:
         return [("P2", "[P2] verify 需要流程连线（kind: flow / return 或 paths），这张图没有")], []
-    ref = lambda r, ctx: d.resolve(r, f"verify.{ctx}").id
+    def ref(r, ctx):
+        nid = d.resolve(r, f"verify.{ctx}").id
+        if nid not in out:
+            raise SpecError(f"verify.{ctx}: '{r}' 不在流程步骤集合中")
+        return nid
     lst = lambda v: v if isinstance(v, list) else [v]
     starts = [ref(s, "start") for s in lst(V["start"])] if V.get("start") else \
-        [n for n in out if not any(k != "return" for _, k in inc.get(n, []))]
-    ends = [ref(s, "end") for s in lst(V["end"])] if V.get("end") else [n for n in out if not out[n]]
+        [n for n in out if out[n] and not any(k != "return" for _, k in inc.get(n, []))]
+    ends = [ref(s, "end") for s in lst(V["end"])] if V.get("end") else [n for n in out if inc[n] and not out[n]]
     L = lambda n: d.nodes[n].label
     found, ok = [], []
+    if V.get("nodes"):
+        ok.append(f"验证范围：指定的 {len(out)} 个步骤；未列入的节点与跨范围连线不验证")
     reach = _bfs(out, starts)
     if V.get("reachable", True):
         miss = [n for n in out if n not in reach]
@@ -3571,6 +3556,9 @@ def verify_flow(d):
     for m in V.get("must_pass") or []:
         tgt = ref(m["before"], "must_pass.before")
         thr = [ref(x, "must_pass.through") for x in lst(m["through"])]
+        if tgt not in reach:
+            found.append(("P1", f"[P1] 目标『{L(tgt)}』从起点不可达，无法确认控制点必经关系"))
+            continue
         miss, ex = [], None
         for y in thr:
             par = _bfs(out, starts, avoid={y})
@@ -3583,12 +3571,21 @@ def verify_flow(d):
             ok.append(f"已验证：到达『{L(tgt)}』之前必经 {'、'.join('『' + L(y) + '』' for y in thr)}")
     for pair in V.get("separate") or []:
         a, b = ref(pair[0], "separate"), ref(pair[1], "separate")
-        ca, cb = d.nodes[a].col, d.nodes[b].col
-        role = lambda c: d.cols[c].get("label") or c
-        if ca == cb:
-            found.append(("P5", f"[P5] 『{L(a)}』与『{L(b)}』都由『{role(ca)}』执行，违反岗位分离"))
+        def actor(n):
+            explicit = getattr(d.nodes[n], "actor", None)
+            if explicit:
+                return explicit
+            if d.spec.get("column_semantics") == "roles":
+                col = next(c for c in d.spec["columns"] if c["id"] == d.nodes[n].col)
+                return col.get("actor") or col.get("label") or col["id"]
+            return None
+        aa, ab = actor(a), actor(b)
+        if not aa or not ab:
+            found.append(("P5", f"[P5] 『{L(a)}』与『{L(b)}』的执行角色待确认，不能由排版列推断岗位分离"))
+        elif aa == ab:
+            found.append(("P5", f"[P5] 『{L(a)}』与『{L(b)}』都由『{aa}』执行，违反岗位分离"))
         else:
-            ok.append(f"已验证：『{L(a)}』与『{L(b)}』由不同角色执行（{role(ca)} / {role(cb)}）")
+            ok.append(f"已验证：『{L(a)}』与『{L(b)}』声明了不同角色（{aa} / {ab}）；实际权限另行核验")
     return found, ok
 
 
@@ -3815,6 +3812,7 @@ def selftest():
         print(f"  {'DETECTED' if hit else 'MISSED  '}  {code:<4} {what}" + ("" if hit else f"（实际报出：{sorted(got) or '无'}）"))
     allc = ALL_CODES
     left = sorted(allc - covered)
+    bad += len(left)
     print(f"③ 规则覆盖 {len(covered)}/{len(allc)}" + (f"；尚无改坏样例：{'、'.join(left)}" if left else ""))
     print("SELFTEST " + ("PASS" if not bad else f"FAIL（{bad} 项）"))
     return bad == 0
@@ -3822,8 +3820,9 @@ def selftest():
 
 # ---------------------------------------------------------------- 入口
 def main():
-    ap = argparse.ArgumentParser(description="saan-diagram v1.0: YAML spec -> HTML/SVG/PNG/whiteboard DSL")
+    ap = argparse.ArgumentParser(description="saan-diagram v1.1.0: YAML spec -> HTML/SVG/PNG/whiteboard DSL")
     ap.add_argument("spec", nargs="?")
+    ap.add_argument("--result-json", help="保存机器可读的校验与产物状态（出图默认写 <slug>.result.json）")
     ap.add_argument("--all", action="store_true", help="一次完成：校验 → HTML + PNG + 画板 DSL（推荐）")
     ap.add_argument("--outdir", help="--all 的输出目录（默认与 spec 同目录）")
     ap.add_argument("--init", nargs="?", const="list", help="打印起步模板：arch flow paths swim dfd audit opportunity layers er org fishbone timeline quadrant idef0")
@@ -3848,7 +3847,7 @@ def main():
         if a.guide == "list" or a.guide not in GUIDES:
             print("可用主题：" + "、".join(sorted(GUIDES)))
             sys.exit(0 if a.guide == "list" else 3)
-        print(GUIDES[a.guide])
+        print(GUIDES[a.guide].read_text(encoding="utf-8"))
         return
     if a.init:
         name = INIT_ALIAS.get(a.init, a.init)
@@ -3861,46 +3860,85 @@ def main():
         ap.error("需要 spec 文件；或用 --init / --guide / --selftest")
 
     slug = Path(a.spec).stem.replace(".", "-") or "biz"
+    outdir = Path(a.outdir) if a.outdir else Path(a.spec).parent
+    result_path = Path(a.result_json) if a.result_json else (None if a.lint else outdir / f"{slug}.result.json")
+    result = {"schema_version": 1, "status": "pending", "validation": "not_run", "artifacts": {}, "errors": []}
+
+    def finish(code, status):
+        result.update(exit_code=code, status=status)
+        if result_path:
+            try:
+                result_path.parent.mkdir(parents=True, exist_ok=True)
+                result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                print(f"结果：{result_path}")
+            except OSError as ex:
+                print(f"结果文件写入失败：{ex}")
+                return 4
+        return code
+
     try:
-        spec = yaml.safe_load(Path(a.spec).read_text(encoding="utf-8"))
+        spec = load_spec(a.spec)
         d, svg, W, H = build_spec(spec, a.theme, a.brand, a.titlebar, a.orient, slug)
+        layout, finds, accepted, ok = collect(d)
     except SpecError as ex:
         print(f"SPEC 错误: {ex}")
-        sys.exit(3)
-    layout, finds, accepted, ok = collect(d)
+        result["errors"].append(str(ex))
+        return finish(3, "invalid_spec")
     report(layout, finds, accepted, ok)
+    result["validation"] = "failed" if layout or finds else "passed"
+    result["findings"] = {"layout": layout, "unconfirmed": finds, "accepted": accepted, "verified": ok}
     size = d.stats() if hasattr(d, "stats") else f"{len(d.nodes)} 节点 · {len(d.edges)} 连线"
     if a.lint or layout or finds:
-        st = "PASS" if not layout and not finds else "FAIL"
-        print(f"{st}: 排版 {len(layout)} 条 · 发现 {len(finds)} 条（已确认 {len(accepted)}） · {size}")
-        if a.lint or st == "FAIL":
-            sys.exit(1 if layout else 2 if finds else 0)
+        print(f"{'FAIL' if layout or finds else 'PASS'}: 排版 {len(layout)} 条 · 发现 {len(finds)} 条（已确认 {len(accepted)}） · {size}")
+        return finish(1 if layout else 2 if finds else 0, "validation_failed" if layout or finds else "validated")
     notes = note_lines(accepted, ok)
     svg, H2 = add_notes_svg(svg, W, H, d.t, notes)
-    outdir = Path(a.outdir) if a.outdir else Path(a.spec).parent
-    outdir.mkdir(parents=True, exist_ok=True)
     out = Path(a.out) if a.out else outdir / f"{slug}.html"
-    out.write_text(render_html(svg, W, d.spec.get("title", "diagram")), encoding="utf-8")
-    made = [str(out)]
+
+    def produce(kind, path, writer):
+        dest = Path(path)
+        entry = result["artifacts"][kind] = {"path": str(dest), "status": "pending"}
+        # Replace only after successful generation, so stale files are never reported as new.
+        import tempfile
+        tmp = None
+        try:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(dir=dest.parent, suffix=dest.suffix, delete=False) as fh:
+                tmp = Path(fh.name)
+            writer(tmp)
+            if not tmp.stat().st_size:
+                raise OSError("输出文件为空")
+            tmp.replace(dest)
+            entry["status"] = "generated"
+            print(f"  {dest}")
+        except Exception as ex:
+            entry.update(status="failed", error=f"{ex.__class__.__name__}: {ex}")
+            result["errors"].append(f"{kind}: {entry['error']}")
+            print(f"{kind} 生成失败：{entry['error']}")
+        finally:
+            if tmp and tmp.exists():
+                tmp.unlink()
+
+    produce("html", out, lambda p: p.write_text(render_html(svg, W, d.spec.get("title", "diagram")), encoding="utf-8"))
     if a.svg:
-        Path(a.svg).write_text(svg, encoding="utf-8")
-        made.append(a.svg)
+        produce("svg", a.svg, lambda p: p.write_text(svg, encoding="utf-8"))
     png = a.png or (str(outdir / f"{slug}.png") if a.all else None)
     if png:
-        try:
-            snapshot(out, png, a.scale)
-            made.append(png)
-        except Exception as ex:   # 没装 playwright 时不阻断交付
-            print(f"跳过 PNG：{ex.__class__.__name__}（pip install playwright 后可导出）")
+        if result["artifacts"]["html"]["status"] == "generated":
+            produce("png", png, lambda p: snapshot(out, p, a.scale))
+        else:
+            result["artifacts"]["png"] = {"path": str(png), "status": "blocked", "error": "HTML 未生成"}
     wbp = a.wb or (str(outdir / f"{slug}.wb.json") if a.all else None)
     if wbp:
-        dsl = d.wb(a.wb_route) if hasattr(d, "wb") else to_wb_dsl(d, a.wb_route)
-        dsl = add_notes_wb(dsl, W, H, d.t, notes)
-        Path(wbp).write_text(json.dumps(dsl, ensure_ascii=False, indent=1), encoding="utf-8")
-        made.append(wbp)
-    print(f"OK {W:.0f}x{H2:.0f} · {size} · 已确认发现 {len(accepted)} · 已验证 {len(ok)}")
-    for m in made:
-        print("  " + m)
+        def write_wb(path):
+            dsl = d.wb(a.wb_route) if hasattr(d, "wb") else to_wb_dsl(d, a.wb_route)
+            dsl = add_notes_wb(dsl, W, H, d.t, notes)
+            path.write_text(json.dumps(dsl, ensure_ascii=False, indent=1), encoding="utf-8")
+        produce("whiteboard_dsl", wbp, write_wb)
+    failed = any(v["status"] != "generated" for v in result["artifacts"].values())
+    print(f"{'PARTIAL' if failed else 'OK'} {W:.0f}x{H2:.0f} · {size} · 已确认发现 {len(accepted)} · 已验证 {len(ok)}")
+    return finish(4 if failed else 0, "partial" if failed else "generated")
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

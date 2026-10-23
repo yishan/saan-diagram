@@ -1,6 +1,6 @@
 # IDEF0 功能模型
 
-> 用 `python3 render.py --guide idef0` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `python3 scripts/render.py --guide idef0` 输出本文；起步模板用 `--init <示例名>`。
 
 ## IDEF0 功能模型（`layout: idef0`）
 讲"一项业务由哪些活动组成，每个活动**受什么约束、靠什么完成**"。和流程图的区别：流程图讲顺序，IDEF0 讲每个活动的四个接口（ICOM）。
