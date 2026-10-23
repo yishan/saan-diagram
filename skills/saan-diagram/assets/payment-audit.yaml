@@ -1,0 +1,37 @@
+# 审计流程图示例（profile: audit）：泳道 + 单据 + 控制点
+title: 合同付款审批审计流程
+desc: 合同付款从业务部门申请、采购部门核对验收、财务审核发票与三单匹配到出纳支付的审计流程，标出 4 个关键控制点及其防范的风险。
+profile: audit
+columns:
+  - {id: biz, label: 业务部门, lanes: 2}
+  - {id: buy, label: 采购部门, lanes: 2}
+  - {id: fin, label: 财务部门, lanes: 2}
+  - {id: pay, label: 出纳,     lanes: 2}
+nodes:
+  - {label: 提交付款申请, kind: hub, col: biz, lane: 0.05, row: 0.4}
+  - {label: 付款申请单, kind: doc, col: biz, lane: 1.15, row: 0.4}
+  - {label: 核对合同验收, col: buy, lane: 0.05, row: 2.0, control: K1, risk: 未验收即付款}
+  - {label: 验收单, kind: doc, col: buy, lane: 1.15, row: 2.0}
+  - {label: 审核发票, col: fin, lane: 0.05, row: 3.6, control: K2, risk: 发票不真实或金额不符}
+  - {label: 发票, kind: doc, col: fin, lane: 1.15, row: 3.6}
+  - {id: match, label: 三单一致？, kind: decision, col: fin, lane: 0.05, row: 5.2, control: K3, risk: 合同、验收、发票三者不一致}
+  - {label: 执行支付, kind: hub, col: pay, lane: 0.05, row: 6.8, control: K4, risk: 未经授权或重复付款, core: true}
+  - {label: 付款凭证, kind: doc, col: pay, lane: 1.15, row: 6.8}
+edges:
+  - {from: 提交付款申请, to: 付款申请单, kind: data}
+  - {from: 提交付款申请, to: 核对合同验收, kind: flow, route: vh}
+  - {from: 验收单, to: 核对合同验收, kind: data}
+  - {from: 核对合同验收, to: 审核发票, kind: flow, route: vh}
+  - {from: 发票, to: 审核发票, kind: data}
+  - {from: 审核发票, to: match, kind: flow}
+  - {from: match, to: 执行支付, kind: flow, route: vh, label: 是, label_at: start}
+  - {from: match, to: 提交付款申请, kind: return, route: ll, offset: 28, label: 否·退回}
+  - {from: 执行支付, to: 付款凭证, kind: data}
+
+# 路径验证：控制点不可绕过、岗位分离（见 --guide verify）
+verify:
+  end: [执行支付]
+  must_pass:
+    - {before: 执行支付, through: [核对合同验收, 审核发票, match]}
+  separate:
+    - [提交付款申请, 执行支付]

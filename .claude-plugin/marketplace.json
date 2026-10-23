@@ -1,0 +1,14 @@
+{
+  "name": "saan-diagram",
+  "description": "Saan Diagram：中文业务图示的约束语言",
+  "owner": {
+    "name": "Yishan"
+  },
+  "plugins": [
+    {
+      "name": "saan-diagram",
+      "source": "./",
+      "description": "按统一规范绘制 14 种中文业务图示，YAML spec + lint 校验，可写入飞书画板或输出 HTML/SVG/PNG。"
+    }
+  ]
+}

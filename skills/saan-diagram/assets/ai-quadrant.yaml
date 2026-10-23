@@ -1,0 +1,20 @@
+# 四象限示例：AI 场景优先级（价值 × 落地难度）
+layout: quadrant
+title: 招采 AI 场景优先级
+x: {label: 落地可行性, low: 难, high: 易}
+y: {label: 业务价值, low: 低, high: 高}
+focus: q1
+quadrants:
+  q1: {label: 优先做, note: 价值高、好落地}
+  q2: {label: 攻坚储备, note: 价值高、难度大}
+  q3: {label: 暂不做, note: 投入产出比低}
+  q4: {label: 顺手做, note: 低成本快赢}
+items:
+  - {label: 招标文件智能生成, x: 7.5, y: 8.2, core: true}
+  - {label: 清单自动匹配, x: 8.4, y: 6.8}
+  - {label: 智能辅助评审, x: 3.2, y: 8.8, from: [2.0, 8.6]}
+  - {label: 围串标识别, x: 2.4, y: 7.4}
+  - {label: 供应商画像, x: 6.2, y: 6.0}
+  - {label: 制度问答助手, x: 8.8, y: 3.6}
+  - {label: 合同条款比对, x: 6.8, y: 2.4}
+  - {label: 价格趋势预测, x: 2.6, y: 3.2}

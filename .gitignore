@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.DS_Store
+# 本地出图产物
+*.html
+!docs/**/*.html
+*.wb.json
+*.openapi.json
+*.board.png
+out/

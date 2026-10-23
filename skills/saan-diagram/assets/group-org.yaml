@@ -1,0 +1,35 @@
+# 组织架构 + 数据隔离示例：嵌套 = 外层可见内层；并列 = 互相隔离；跨域访问画授权
+layout: org
+title: 集团采购组织与数据隔离
+desc: 甲集团下设集采中心与三家子公司，展示数据域的嵌套（上级汇总可见）与隔离，以及跨数据域的授权。
+orgs:
+  - id: group
+    label: 甲集团
+    kind: hq
+    sub: T00
+    children:
+      - {id: center, label: 集采中心, core: true}
+      - id: coa
+        label: A 建设公司
+        sub: T01
+        children:
+          - {label: 第一工程分公司}
+          - {label: 第二工程分公司}
+          - {label: 第三工程分公司}
+          - {label: 项目部（临时）, kind: virtual}
+      - id: cob
+        label: B 投资公司
+        sub: T02
+        children:
+          - {label: 运营公司}
+          - {label: 贸易公司}
+      - {id: coc, label: C 材料公司, sub: T03}
+scopes:
+  - {id: g, label: 集团数据域 · 汇总可见下级, members: [group], exclude: [coc], kind: shared}
+  - {id: a, label: A 公司数据域, members: [coa]}
+  - {id: b, label: B 公司数据域, members: [cob]}
+  - {id: c, label: C 公司独立域, members: [coc]}
+grants:
+  - {from: center, to: coa, kind: delegate, label: 代理集中采购}
+  - {from: cob, to: coa, kind: read, label: 共享供应商库}
+  - {from: coc, to: group, kind: read, label: 报送采购统计}

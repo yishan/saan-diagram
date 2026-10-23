@@ -1,0 +1,30 @@
+# 数据流图示例（profile: dfd）：处理与存储交替，外部实体在两侧
+title: 电子投标数据流
+desc: 供应商投标文件从递交、开标、评审到形成评标报告的数据流，含外部实体、处理过程与数据存储。
+profile: dfd
+columns:
+  - {id: ext,   label: 外部实体, lanes: 1}
+  - {id: proc,  label: 处理过程, lanes: 2}
+  - {id: store, label: 数据存储, lanes: 2}
+  - {id: out,   label: 结果去向, lanes: 1}
+nodes:
+  - {label: 供应商,   kind: system, owner: external, col: ext, lane: 0, row: 0.6}
+  - {label: 评审专家, kind: system, owner: external, col: ext, lane: 0, row: 5.4}
+  - {label: 接收投标文件, col: proc, lane: 0.5, row: 0.6, sub: P1}
+  - {label: 解密开标,     col: proc, lane: 0.5, row: 3.0, sub: P2}
+  - {label: 评审打分,     col: proc, lane: 0.5, row: 5.4, sub: P3, core: true}
+  - {label: 生成评标报告, col: proc, lane: 0.5, row: 7.8, sub: P4}
+  - {label: 投标文件库, kind: store, col: store, lane: 0.5, row: 1.8, sub: D1}
+  - {label: 开标记录,   kind: store, col: store, lane: 0.5, row: 4.2, sub: D2}
+  - {label: 评分表,     kind: store, col: store, lane: 0.5, row: 6.6, sub: D3}
+  - {label: 采购人, kind: system, owner: internal, col: out, lane: 0, row: 7.8}
+edges:
+  - {from: 供应商, to: 接收投标文件, kind: data, label: 加密标书}
+  - {from: 接收投标文件, to: 投标文件库, kind: data, label: 存档, label_at: 1}
+  - {from: 投标文件库, to: 解密开标, kind: data, label: 读取, label_at: 1}
+  - {from: 解密开标, to: 开标记录, kind: data, label: 报价一览, label_at: 1}
+  - {from: 开标记录, to: 评审打分, kind: data, label: 报价清单, label_at: 1}
+  - {from: 评审专家, to: 评审打分, kind: data, label: 评分意见}
+  - {from: 评审打分, to: 评分表, kind: data, label: 写入得分, label_at: 1}
+  - {from: 评分表, to: 生成评标报告, kind: data, label: 汇总得分, label_at: 1}
+  - {from: 生成评标报告, to: 采购人, kind: data, label: 评标报告}

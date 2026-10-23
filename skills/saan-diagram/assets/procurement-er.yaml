@@ -1,0 +1,24 @@
+# 实体关系图示例：采购核心数据模型
+layout: er
+title: 采购核心数据模型
+desc: 采购计划、项目、标段、投标响应、评审、合同与供应商、专家之间的实体关系与基数。
+entities:
+  - {id: plan,    label: 采购计划, col: 0, row: 0, fields: ["#计划编号", 需求部门, 计划金额]}
+  - {id: project, label: 采购项目, col: 1, row: 0, core: true, fields: ["#项目编号", "→计划编号", 项目名称, 采购方式, 预算金额]}
+  - {id: lot,     label: 标段, col: 2, row: 0, fields: ["#标段编号", "→项目编号", 标段名称, 最高限价]}
+  - {id: ctr,     label: 合同, col: 3, row: 0, fields: ["#合同编号", "→标段编号", "→供应商编号", 合同金额]}
+  - {id: expert,  label: 评审专家, col: 0, row: 1, fields: ["#专家编号", 姓名, 专业类别]}
+  - {id: score,   label: 评审记录, col: 1, row: 1, fields: ["#记录编号", "→响应编号", "→专家编号", 得分]}
+  - {id: bid,     label: 投标响应, col: 2, row: 1, fields: ["#响应编号", "→标段编号", "→供应商编号", 报价, 递交时间]}
+  - {id: vendor,  label: 供应商, col: 3, row: 1, fields: ["#供应商编号", 统一信用代码, 供应商名称, 资质等级]}
+groups:
+  - {label: 评审域, members: [expert, score]}
+relations:
+  - {from: plan,    to: project, card: ["1", "N"], label: 立项}
+  - {from: project, to: lot,     card: ["1", "N"], label: 划分}
+  - {from: lot,     to: ctr,     card: ["1", "0..1"], label: 签订}
+  - {from: lot,     to: bid,     card: ["1", "N"], label: 接收}
+  - {from: vendor,  to: bid,     card: ["1", "N"], label: 递交}
+  - {from: vendor,  to: ctr,     card: ["1", "N"]}
+  - {from: bid,     to: score,   card: ["1", "N"], label: 被评审}
+  - {from: expert,  to: score,   card: ["1", "N"], label: 打分}

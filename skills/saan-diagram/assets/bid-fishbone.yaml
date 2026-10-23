@@ -1,0 +1,17 @@
+# 鱼骨图示例：评标周期为什么超长
+layout: fishbone
+title: 评标周期超长原因分析
+effect: 评标周期平均 32 天
+categories:
+  - label: 人
+    causes: [专家抽取后临时回避, {label: 评委同时评多个项目, root: true}, 代理机构经验不足]
+  - label: 法
+    causes: [{label: 澄清环节无时限, root: true}, 复核需线下签字, 异议处理无标准时长]
+  - label: 机
+    causes: [评标系统不支持并行, 电子签章偶发失败]
+  - label: 料
+    causes: [招标文件评分项含糊, 投标文件格式不统一, 资质原件需现场核验]
+  - label: 环
+    causes: [评标室需提前预约, 跨地市专家差旅]
+  - label: 测
+    causes: [周期只统计到定标, 无分环节耗时数据]

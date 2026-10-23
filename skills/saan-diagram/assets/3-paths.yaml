@@ -1,0 +1,39 @@
+# 示例 3 · 路径对比视图：不同采购方式走过哪些阶段
+title: 采购方式路径对比
+desc: 公开招标、询比采购、竞争谈判、单一来源四种方式在公告、响应、评审、定标、合同五个阶段上的路径差异。
+columns:
+  - {id: way,      label: 采购方式, lanes: 1}
+  - {id: notice,   label: 发布公告, lanes: 1}
+  - {id: respond,  label: 供应商响应, lanes: 1}
+  - {id: review,   label: 评审, lanes: 1}
+  - {id: award,    label: 定标, lanes: 1}
+  - {id: contract, label: 签订合同, lanes: 1}
+paths:
+  row: 0.4
+  tag_col: way
+  edge_kind: flow
+  rows:
+    - name: 公开招标
+      steps:
+        - {label: 招标公告, col: notice}
+        - {label: 投标, col: respond}
+        - {label: 专家评标, col: review, core: true}
+        - {label: 中标公示, col: award}
+        - {label: 合同, col: contract}
+    - name: 询比采购
+      steps:
+        - {label: 询价公告, col: notice}
+        - {label: 报价, col: respond}
+        - {label: 比价, col: review}
+        - {label: 合同, col: contract}
+    - name: 竞争谈判
+      steps:
+        - {label: 定向邀请, col: notice}
+        - {label: 多轮谈判, col: respond, core: true}
+        - {label: 成交确认, col: award}
+        - {label: 合同, col: contract}
+    - name: 单一来源
+      steps:
+        - {label: 论证公示, col: notice}
+        - {label: 价格协商, col: respond}
+        - {label: 合同, col: contract}

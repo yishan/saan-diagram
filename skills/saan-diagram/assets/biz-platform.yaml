@@ -1,0 +1,65 @@
+# 分层架构图示例：通用企业业务平台总体架构（虚构，仅示范写法）
+layout: layers
+title: 企业业务协同平台
+desc: 通用企业业务平台总体架构：展示层、服务层、能力层、技术层、设施层自上而下，右侧为集成平台与内外部系统，两侧为安全运维与法规制度体系。
+width: 1760
+special: {label: AI 能力}          # 重点能力：本图用来标 AI，图例显示"AI 能力"
+
+rails:
+  left:  [安全保障体系, 运维支撑体系, 业务标准, 数据标准, 接口标准, 技术标准]
+  right: [国家法律法规, 行业监管要求, 企业管理制度, 业务操作规范]
+
+layers:
+  - id: ui
+    label: 展示层
+    blocks:
+      - {w: 3, items: [电脑端, 手机端, 小程序]}
+      - {w: 2, items: [管理驾驶舱, BI 看板]}
+
+  - id: svc
+    label: 服务层
+    blocks:
+      - {tab: 业务工作台, title: 核心业务服务, core: true, w: 1.4, cols: 2,
+         items: [流程配置, 规则配置, 客户管理, 合作方管理, 项目管理, ……]}
+      - {tab: 客户门户, title: 客户服务, items: [在线申请, 进度查询, 资料提交, ……]}
+      - {tab: 合作方门户, title: 合作方服务, items: [入驻登记, 信息维护, 协同处理, ……]}
+      - {tab: 运营工作台, title: 运营服务, items: [平台运营, 内容管理, 数据分析, ……]}
+      - {tab: 监督工作台, title: 监督服务, items: [异常监控, 风险预警, 审计追溯, ……]}
+
+  - id: cap
+    label: 能力层
+    blocks:
+      - title: 业务中台
+        stages:
+          - {title: 需求受理, steps: [需求登记, 需求评估, 立项审批]}
+          - {title: 方案制定, steps: [方案编制, 报价测算, 方案评审]}
+          - {title: 合同执行, core: true, steps: [合同签订, 过程跟踪]}
+          - {title: 交付验收, steps: [交付确认, 验收评价, 结算支付]}
+          - {title: 归档, steps: [资料归档]}
+
+  - id: tech
+    label: 技术层
+    blocks:
+      - {title: 统一技术底座, items: [流程引擎, 组织权限, 任务调度, ……]}
+      - {title: AI 能力平台, kind: special, w: 1.25, items: [智能问答, 文档生成, 智能审核, 风险识别, ……]}
+
+  - id: infra
+    label: 设施层
+    blocks:
+      - {items: [云计算, 数据库, 对象存储, 消息队列, 灾备服务, ……]}
+
+side:
+  - id: integ
+    w: 96
+    sections:
+      - {id: integ_p, title: 集成平台, vertical: true, span: [ui, tech], items: [应用集成, 数据集成, 开放接口, 消息集成]}
+      - {id: ai3, title: 第三方AI能力, kind: special, span: [infra, infra]}
+  - id: ext
+    w: 184
+    sections:
+      - {title: 企业内部系统, owner: internal, items: [企业 OA, 财务系统, 合同系统, 主数据]}
+      - {title: 外部系统, owner: external, items: [CA 电子签章, 工商信息, 银行系统, 短信服务]}
+      - {title: 生态系统, owner: external, items: [支付平台, 电子发票]}
+
+links:
+  - {from: integ, to: ext, kind: bidir, label: 集成}

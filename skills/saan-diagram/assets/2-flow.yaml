@@ -1,0 +1,27 @@
+# 主流程视图：单条流程，默认不画泳道（列只是排版网格），节点等距排列
+title: 采购业务主流程
+desc: 一次采购从提交需求、预算判断、寻源评标到合同签订与付款的主流程，含预算不足的回退分支。
+columns:
+  - {id: f, lanes: 9}
+paths:
+  row: 0.6
+  edge_kind: flow
+  rows:
+    - name: 主流程
+      height: 2
+      steps:
+        - {label: 提交需求, col: f, lane: 0}
+        - {id: budget, label: 预算充足？, kind: decision, col: f, lane: 1.5}
+        - {label: 选择方式, col: f, lane: 3, in_label: 是}
+        - {label: 开标评标, col: f, lane: 4.5, core: true}
+        - {label: 签订合同, col: f, lane: 6}
+        - {label: 验收付款, kind: hub, col: f, lane: 7.5}
+        - {label: 调整预算, col: f, lane: 1.5, drow: 1.6, break: true}
+  edges:
+    - {from: 主流程.budget, to: 主流程.调整预算, kind: flow, route: v, label: 否}
+    - {from: 主流程.调整预算, to: 主流程.提交需求, kind: return, route: hv, label: 重新提交}
+
+# 路径验证：每一步都能从起点到达、都能走到终点；付款前必经开标评标
+verify:
+  must_pass:
+    - {before: 主流程.验收付款, through: [主流程.开标评标]}

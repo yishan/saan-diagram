@@ -1,0 +1,22 @@
+# 机会流程图示例：增值 / 非增值两列，自动统计非增值占比
+title: 供应商准入机会流程
+desc: 供应商准入流程中增值环节与非增值环节（重复提交、等待、重复会签）的分布，用于识别优化机会。
+profile: opportunity
+columns:
+  - {id: va,  label: 增值环节,   lanes: 2, value: true}
+  - {id: nva, label: 非增值环节, lanes: 2, value: false}
+nodes:
+  - {label: 提交准入申请, kind: hub, col: va, lane: 0.5, row: 0.4}
+  - {label: 纸质材料重复提交, col: nva, lane: 0.5, row: 2.0, core: true}
+  - {label: 资质审核, col: va, lane: 0.5, row: 3.6}
+  - {label: 等待线下盖章, col: nva, lane: 0.5, row: 5.2}
+  - {label: 准入评审, col: va, lane: 0.5, row: 6.8}
+  - {label: 多部门重复会签, col: nva, lane: 0.5, row: 8.4, core: true}
+  - {label: 入库并通知, kind: hub, col: va, lane: 0.5, row: 10.0}
+edges:
+  - {from: 提交准入申请, to: 纸质材料重复提交, kind: flow, route: vh}
+  - {from: 纸质材料重复提交, to: 资质审核, kind: flow, route: vh}
+  - {from: 资质审核, to: 等待线下盖章, kind: flow, route: vh}
+  - {from: 等待线下盖章, to: 准入评审, kind: flow, route: vh}
+  - {from: 准入评审, to: 多部门重复会签, kind: flow, route: vh}
+  - {from: 多部门重复会签, to: 入库并通知, kind: flow, route: vh}

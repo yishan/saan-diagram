@@ -1,0 +1,19 @@
+# 里程碑时间线示例：某平台二期
+layout: timeline
+title: 某平台二期里程碑
+start: 2026-03
+end: 2027-03
+today: 2026-10-22
+phases:
+  - {label: 需求与方案, from: 2026-03, to: 2026-05}
+  - {label: 开发与集成, from: 2026-06, to: 2026-10}
+  - {label: 试点运行, from: 2026-11, to: 2027-01, core: true}
+  - {label: 全面推广, from: 2027-02, to: 2027-03}
+milestones:
+  - {label: 需求评审通过, date: 2026-04-28}
+  - {label: 方案定稿, date: 2026-05-30}
+  - {label: 财务系统联调, date: 2026-09-25, plan: 2026-08-31}
+  - {label: UAT 验收, date: 2026-10-30, plan: 2026-10-15}
+  - {label: 试点上线, date: 2026-11-20, core: true}
+  - {label: 试点复盘, date: 2027-01-20}
+  - {label: 全面上线, date: 2027-03-15}

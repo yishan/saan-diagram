@@ -1,0 +1,28 @@
+# IDEF0 示例：采购执行（A0）——输入在左、控制在上、输出在右、机制在下
+layout: idef0
+node: A0
+title: 采购执行
+activities:
+  - {id: plan, label: 编制采购计划}
+  - {id: bid, label: 组织招标采购, core: true}
+  - {id: eval, label: 评审与定标}
+  - {id: sign, label: 签订采购合同}
+inputs:
+  - {to: plan, label: 项目物资需求}
+  - {to: bid, label: 供应商名录}
+outputs:
+  - {from: sign, label: 采购合同}
+  - {from: eval, label: 中标通知}
+flows:
+  - {from: plan, to: bid, label: 采购计划}
+  - {from: bid, to: eval, label: 投标文件}
+  - {from: eval, to: sign, label: 定标结果}
+  - {from: eval, to: bid, as: control, label: 澄清要求}
+controls:
+  - {label: 集团采购管理制度, to: [plan, bid, eval]}
+  - {label: 招标投标法, to: [bid, eval]}
+  - {label: 合同管理办法, to: [sign]}
+mechanisms:
+  - {label: 招采平台, owner: internal, to: [bid, eval, sign]}
+  - {label: 评标专家, to: [eval]}
+  - {label: 采购部, to: [plan]}
