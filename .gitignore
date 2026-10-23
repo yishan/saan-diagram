@@ -4,6 +4,7 @@ __pycache__/
 # 本地出图产物
 *.html
 !docs/**/*.html
+!page/**/*.html
 *.wb.json
 *.openapi.json
 *.board.png
@@ -14,3 +15,5 @@ out/
 *.publish.json
 *.before.png
 *.wb.png
+
+.vercel/

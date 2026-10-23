@@ -1,183 +1,188 @@
 # Saan Diagram
 
-把业务描述、需求文档、白板截图，转成同一套规范下的中文业务图示。
+**English** | [简体中文](README.zh-CN.md)
 
-> **统一的是约束语言，不是具体方案。** 不同项目画的内容可以不同，但阶段、节点类型、线型、配色和校验规则都是同一套。
+Turn business descriptions, requirements documents, and whiteboard screenshots into Chinese business diagrams with a consistent visual language.
 
-Saan Diagram 是一个可用于 Claude Code、Codex 等 Agent 的 Skill。模型只写一份 YAML spec，用阶段、泳道、行来定位，不写像素也不写颜色；坐标、走线、配色、字号和图例都由 `render.py` 计算。`--lint` 不通过，就不能交付。
+> **Standardize the rules, not the solution.** Each project can have different content while sharing the same stages, node types, line styles, colors, and validation rules.
 
-- **14 种图示**，共用一套视觉语法
-- **49 条校验规则**，写在脚本里，不靠模型记忆；`--selftest` 证明每条规则都能被故意改坏的样例触发
-- **业务发现不许被"修掉"**：失控点、绕过控制、数据黑洞、权限交叉等问题会原样报告，用户确认后写进图例
-- **流程路径验证**：检查流程图的可达性与控制点绕过路径，检查控制点不可绕过、岗位分离、没有死路
-- **颜色只留给"系统"和"核心"**：业务节点一律中性灰，核心色全图不超过 3 处
-- **交付方式由你选**：直接输出 HTML / SVG / PNG，或通过内置脚本安全写入飞书画板（不用飞书的人不会加载这部分说明）
+Saan Diagram is an agent skill for Claude Code, Codex, and other compatible agents. The model writes a YAML spec using stages, lanes, and rows instead of pixel coordinates or colors. `render.py` calculates positions, routes, colors, typography, and legends. Diagrams must pass `--lint` before delivery.
 
-![分层架构图示例](docs/img/biz-platform.png)
+- **14 diagram types** sharing one visual language.
+- **49 validation rules** implemented in code. `--selftest` checks that deliberately broken examples trigger every rule.
+- **Preserve business findings:** missing controls, bypass paths, data sinks, and conflicting responsibilities are reported as findings. Once the user confirms the current situation, the findings appear in the diagram legend.
+- **Process path verification:** check reachability, control-point bypasses, separation of duties, and dead ends in the modeled process.
+- **Reserve color for systems and core functions:** business nodes use neutral gray, with at most three core highlights per diagram.
+- **Choose your output:** HTML, SVG, PNG, or Feishu/Lark whiteboard publishing through the bundled script. Whiteboard instructions are loaded only when needed.
 
-## 支持的图示
+The skill instructions and example labels are currently in Chinese. This English README explains installation and use; it does not change the diagram language.
 
-| 你要表达的是 | 图示 | 写法 | 示例 |
+![Layered architecture example](docs/img/biz-platform.png)
+
+## Supported diagrams
+
+| What you need to show | Diagram | Spec structure | Example |
 |---|---|---|---|
-| 各阶段有哪些模块，接哪些系统 | 架构视图 | `columns` + `nodes` + `edges` | [1-arch](skills/saan-diagram/assets/1-arch.yaml) |
-| 一条主流程，含判断和回退 | 主流程视图 | `paths` | [2-flow](skills/saan-diagram/assets/2-flow.yaml) |
-| 几种方式各走过哪些阶段 | 路径对比视图 | `paths` 多行 | [3-paths](skills/saan-diagram/assets/3-paths.yaml) |
-| 多个角色之间的交接 | 泳道图 | `columns` = 角色 | [4-swim](skills/saan-diagram/assets/4-swim.yaml) |
-| 数据从哪来、经过哪些处理、存到哪 | 数据流图 | `profile: dfd` | [bid-dfd](skills/saan-diagram/assets/bid-dfd.yaml) |
-| 单据与关键控制点 | 审计流程图 | `profile: audit` | [payment-audit](skills/saan-diagram/assets/payment-audit.yaml) |
-| 哪些环节不增值 | 机会流程图 | `profile: opportunity` | [vendor-opportunity](skills/saan-diagram/assets/vendor-opportunity.yaml) |
-| 平台由哪些层组成、对外接什么 | 分层架构图 | `layout: layers` | [biz-platform](skills/saan-diagram/assets/biz-platform.yaml) |
-| 业务对象及其关系、几对几 | 实体关系图 | `layout: er` | [procurement-er](skills/saan-diagram/assets/procurement-er.yaml) |
-| 谁管谁，谁能看到谁的数据 | 组织架构图 + 数据隔离 | `layout: org` | [group-org](skills/saan-diagram/assets/group-org.yaml) |
-| 一个结果背后有哪些原因 | 鱼骨图 | `layout: fishbone` | [bid-fishbone](skills/saan-diagram/assets/bid-fishbone.yaml) |
-| 关键节点什么时候到、偏了多少 | 里程碑时间线 | `layout: timeline` | [platform-timeline](skills/saan-diagram/assets/platform-timeline.yaml) |
-| 两个维度上该先做哪个 | 四象限图 | `layout: quadrant` | [ai-quadrant](skills/saan-diagram/assets/ai-quadrant.yaml) |
-| 每个活动受什么约束、靠谁完成 | IDEF0 功能模型 | `layout: idef0` | [proc-idef0](skills/saan-diagram/assets/proc-idef0.yaml) |
+| Modules in each stage and the systems they connect to | Architecture view | `columns` + `nodes` + `edges` | [1-arch](skills/saan-diagram/assets/1-arch.yaml) |
+| A main process with decisions and returns | Process flow | `paths` | [2-flow](skills/saan-diagram/assets/2-flow.yaml) |
+| Different approaches across the same stages | Path comparison | Multiple `paths` rows | [3-paths](skills/saan-diagram/assets/3-paths.yaml) |
+| Handoffs between roles | Swimlane diagram | Columns represent roles | [4-swim](skills/saan-diagram/assets/4-swim.yaml) |
+| Where data comes from, how it is processed, and where it is stored | Data flow diagram | `profile: dfd` | [bid-dfd](skills/saan-diagram/assets/bid-dfd.yaml) |
+| Documents and key controls | Audit flowchart | `profile: audit` | [payment-audit](skills/saan-diagram/assets/payment-audit.yaml) |
+| Steps that do not add value | Opportunity flowchart | `profile: opportunity` | [vendor-opportunity](skills/saan-diagram/assets/vendor-opportunity.yaml) |
+| Platform layers and external connections | Layered architecture | `layout: layers` | [biz-platform](skills/saan-diagram/assets/biz-platform.yaml) |
+| Business entities, relationships, and cardinality | Entity relationship diagram | `layout: er` | [procurement-er](skills/saan-diagram/assets/procurement-er.yaml) |
+| Reporting lines and declared data access boundaries | Organization chart with data isolation | `layout: org` | [group-org](skills/saan-diagram/assets/group-org.yaml) |
+| Causes behind an outcome | Fishbone diagram | `layout: fishbone` | [bid-fishbone](skills/saan-diagram/assets/bid-fishbone.yaml) |
+| Milestone dates and schedule variance | Milestone timeline | `layout: timeline` | [platform-timeline](skills/saan-diagram/assets/platform-timeline.yaml) |
+| Priorities across two dimensions | Quadrant chart | `layout: quadrant` | [ai-quadrant](skills/saan-diagram/assets/ai-quadrant.yaml) |
+| Inputs, controls, outputs, and mechanisms for each activity | IDEF0 function model | `layout: idef0` | [proc-idef0](skills/saan-diagram/assets/proc-idef0.yaml) |
 
-时序交互、状态流转、物理表结构、按任务排期的甘特图不在范围内，建议用 Mermaid 或数据库建模工具。
+Sequence diagrams, state machines, physical database schemas, and task-level Gantt charts are outside this skill's scope. Use tools such as Mermaid or a database modeling tool for those tasks.
 
-## 安装
+## Installation
 
-### skills CLI（Claude Code / Codex 等）
+### skills CLI (Claude Code, Codex, and other agents)
 
 ```bash
-# 只列出可发现的 Skill，不安装
+# List discoverable skills without installing
 npx skills add yishan/saan-diagram --list
 
-# 安装，并交互选择目标 Agent；默认安装到当前项目
+# Install and select agents interactively; project-level installation is the default
 npx skills add yishan/saan-diagram --skill saan-diagram
 
-# 明确安装到 Claude Code 或 Codex；加 -g 可安装到用户级目录
+# Choose Claude Code or Codex explicitly; add -g for a user-level installation
 npx skills add yishan/saan-diagram --skill saan-diagram -a claude-code
 npx skills add yishan/saan-diagram --skill saan-diagram -a codex
 ```
 
-依赖当前 skills CLI 所要求的 Node.js 版本。CLI 安装完整 Skill 目录，Python 与 PNG 运行依赖仍需按下文安装。
-skills.sh 的目录与排名由 CLI 安装统计驱动；本仓库有安装命令不代表平台已收录，CLI 安装成功也不代表渲染或飞书写入已验收。参见 [CLI 文档](https://github.com/vercel-labs/skills) 与 [收录说明](https://skills.sh/docs/faq)。
+Use a Node.js version supported by the current skills CLI. The CLI installs the complete skill directory; install Python and PNG rendering dependencies separately as described below.
 
-### Claude Code（插件市场）
+The skills.sh directory and rankings are driven by CLI installation telemetry. Having an installation command does not establish that the skill is listed, and successful installation does not validate rendering or whiteboard publishing. See the [CLI documentation](https://github.com/vercel-labs/skills) and [listing FAQ](https://skills.sh/docs/faq).
+
+### Claude Code plugin marketplace
 
 ```bash
 /plugin marketplace add yishan/saan-diagram
 /plugin install saan-diagram@saan-diagram
 ```
 
-### Claude Code（手动）
+### Claude Code manual installation
 
-把 `skills/saan-diagram/` 整个目录复制到 `~/.claude/skills/saan-diagram/`（个人）或项目里的 `.claude/skills/saan-diagram/`。
+Copy the entire `skills/saan-diagram/` directory to `~/.claude/skills/saan-diagram/` for personal use, or to `.claude/skills/saan-diagram/` in your project.
 
 ### Claude.ai
 
-把 `skills/saan-diagram/` 目录打成 zip（zip 里的顶层是 `saan-diagram/` 文件夹），在 Claude.ai 的设置里上传为自定义 Skill。
+Zip the complete `skills/saan-diagram/` directory, keeping `saan-diagram/` as the top-level folder in the archive. Upload it as a custom skill in Claude.ai settings.
 
-## 依赖
+## Dependencies
 
-| 用途 | 需要 |
+| Purpose | Requirements |
 |---|---|
-| 校验与出 HTML / SVG | Python 3.9+、`pyyaml` |
-| 导出 PNG | `playwright` + Chromium |
-| 写入飞书画板 | [`lark-cli`](https://github.com/larksuite) 并已登录，Node.js（用于 `@larksuite/whiteboard-cli`） |
+| Validation and HTML/SVG output | Python 3.9+ and `pyyaml` |
+| PNG export | `playwright` and Chromium |
+| Feishu/Lark whiteboard publishing | An authenticated [`lark-cli`](https://github.com/larksuite), plus Node.js for `@larksuite/whiteboard-cli` |
 
-## 单独使用渲染脚本
+## Standalone renderer
 
 ```bash
 cd skills/saan-diagram
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-# 需要 PNG 时再安装：
+# Install these only if you need PNG output:
 python -m pip install -r requirements-png.txt
 python -m playwright install chromium
-python3 scripts/render.py --init audit > pay.yaml     # 起步模板（14 种）
-python3 scripts/render.py --guide verify              # 某类图的详细写法
-python3 scripts/render.py pay.yaml --all              # 校验 + 路径验证 + HTML + PNG + 画板 DSL
-python3 scripts/render.py --selftest                  # 自测：示例全部通过 + 每条规则都能失败
+python3 scripts/render.py --init audit > pay.yaml     # Starter template (14 types)
+python3 scripts/render.py --guide verify              # Detailed guide for a topic
+python3 scripts/render.py pay.yaml --all              # Validate, verify paths, export HTML/PNG/whiteboard DSL
+python3 scripts/render.py --selftest                  # Validate examples and exercise every rule
 ```
 
-退出码：0 本次请求通过 · 1 排版问题 · 2 未确认的业务发现 · 3 spec 输入错误 · 4 产物生成失败或不完整。
+Exit codes: `0` requested operation succeeded · `1` layout issues · `2` unconfirmed business findings · `3` invalid spec · `4` failed or incomplete artifact generation.
 
-出图自动生成 `<slug>.result.json`，记录每个产物的状态。PNG 失败会返回 4，保留已生成的 HTML 和画板 DSL；若只需要 HTML/SVG，请显式使用对应参数。`--result-json PATH` 可指定结果文件，配合 `--lint` 也可取得机器可读结果。
+Rendering also writes `<slug>.result.json` with the status of each artifact. A PNG export failure returns `4` while preserving successfully generated HTML and whiteboard DSL. Request HTML/SVG explicitly when PNG is not needed. Use `--result-json PATH` to choose a result file; this option also provides machine-readable results with `--lint`.
 
-## 流程路径验证
+## Process path verification
 
 ```yaml
 verify:
   must_pass:
-    - {before: 执行支付, through: [核对合同验收, 审核发票, 三单一致？]}   # 控制点不可绕过
+    - {before: 执行支付, through: [核对合同验收, 审核发票, 三单一致？]}   # Required controls before payment
   separate:
-    - [提交付款申请, 执行支付]                                          # 岗位分离
+    - [提交付款申请, 执行支付]                                      # Separation of duties
 ```
 
-失败时给出业务语言的反例，例如"可以绕过『审核发票』到达『执行支付』：提交付款申请 → 紧急付款审批 → 执行支付"。这类问题属于业务发现，不能为了通过而删线；用户确认现状如此后写进 `accept`，图例下方会如实写明。
+Failures include a counterexample in business terms, such as: “Payment can be reached without invoice review: submit payment request → emergency payment approval → execute payment.” These are business findings. Do not delete edges just to pass validation. If the user confirms that this is the current process, record the finding in `accept`; it will appear below the legend.
 
-![审计流程图与路径验证](docs/img/payment-audit.png)
+![Audit flowchart with path verification](docs/img/payment-audit.png)
 
-## 写入飞书画板
+## Publish to a Feishu/Lark whiteboard
 
-写入只能通过内置脚本，模型不直接拼 lark-cli 写入命令：
+Use the bundled publisher instead of constructing write commands directly:
 
 ```bash
 cd skills/saan-diagram
-python3 scripts/wb_publish.py pay.wb.json --token <wbcn…>                # 先导出现有画板并停下（退出码 20）
-python3 scripts/wb_publish.py pay.wb.json --token <wbcn…> --mode append  # 确认后写入，写后导出核验图
+python3 scripts/wb_publish.py pay.wb.json --token <wbcn…>                # Export the existing board and stop (exit 20)
+python3 scripts/wb_publish.py pay.wb.json --token <wbcn…> --mode append  # After confirmation, write and export for review
 ```
 
-写入成功但核验图导出失败时，退出码为 21。只重试回读，避免再次写入：
+If the write succeeds but the verification image cannot be exported, the script returns `21`. Retry only the readback to avoid another write:
 
 ```bash
 python3 scripts/wb_publish.py pay.wb.json --token <wbcn…> --verify-only
 ```
 
-发布结果写入 `<slug>.wb.publish.json`。回读成功与人工/图像工具查看通过是不同状态。`--pass` 仅允许门禁要求且用户确认过的 `--pass=--yes`，不能改变目标、来源或写入方式。
+Publishing results are saved to `<slug>.wb.publish.json`. Successful readback and visual inspection are separate states. The only permitted passthrough is `--pass=--yes`, when required by the confirmation gate and authorized by the user. Passthrough arguments cannot change the target, source, or write mode.
 
-## 视觉语法速览
+## Visual language
 
-| 元素 | 样式 |
+| Element | Style |
 |---|---|
-| 主线节点 `hub` / 功能模块 `module` | 中性灰，深浅两档 |
-| 内部系统 / 外部服务 `system` | VI 主色 / 主色提亮 45% |
-| 核心业务 `core: true` | 主色浅底 + 主色描边，全图 ≤3 处 |
-| 重点能力 `special` | 浅橙底，名称由 `special.label` 声明（如"AI 能力"） |
-| 业务主流程 / 数据集成 / 配置依赖 | 实线 / 点线 / 紫色虚线 |
-| 标题栏 | 默认白底线框，可选 `gray` / `brand` / `dark` |
+| Main-process node `hub` / functional module `module` | Two shades of neutral gray |
+| Internal system / external service `system` | Brand color / brand color lightened by 45% |
+| Core business function `core: true` | Light brand background and brand border; at most 3 per diagram |
+| Highlighted capability `special` | Light orange; category named by `special.label`, such as “AI capabilities” |
+| Business flow / data integration / configuration dependency | Solid / dotted / purple dashed line |
+| Title bar | White with an outline by default; optional `gray`, `brand`, or `dark` |
 
-完整规则见 [SKILL.md](skills/saan-diagram/SKILL.md)。
+See [SKILL.md](skills/saan-diagram/SKILL.md) for the full rules in Chinese.
 
-## 写飞书画板的规矩（写在脚本里）
+## Whiteboard publishing safeguards
 
-- 不带 `--mode` 不写：先导出现有画板预览，退出码 20，看图后再决定追加还是覆盖
-- 覆盖只在 `--mode overwrite` 时发生，必须有用户明确同意
-- 不新建文档：只往用户给的画板或文档里写
-- `lark-cli` 退出码 10 是高风险确认门禁，原样返回给用户确认，不自动追加参数
-- 幂等 token 由目标、写入方式和内容共同生成，重试自动复用
+- Without `--mode`, no write occurs. The script exports the existing board and exits with `20`. Review the image before choosing append or overwrite.
+- Overwriting requires `--mode overwrite` and explicit user approval.
+- The publisher does not create documents. It writes only to the board or document supplied by the user.
+- A `lark-cli` exit code of `10` is a high-risk confirmation gate. It is returned for user confirmation; arguments are not added automatically.
+- The idempotency token includes the target, write mode, and content, and is reused on retries.
 
-## 开发与验证
+## Development and validation
 
-`guides/*.md` 与 `assets/*.yaml` 是指南和示例的唯一维护源。渲染器直接读取这些文件，不维护内嵌副本；发布和安装时必须保留完整 `skills/saan-diagram/` 目录。输入校验在 `scripts/spec_validation.py`，渲染器只保留一个 CLI 入口。
+`guides/*.md` and `assets/*.yaml` are the authoritative guide and example sources. The renderer reads these files directly instead of maintaining embedded copies. Distribute and install the complete `skills/saan-diagram/` directory. Input validation lives in `scripts/spec_validation.py`; the renderer has one CLI entry point.
 
-在仓库根目录运行：
+Run from the repository root:
 
 ```bash
 python3 skills/saan-diagram/scripts/render.py --selftest
 python3 -m unittest discover -s tests -v
-python3 scripts/render_smoke.py            # 14 个示例：校验、SVG、画板 DSL
-python3 scripts/render_smoke.py --png      # 另做实际浏览器 PNG 导出
+python3 scripts/render_smoke.py            # Validate all 14 examples and their SVG/whiteboard DSL output
+python3 scripts/render_smoke.py --png      # Also export PNGs in a real browser
 ```
 
-GitHub Actions 运行 Python 版本矩阵、行为回归测试和浏览器导出检查。自测的 49/49 是规则触发覆盖，不代表全部分支、视觉效果或实际业务权限都已验证。飞书发布测试使用模拟子进程，不访问用户画板。
+GitHub Actions runs a Python version matrix, behavioral regression tests, and browser export checks. The self-test's 49/49 count measures rule-trigger coverage, not complete branch coverage, visual correctness, or actual business permissions. Whiteboard publishing tests use mocked subprocesses and do not access user boards.
 
-### 从 v1.0 升级
+### Upgrading from v1.0
 
-- `verify: {}` 现在实际启用检查；漏连线的业务步骤可能产生新发现。混合图可用 `verify.nodes` 明确验证范围，并解释排除原因。
-- 岗位分离需要节点 `actor`，或明确声明 `column_semantics: roles`；不能把业务阶段当岗位。
-- 时间线完成状态由 `status: done | pending | unknown` 明确声明；省略为待确认。
-- PNG 缺失不再作为完整交付返回 0；写入后回读失败返回 21。
-- 不再支持仅复制 render.py 的安装方式；请完整安装 Skill。
+- `verify: {}` now enables verification. Disconnected business steps may produce new findings. For mixed diagrams, use `verify.nodes` to declare the scope and explain exclusions.
+- Separation of duties requires node-level `actor` values or `column_semantics: roles`. Business stages do not imply roles.
+- Timeline completion is explicitly declared with `status: done | pending | unknown`. Omitted status means unknown.
+- Missing PNG output no longer returns `0` for a complete delivery. Failed readback after a write returns `21`.
+- Installing only `render.py` is no longer supported. Install the complete skill directory.
 
-## 致谢
+## Acknowledgments
 
-排版规则参考 [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design)（图示类型选择、正交连线、标签留白、焦点色预算、4px 网格），并改成适合中文业务图的版本。
+Layout rules draw on [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design): diagram selection, orthogonal connectors, label spacing, accent-color budgets, and a 4 px grid. They have been adapted for Chinese business diagrams.
 
-## 许可
+## License
 
-[MIT](LICENSE) © 2026 Yishan。示例内容均为虚构。
+[MIT](LICENSE) © 2026 Yishan. All example content is fictional.
