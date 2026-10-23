@@ -2,6 +2,8 @@
 
 [English](README.md) | **简体中文**
 
+[介绍页与示例图库](https://saan-diagram.vercel.app/)
+
 把业务描述、需求文档、白板截图，转成同一套规范下的中文业务图示。
 
 > **统一的是约束语言，不是具体方案。** 不同项目画的内容可以不同，但阶段、节点类型、线型、配色和校验规则都是同一套。
@@ -175,6 +177,12 @@ GitHub Actions 运行 Python 版本矩阵、行为回归测试和浏览器导出
 - 时间线完成状态由 `status: done | pending | unknown` 明确声明；省略为待确认。
 - PNG 缺失不再作为完整交付返回 0；写入后回读失败返回 21。
 - 不再支持仅复制 render.py 的安装方式；请完整安装 Skill。
+
+## 介绍页
+
+静态介绍页源码放在 [`page/`](page/README.md)，由 Vercel 托管。项目的 Root Directory 为 `page`，生产分支为 `main`，不需要构建步骤。
+
+修改技能示例或预览图后，运行 `python3 scripts/sync_page.py`，同步页面中的 14 份 spec、图片和版本标识。
 
 ## 致谢
 

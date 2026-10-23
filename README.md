@@ -2,6 +2,8 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
+[Introduction & example gallery (中文)](https://saan-diagram.vercel.app/)
+
 Turn business descriptions, requirements documents, and whiteboard screenshots into Chinese business diagrams with a consistent visual language.
 
 > **Standardize the rules, not the solution.** Each project can have different content while sharing the same stages, node types, line styles, colors, and validation rules.
@@ -178,6 +180,12 @@ GitHub Actions runs a Python version matrix, behavioral regression tests, and br
 - Timeline completion is explicitly declared with `status: done | pending | unknown`. Omitted status means unknown.
 - Missing PNG output no longer returns `0` for a complete delivery. Failed readback after a write returns `21`.
 - Installing only `render.py` is no longer supported. Install the complete skill directory.
+
+## Introduction page
+
+The static introduction page lives in [`page/`](page/README.md) and is hosted on Vercel. The Vercel project uses `page` as its Root Directory and `main` as its production branch. No build step is required.
+
+Run `python3 scripts/sync_page.py` after updating the skill examples or preview images to refresh the page's 14 embedded specs, images, and version label.
 
 ## Acknowledgments
 
