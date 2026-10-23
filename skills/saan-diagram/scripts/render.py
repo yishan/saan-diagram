@@ -901,7 +901,7 @@ class Diagram:
     def _legend(self, A, y, W, slug):
         t = self.t
         A(f'<line x1="{BODY_PAD}" x2="{W-BODY_PAD}" y1="{y-16}" y2="{y-16}" stroke="{t["rule"]}"/>')
-        A(f'<text x="{BODY_PAD + 8}" y="{y+14}" fill="{t["soft"]}" font-size="{FS}" font-weight="600">{esc(tr(t, '图例'))}</text>')
+        A(f'<text x="{BODY_PAD + 8}" y="{y+14}" fill="{t["soft"]}" font-size="{FS}" font-weight="600">{esc(tr(t, "图例"))}</text>')
         for kind, c, s, label, x, y in self.legend_layout(y)[0]:
             if kind == "rect":
                 sa = f' stroke="{s}"' if s else ""
