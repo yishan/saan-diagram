@@ -1,6 +1,6 @@
 # 阶段类图示：架构视图 / 主流程 / 路径对比 / 泳道图
 
-> 用 `python3 scripts/render.py --guide stages` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `uv run scripts/render.py --guide stages` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 画布与方向
 **泳道是可选的。** `columns` 永远是排版网格；画不画成可见泳道（列框和列头）由 `swimlane` 决定：
@@ -15,7 +15,7 @@
 
 需要时用 `swimlane: true | false` 覆盖默认值。**不画泳道时，列只是网格，节点要等距排**：单条流程用一个宽列（如 `lanes: 9`），节点 `lane` 按固定步长递增（如 0、1.5、3 …），别沿用"每阶段一列"的写法，否则间距会忽大忽小。
 
-- 顶部是标题栏，默认**白底线框**（`titlebar: outline`：1px 中性灰边框、深色字，不占用颜色预算）。也可以用 `gray`（浅灰底）、`brand`（VI 主色底，文字黑白自动按对比度选）或 `dark`（深色底）。
+- 顶部是标题栏，默认**无边框**（`titlebar: plain`：白底、只有深色标题文字，不占用颜色预算）。也可以用 `outline`（白底 1px 中性灰线框）、`gray`（浅灰底）、`brand`（VI 主色底，文字黑白自动按对比度选）或 `dark`（深色底）。
 - **横向**（默认）：阶段从左到右成列，列头在顶部，`row` 往下走。
 - **竖向**（`orientation: vertical`）：阶段从上到下成带，阶段名在左侧表头，`row` 往右走。同一份 spec 两个方向都能出图：`lane` 永远沿阶段宽度方向，`row` 永远跨阶段方向，走线方向（`h`↔`v`、`hv`↔`vh`、`ll`↔`tt`…）自动转置。换方向后要重新跑 `--lint`，个别间距可能需要微调。
 - 所有结构尺寸都在 **4px 网格**上：泳道 112×48、节点高 28（带副标签 40）、系统块高 36、连线圆角 8。
@@ -105,7 +105,7 @@ desc: 一句话说明内容（无障碍描述）
 orientation: horizontal           # horizontal（默认）| vertical
 swimlane: true                    # 画不画泳道；不写按「画布与方向」的默认值
 brand: "#3370FF"                  # VI 主色，可省略
-titlebar: outline                 # outline（默认，白底线框）| gray | brand | dark
+titlebar: plain                   # plain（默认，无边框）| outline（白底线框）| gray | brand | dark
 special: {label: AI 能力, prefix: AI}   # 可选：重点能力的名称（默认"重点能力"）和标签前缀
 columns:                          # 阶段：横向时从左到右，竖向时从上到下（泳道图里写角色）
   - {id: pre,  label: 上传预处理, lanes: 3}
@@ -151,14 +151,16 @@ paths:                            # 可选；单独使用 = 主流程图
     - {from: 秒传.hit, to: 秒传.引用计数+1, kind: flow, route: vh, label: 是, label_at: start}
 ```
 
-**泳道图写法**：`columns` 写角色（每个 `lanes: 1`），节点按时间顺序放 `row: 0.4, 2.0, 3.6 …`（步长 1.6），跨角色交接用 `route: vh` 或 `vhv`，回退用 `ll`（`offset ≥ 16`）。
+**泳道图写法**：`columns` 写角色（每个 `lanes: 1`），节点按时间顺序放 `row: 0.4, 2.0, 3.6 …`（步长 1.6），跨角色交接用 `route: vh` 或不写 route（auto 会优先走一折），回退用 `ll`（`offset ≥ 16`）。
 
 **走线 `route`**（按横向描述，竖向时自动转置）：
-- `auto`（默认）
+- `auto`（默认）：两端对齐时走直线；斜对角时优先走一个拐角（`hv` / `vh`），路上有节点挡住才折两次。auto 连线折两次会报 **G5**
 - `h` / `v`：直线
 - `hvh` 配 `mid_x`，`vhv` 配 `mid_row`
 - `hv` / `vh`：一个拐角
 - `ll` / `rr` / `tt` / `bb`：U 形绕行，配 `offset`（`ll` / `rr` 也可以配 `mid_x`，`tt` / `bb` 配 `mid_row`）
+
+**对齐**：渲染前会把直接相连、只差不到半个泳道或半行的两个自由节点自动对齐（分组成员、路径视图节点不动；挪了会越出阶段或撞到别的节点也不动），让连线走直线。写 spec 时仍应主动对齐：上下相接的放同一 `lane`，左右相接的放同一 `row`。不需要时写 `align: false` 关闭。
 
 **其他参数**：
 - `mid_x` 可以写 `"阶段id:泳道"`（负数或小数表示阶段间缝隙）
@@ -166,4 +168,4 @@ paths:                            # 可选；单独使用 = 主流程图
 - `label_at`：`start | end | longest | 段号`
 - `bus`、`emphasis`、`no_arrow`
 
-**命令行**：`--orient horizontal|vertical`、`--brand "#RRGGBB"`、`--titlebar outline|gray|brand|dark` 覆盖 spec 里的同名设置。`--orient` 只对 stages 布局有效；`--brand` / `--titlebar` / `--wb` 所有布局都支持。
+**命令行**：`--orient horizontal|vertical`、`--brand "#RRGGBB"`、`--titlebar plain|outline|gray|brand|dark` 覆盖 spec 里的同名设置。`--orient` 只对 stages 布局有效；`--brand` / `--titlebar` / `--wb` 所有布局都支持。

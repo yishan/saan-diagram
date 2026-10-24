@@ -108,8 +108,8 @@ edges:
 - from: 提交付款申请
   to: 执行支付
   kind: flow
-  route: ll
-  offset: 60
+  route: tt
+  offset: 16
 verify:
   end:
   - 执行支付

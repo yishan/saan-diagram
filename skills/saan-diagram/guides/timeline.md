@@ -1,6 +1,6 @@
 # 里程碑时间线
 
-> 用 `python3 scripts/render.py --guide timeline` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `uv run scripts/render.py --guide timeline` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 里程碑时间线（`layout: timeline`）
 讲"关键节点什么时候到、现在走到哪、偏了多少"。阶段是轴上方的条，里程碑是轴上的菱形，名称和日期挂在轴下方，放不下时自动错行。

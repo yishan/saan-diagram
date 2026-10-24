@@ -1,6 +1,6 @@
 # 写入飞书画板
 
-> 用 `python3 scripts/render.py --guide feishu` 输出本文。写入只能通过 `scripts/wb_publish.py`，**不要直接拼 lark-cli 写入命令**：安全规矩写在脚本里，绕开脚本就等于绕开规矩。
+> 用 `uv run scripts/render.py --guide feishu` 输出本文。写入只能通过 `scripts/wb_publish.py`，**不要直接拼 lark-cli 写入命令**：安全规矩写在脚本里，绕开脚本就等于绕开规矩。
 
 ```bash
 python3 scripts/wb_publish.py --probe                                   # 探测环境（缓存 12 小时）

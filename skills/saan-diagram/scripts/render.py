@@ -1,9 +1,13 @@
-#!/usr/bin/env python3
-"""saan-diagram renderer v1.2.0 (stages | layers | er | org | fishbone | timeline | quadrant | idef0): YAML spec -> HTML / SVG / PNG / Feishu whiteboard DSL.
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["PyYAML==6.0.3"]
+# ///
+"""saan-diagram renderer v1.3.0 (stages | layers | er | org | fishbone | timeline | quadrant | idef0): YAML spec -> HTML / SVG / PNG / Feishu whiteboard DSL.
 
-Usage:
-  python3 render.py spec.yaml [-o out.html] [--svg out.svg] [--png out.png]
-                    [--wb out.wb.json] [--brand "#3370FF"] [--titlebar outline|gray|brand|dark]
+Usage (uv reads the inline dependencies above; no venv needed):
+  uv run render.py spec.yaml [-o out.html] [--svg out.svg] [--png out.png]
+                    [--wb out.wb.json] [--brand "#3370FF"] [--titlebar plain|outline|gray|brand|dark]
                     [--orient horizontal|vertical] [--lint]
 
 The spec says WHAT is on the diagram (columns, groups, nodes, edges, overlays,
@@ -17,7 +21,7 @@ from pathlib import Path
 try:
     import yaml
 except ImportError:  # pragma: no cover
-    sys.exit("需要 PyYAML：请在虚拟环境中安装 requirements.txt")
+    sys.exit("需要 PyYAML：用 uv run scripts/render.py … 运行，或先 pip install -r requirements.txt")
 
 from spec_validation import SpecError, load_spec, validate_spec
 from i18n import tr, join_labels
@@ -33,7 +37,7 @@ NEUTRAL = {
     "node": "#F2F3F5", "hub": "#DEE0E3", "node_text": "#1F2329", "frame": "#BBBFC4",
     "header": "#1F2329", "meta": "#7B7FF5", "ai_fill": "#FDEBD8", "ai_stroke": "#F5C99B",
 }
-TITLEBARS = ("outline", "gray", "brand", "dark")
+TITLEBARS = ("plain", "outline", "gray", "brand", "dark")
 
 
 def _rgb(h):
@@ -73,7 +77,7 @@ def on(bg, ink=NEUTRAL["ink"]):
     return "#FFFFFF" if contrast(bg, "#FFFFFF") >= contrast(bg, ink) else ink
 
 
-def make_theme(brand=None, titlebar="outline"):
+def make_theme(brand=None, titlebar="plain"):
     brand = brand or DEFAULT_BRAND
     try:
         _rgb(brand)
@@ -88,8 +92,8 @@ def make_theme(brand=None, titlebar="outline"):
         "sys_int": brand, "sys_int_text": on(brand),
         "sys_ext": sys_ext, "sys_ext_text": on(sys_ext),
     })
-    bar = {"outline": t["paper"], "gray": "#EDEEF0", "brand": brand, "dark": "#2B2F36"}[titlebar]
-    # outline（默认）：白底 + 中性灰 1px 线框；其余为实心底色，边框与底色同色
+    bar = {"plain": t["paper"], "outline": t["paper"], "gray": "#EDEEF0", "brand": brand, "dark": "#2B2F36"}[titlebar]
+    # plain（默认）：白底无边框，只有标题文字；outline：白底 + 中性灰 1px 线框；其余为实心底色，边框与底色同色
     edge = t["frame"] if titlebar == "outline" else bar
     t.update({"titlebar": bar, "titletext": on(bar), "titleedge": edge})
     return t
@@ -206,7 +210,7 @@ class Diagram:
         self.spec = spec
         preset = PRESETS.get(theme or spec.get("theme") or "gray", DEFAULT_BRAND)
         self.t = make_theme(brand or spec.get("brand") or preset,
-                            titlebar or spec.get("titlebar") or "outline")
+                            titlebar or spec.get("titlebar") or "plain")
         self.t["language"] = spec.get("language", "zh-CN")
         self.t["special_label"], self.t["special_prefix"] = special_info(spec)
         self.vertical = (orient or spec.get("orientation") or "horizontal") == "vertical"
@@ -218,6 +222,7 @@ class Diagram:
         self._layout_nodes()
         self._layout_paths()
         self._collect_edges()
+        self._align_nodes()
         self._finish_extent()
 
     # -- stages: columns (horizontal) or bands stacked top→bottom (vertical).
@@ -420,7 +425,78 @@ class Diagram:
                 self.warnings.append(f"[E3] 元关系连线 {a.label}→{b.label} 必须带标签")
             self.edges.append({**e, "kind": kind, "a": a, "b": b})
 
+    # ------------------------------------------------------------ alignment
+    def _free(self, n):
+        """Free-standing node the aligner may nudge (not a group member, path step or container)."""
+        return isinstance(n, Box) and n.id in self.nodes and n.kind != "label" \
+            and not getattr(n, "container", None) and not getattr(n, "path", None)
+
+    def _fits(self, n, x, y):
+        """n moved to (x, y) stays in its stage and clear of every other node and visible group."""
+        c = self.cols.get(getattr(n, "col", None))
+        if c:
+            lo, hi = (y, y + n.h) if self.vertical else (x, x + n.w)
+            if lo < c["s"] + 2 or hi > c["s"] + c["size"] - 2:
+                return False
+        if (x < self.left - 0.5) if self.vertical else (y < self.top - 0.5):
+            return False
+        box = (x, y, x + n.w, y + n.h)
+        for o in self.nodes.values():
+            if o is not n and _overlap_rect(box, (o.x - 8, o.y - 8, o.r + 8, o.b + 8), 0):
+                return False
+        for c in self.containers.values():
+            if (c.frame or c.core) and n.id not in c.members and _overlap_rect(box, (c.x - 4, c.y - 4, c.r + 4, c.b + 4), 0):
+                return False
+        return True
+
+    def _align_nodes(self):
+        """Rule 8: line up directly connected nodes that are slightly off (≤ half a lane / row),
+        so the auto-routed edge between them runs straight instead of bending twice."""
+        if self.spec.get("align") is False:
+            return
+        locked = {"x": set(), "y": set()}
+        for e in self.edges:
+            if e.get("route", "auto") != "auto" or any(e.get(k) is not None for k in ("mid_x", "mid_row", "port_a", "port_b")):
+                continue
+            a, b = e["a"], e["b"]
+            gap_x = max(b.x - a.r, a.x - b.r)
+            gap_y = max(b.y - a.b, a.y - b.b)
+            dx, dy = b.cx - a.cx, b.cy - a.cy
+            if gap_y > 0 and 0.5 < abs(dx) <= CW / 2:
+                axis = "x"
+            elif gap_x > 0 and 0.5 < abs(dy) <= RH / 2:
+                axis = "y"
+            else:
+                continue
+            for n, other in ((b, a), (a, b)):
+                if not self._free(n) or n.id in locked[axis]:
+                    continue
+                nx = other.cx - n.w / 2 if axis == "x" else n.x
+                ny = other.cy - n.h / 2 if axis == "y" else n.y
+                if self._fits(n, nx, ny):
+                    n.x, n.y = nx, ny
+                    locked[axis] |= {n.id, other.id}
+                    break
+
     # ------------------------------------------------------------ routing
+    def _l_clear(self, a, b, mode):
+        """Single-bend route a→b (hv / vh) with room for the arrow and no node in the way."""
+        right, down = b.cx > a.cx, b.cy > a.cy
+        if mode == "hv":
+            p1 = (a.r if right else a.x, a.cy)
+            p2 = (b.cx, b.y if down else b.b)
+            room = ((p2[0] - p1[0]) if right else (p1[0] - p2[0]), (p2[1] - p1[1]) if down else (p1[1] - p2[1]))
+        else:
+            p1 = (a.cx, a.b if down else a.y)
+            p2 = (b.x if right else b.r, b.cy)
+            room = ((p2[1] - p1[1]) if down else (p1[1] - p2[1]), (p2[0] - p1[0]) if right else (p1[0] - p2[0]))
+        if room[0] < MIN_SEG or room[1] < MIN_END:
+            return False
+        corner = (p2[0], p1[1]) if mode == "hv" else (p1[0], p2[1])
+        skip = {a.id, b.id} | set(getattr(a, "members", None) or []) | set(getattr(b, "members", None) or [])
+        return not any(_hit(seg, n) for n in self.nodes.values() if n.id not in skip and n.kind != "label"
+                       for seg in ((p1, corner), (corner, p2)))
+
     def _mids(self, e):
         """Physical (mx, my) overrides from spec-level mid_x ("col:lane") / mid_row."""
         mx = my = None
@@ -465,10 +541,23 @@ class Diagram:
         if mode == "auto":
             gap_x = max(b.x - a.r, a.x - b.r)
             gap_y = max(b.y - a.b, a.y - b.b)
-            if gap_x > 0 and (gap_x >= gap_y or gap_y <= 0):
-                mode = "h" if abs(a.cy - b.cy) < 3 else "hvh"
+            if gap_x > 0 and abs(a.cy - b.cy) < 3:
+                mode = "h"
+            elif gap_y > 0 and abs(a.cx - b.cx) < 3:
+                mode = "v"
             else:
-                mode = "v" if abs(a.cx - b.cx) < 3 else "vhv"
+                # Prefer one bend over two: diagonal neighbours get an L when its path is clear.
+                horiz = gap_x > 0 and (gap_x >= gap_y or gap_y <= 0)
+                ls = ("hv", "vh") if horiz else ("vh", "hv")
+                free = gmx is None and gmy is None and gap_x > 0 and gap_y > 0
+                ok = [m for m in ls if free and self._l_clear(a, b, m)]
+                # An L that lands on a side another edge already uses would run beside it; take the other L first.
+                used = getattr(self, "_used_sides", set())
+                right, down = b.cx > a.cx, b.cy > a.cy
+                sides = {"hv": ("R" if right else "L", "T" if down else "B"),
+                         "vh": ("B" if down else "T", "L" if right else "R")}
+                ok.sort(key=lambda m: (a.id, sides[m][0]) in used or (b.id, sides[m][1]) in used)
+                mode = ok[0] if ok else ("hvh" if horiz else "vhv")
         if mode in ("h", "hvh"):
             right = b.cx > a.cx
             p1 = (a.r if right else a.x, a.cy)
@@ -521,9 +610,16 @@ class Diagram:
     def all_routes(self):
         if getattr(self, "_routes", None) is not None:
             return self._routes
+        # Explicit routes first, so auto edges know which box sides are already taken.
+        self._used_sides = set()
+        routed = {}
+        order = sorted(range(len(self.edges)), key=lambda i: self.edges[i].get("route", "auto") == "auto")
+        for i in order:
+            pts, sides = routed[i] = self.route(self.edges[i])
+            self._used_sides |= {(self.edges[i]["a"].id, sides[0]), (self.edges[i]["b"].id, sides[1])}
         out = []
-        for e in self.edges:
-            pts, sides = self.route(e)
+        for i, e in enumerate(self.edges):
+            pts, sides = routed[i]
             for key, idx, nb, side in (("port_a", 0, 1, sides[0]), ("port_b", -1, -2, sides[1])):
                 off = e.get(key)
                 if off:
@@ -643,7 +739,8 @@ class Diagram:
               f'stroke-linejoin="round"/></marker>')
         A('</defs>')
         A(f'<rect width="{W}" height="{H}" fill="{t["paper"]}"/>')
-        A(f'<rect x="{BODY_PAD+0.5}" y="0.5" width="{W-2*BODY_PAD-1}" height="{TOP_TITLE-1}" fill="{t["titlebar"]}" stroke="{t["titleedge"]}"/>')
+        edge = f' stroke="{t["titleedge"]}"' if t["titleedge"] != t["titlebar"] else ""
+        A(f'<rect x="{BODY_PAD+0.5}" y="0.5" width="{W-2*BODY_PAD-1}" height="{TOP_TITLE-1}" fill="{t["titlebar"]}"{edge}/>')
         A(f'<text x="{W/2}" y="{TOP_TITLE/2+5}" text-anchor="middle" fill="{t["titletext"]}" font-size="16" font-weight="600">{esc(title)}</text>')
         stages, rule, divider = self.chrome(legend_y)
         for (fx, fy, fw, fh), (hx, hy, hw, hh), label in stages:
@@ -1069,6 +1166,13 @@ def _overlap_rect(a, b, m=1):
     return a[0] < b[2] - m and b[0] < a[2] - m and a[1] < b[3] - m and b[1] < a[3] - m
 
 
+def _bends(pts):
+    """Direction changes along an orthogonal polyline (zero-length segments ignored)."""
+    pts = [p for i, p in enumerate(pts) if i == 0 or abs(p[0] - pts[i - 1][0]) > .5 or abs(p[1] - pts[i - 1][1]) > .5]
+    dirs = [abs(p[1] - q[1]) < .5 for p, q in zip(pts, pts[1:])]
+    return sum(1 for u, v in zip(dirs, dirs[1:]) if u != v)
+
+
 def lint(d):
     """Return [(code, message)]; any finding blocks delivery."""
     out = [(w[1:3], w) for w in d.warnings]
@@ -1130,6 +1234,14 @@ def lint(d):
         if bad:
             k = bad[0]
             out.append(("A1", f"[A1] 连线 {e['a'].label}→{e['b'].label} 第 {k+1} 段只有 {segs[k]:.0f}px（需 ≥{need[k]}px），箭头/线段显示不全：拉开 row/lane 间距，或调 mid_x/mid_row"))
+    # G5 auto-routed edges bend at most once (rule 8); loops and explicit routes are the author's call
+    for e, pts, _ in routes:
+        if e.get("route", "auto") != "auto" or e.get("mid_x") is not None or e.get("mid_row") is not None:
+            continue
+        n = _bends(pts)
+        if n >= 2:
+            out.append(("G5", f"[G5] 连线 {e['a'].label}→{e['b'].label} 折了 {n} 次：把两端放到同一 lane（上下相接）或同一 row（左右相接），"
+                              f"或错开成能一折走通的位置（route: hv / vh）；确需绕行时显式写 route"))
     # G4 visible groups must not overlap each other
     vis = [c for c in d.containers.values() if c.frame or c.core]
     for i, a in enumerate(vis):
@@ -1488,7 +1600,7 @@ def scene_wb(scene, t):
 
 def _theme_from(spec, theme, brand, titlebar):
     preset = PRESETS.get(theme or spec.get("theme") or "gray", DEFAULT_BRAND)
-    t = make_theme(brand or spec.get("brand") or preset, titlebar or spec.get("titlebar") or "outline")
+    t = make_theme(brand or spec.get("brand") or preset, titlebar or spec.get("titlebar") or "plain")
     t["language"] = spec.get("language", "zh-CN")
     t["special_label"], t["special_prefix"] = special_info(spec)
     return t
@@ -3388,18 +3500,63 @@ def build(spec_path, theme=None, brand=None, titlebar=None, orient=None):
                       Path(spec_path).stem.replace(".", "-") or "biz")
 
 
+CHROME_CANDIDATES = [
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+    "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+    r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+    r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+    r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+    r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+]
+CHROME_NAMES = ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "microsoft-edge", "msedge", "chrome")
+
+
+def find_chrome():
+    """System Chrome / Chromium / Edge / Brave; SAAN_CHROME overrides."""
+    import os, shutil
+    env = os.environ.get("SAAN_CHROME")
+    if env:
+        found = shutil.which(env) or (env if Path(env).is_file() else None)
+        if not found:
+            raise FileNotFoundError(f"SAAN_CHROME 指向的浏览器不存在：{env}")
+        return found
+    for c in CHROME_CANDIDATES:
+        if Path(c).is_file():
+            return c
+    for name in CHROME_NAMES:
+        if shutil.which(name):
+            return shutil.which(name)
+    raise FileNotFoundError("PNG 需要本机 Chrome / Chromium / Edge；装在非默认位置时用环境变量 SAAN_CHROME 指定可执行文件")
+
+
 def snapshot(html_path, png_path, scale=1.5):
-    """PNG for visual QA / export (needs playwright + chromium)."""
-    import os
-    from playwright.sync_api import sync_playwright
-    with sync_playwright() as p:
-        b = p.chromium.launch()
-        pg = b.new_page(device_scale_factor=scale, viewport={"width": 1400, "height": 900})
-        pg.goto("file://" + os.path.abspath(html_path))
-        w = pg.evaluate("document.querySelector('svg').viewBox.baseVal.width")
-        pg.set_viewport_size({"width": int(w) + 64, "height": 900})
-        pg.locator("svg").first.screenshot(path=png_path)
-        b.close()
+    """PNG for visual QA / export, via the system Chrome in headless mode (no playwright)."""
+    import os, re, subprocess, tempfile
+    page = Path(html_path).read_text(encoding="utf-8")
+    m = re.search(r"<svg\b.*</svg>", page, re.S)
+    vb = m and re.search(r'viewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)', m.group(0))
+    if not vb:
+        raise ValueError(f"{html_path} 中没有带 viewBox 的 <svg>")
+    w, h = math.ceil(float(vb.group(1))), math.ceil(float(vb.group(2)))
+    png = Path(png_path).resolve()
+    with tempfile.TemporaryDirectory(prefix="saan-png-") as td:
+        # Standalone page sized exactly to the SVG, so the viewport screenshot equals the SVG element.
+        src = Path(td) / "snap.html"
+        src.write_text(
+            '<!doctype html><html><head><meta charset="utf-8"><style>'
+            f'html,body{{margin:0;background:#fff;overflow:hidden}}svg{{display:block;width:{w}px;height:{h}px}}'
+            f'</style></head><body>{m.group(0)}</body></html>', encoding="utf-8")
+        cmd = [find_chrome(), "--headless", "--disable-gpu", "--hide-scrollbars", "--no-first-run",
+               "--no-default-browser-check", f"--user-data-dir={Path(td) / 'profile'}",
+               f"--force-device-scale-factor={scale}", f"--window-size={w},{h}",
+               f"--screenshot={png}", src.as_uri()]
+        if hasattr(os, "geteuid") and os.geteuid() == 0:
+            cmd.insert(1, "--no-sandbox")   # Chrome refuses to run as root (containers) without it; the page is our own local file
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    if r.returncode != 0 or not png.exists() or not png.stat().st_size:
+        raise RuntimeError(f"Chrome 截图失败（退出码 {r.returncode}）：{(r.stderr or '').strip()[-300:]}")
 
 
 # ================================================================ CLI：--all / --init / --guide / --selftest
@@ -3748,6 +3905,7 @@ def _m_setup():
     M("R6", "路径行往回走", "3-paths", lambda s: s["paths"]["rows"][0]["steps"].append(dict(s["paths"]["rows"][0]["steps"][0], label="回到起点", id="back")))
     M("G2", "连线穿过别的节点", "1-arch", lambda s: s["edges"].append({"from": "采购需求", "to": "合同签订", "kind": "data", "route": "h"}))
     M("G3", "两条连线叠在一起", "1-arch", lambda s: s["edges"].append({"from": "合同签订", "to": "CA 签章", "kind": "data", "route": "h"}))
+    M("G5", "左右相接的两个节点高低差过半行，只能折两次", "bid-dfd", lambda s: _by_label(s["nodes"], "评分表").update(row=5.95))
     M("G4", "两个有框分组交叠", "1-arch", lambda s: next(x for x in s["groups"] if x["id"] == "source_d").update(frame=True, row=3.6, lane=1.0))
     M("L2", "连线标签压住节点", "1-arch", lambda s: s["edges"].append({"from": "采购需求", "to": "采购寻源", "kind": "data", "route": "v", "label": "标签"}))
     M("L3", "两个连线标签互相重叠", "1-arch", lambda s: s["edges"].append({"from": "财务系统", "to": "结算支付", "kind": "data", "route": "h", "label": "标签"}))
@@ -3803,7 +3961,7 @@ def _idef0_trim(s):
 
 
 ALL_CODES = {"A1", "AU1", "AU2", "B1", "C1", "D1", "D2", "DF1", "DF2", "DF3", "E3", "F1", "F2", "FB1",
-             "G1", "G2", "G3", "G4", "ID1", "ID2", "ID3", "ID5", "K1", "L1", "L2", "L3", "O1", "O2", "O3", "O4",
+             "G1", "G2", "G3", "G4", "G5", "ID1", "ID2", "ID3", "ID5", "K1", "L1", "L2", "L3", "O1", "O2", "O3", "O4",
              "Q1", "Q2", "Q3", "R1", "R3", "R5", "R6", "S1", "T1", "TL1", "TL2", "TL3", "V1", "W1",
              "P1", "P2", "P3", "P4", "P5"}
 
@@ -3844,7 +4002,7 @@ def selftest():
 
 # ---------------------------------------------------------------- 入口
 def main():
-    ap = argparse.ArgumentParser(description="saan-diagram v1.2.0: YAML spec -> HTML/SVG/PNG/whiteboard DSL")
+    ap = argparse.ArgumentParser(description="saan-diagram v1.3.0: YAML spec -> HTML/SVG/PNG/whiteboard DSL")
     ap.add_argument("spec", nargs="?")
     ap.add_argument("--language", choices=["en", "zh-CN"], help="Language of generated captions; overrides spec.language, does not translate input labels")
     ap.add_argument("--result-json", help="保存机器可读的校验与产物状态（出图默认写 <slug>.result.json）")
@@ -3855,11 +4013,11 @@ def main():
     ap.add_argument("--selftest", action="store_true", help="自测：示例全部通过 + 每条规则都能被改坏样例触发")
     ap.add_argument("-o", "--out", help="输出 HTML（默认与 spec 同名）")
     ap.add_argument("--svg", help="另存纯 SVG")
-    ap.add_argument("--png", help="另存 PNG（需要 playwright）")
+    ap.add_argument("--png", help="另存 PNG（调用本机 Chrome headless；SAAN_CHROME 可指定浏览器）")
     ap.add_argument("--scale", type=float, default=1.5)
     ap.add_argument("--theme", choices=sorted(PRESETS), help="兼容旧版：gray=飞书蓝主色，blue=汇报蓝主色")
     ap.add_argument("--brand", help="VI 主色 #RRGGBB")
-    ap.add_argument("--titlebar", choices=TITLEBARS, help="标题栏：outline（默认白底线框）| gray | brand | dark")
+    ap.add_argument("--titlebar", choices=TITLEBARS, help="标题栏：plain（默认，无边框）| outline（白底线框）| gray | brand | dark")
     ap.add_argument("--orient", choices=["horizontal", "vertical"], help="横向或竖向（只对阶段类图示有效）")
     ap.add_argument("--lint", action="store_true", help="只校验")
     ap.add_argument("--wb", help="另存飞书画板 DSL（JSON）")

@@ -1,6 +1,6 @@
 # 实体关系图
 
-> 用 `python3 scripts/render.py --guide er` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `uv run scripts/render.py --guide er` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 实体关系图（`layout: er`）
 参照 diagram-design 的 ER / data model：讲"业务对象是什么、几对几"，不讲物理表结构。

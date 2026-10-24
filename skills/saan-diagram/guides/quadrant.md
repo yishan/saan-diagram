@@ -1,6 +1,6 @@
 # 四象限图
 
-> 用 `python3 scripts/render.py --guide quadrant` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `uv run scripts/render.py --guide quadrant` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 四象限图（`layout: quadrant`）
 讲"在两个维度上，这些事项该先做哪个"。

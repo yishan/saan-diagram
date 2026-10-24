@@ -41,7 +41,7 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-of
 .eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 section{display:grid;gap:20px;padding-block:44px;border-top:1px solid var(--line)}
 
-/* hero: 一个线框标题栏 —— 就是 skill 自己的默认标题样式 */
+/* hero: 一个线框标题栏 —— 对应 skill 的 titlebar: outline（默认已改为无边框的 plain） */
 .hero{display:grid;gap:22px;padding-block:8px 40px}
 .titlebar{border:1px solid var(--ink);background:var(--sheet);padding:22px 24px;display:grid;gap:6px}
 .titlebar h1{font-family:var(--f-display);font-weight:900;font-size:clamp(34px,6vw,58px);line-height:1.1;letter-spacing:.01em}
@@ -159,7 +159,7 @@ footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:
 <div class="wrap">
 
 <header class="hero">
-  <span class="eyebrow">Skill · v1.2.0 · 作者 Yishan · MIT</span>
+  <span class="eyebrow">Skill · v1.3.0 · 作者 Yishan · MIT</span>
   <div class="titlebar">
     <h1>Saan Diagram</h1>
     <p class="sub">把业务描述、需求文档、白板截图，转成同一套规范下的中英文业务图示</p>
@@ -167,7 +167,7 @@ footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:
   <p class="thesis">统一的是<b>约束语言</b>，不是具体方案。</p>
   <div class="facts">
     <span><strong>14</strong>种图示</span>
-    <span><strong>49</strong>条校验规则</span>
+    <span><strong>50</strong>条校验规则</span>
         <span><strong>≤3</strong>处核心色</span>
   </div>
 </header>
@@ -232,6 +232,7 @@ footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:
       </div>
       <ul class="rules">
         <li>只用正交折线，拐角半径 8，不画斜线</li>
+        <li>相连节点自动对齐，auto 连线最多折一次</li>
         <li>标签放在线旁、不压线，也不压节点</li>
         <li>箭头末段 ≥ 24px，箭头前要看得到线</li>
       </ul>
@@ -242,7 +243,7 @@ footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:
         <li>节点名 ≤10 字，连线标签 ≤8 字；放不下就精简措辞，<b>不缩字号</b></li>
         <li>中文最小 12px，不用等宽字体；等宽字体只给技术值（<code>SHA-256</code>）</li>
         <li>所有结构尺寸都落在 4px 网格上</li>
-        <li>标题栏默认白底线框，不占颜色预算</li>
+        <li>标题栏默认无边框，不占颜色预算</li>
         <li>图例自动生成，只列图中实际用到的类型</li>
         <li>泳道不是必备的：只有列本身有含义时才画</li>
       </ul>
@@ -439,8 +440,8 @@ edges:
   - {from: 提交需求, to: 审核立项, kind: flow, route: vh}
   - {from: 审核立项, to: 发布公告, kind: flow}
   - {from: 发布公告, to: 投标报价, kind: flow, route: vh}
-  - {from: 投标报价, to: 评审打分, kind: flow, route: vh}
-  - {from: 评审打分, to: ok, kind: flow, route: vhv}
+  - {from: 投标报价, to: 评审打分, kind: flow, route: hv}
+  - {from: 评审打分, to: ok, kind: flow}
   - {from: ok, to: 签订合同, kind: flow, route: hv, label: 是, label_at: end}
   - {from: ok, to: 发布公告, kind: return, route: ll, offset: 16, label: 否·重招}
   - {from: 签订合同, to: 履约验收, kind: flow, route: vh}
@@ -865,7 +866,7 @@ mechanisms:
       <p style="font-size:13.5px">报告给你；确认属实后写进 <code>accept</code>，图例下方如实标注</p>
     </div>
   </div>
-  <p class="nope"><code>--selftest</code>：49 条规则逐条用改坏的样例验证。</p>
+  <p class="nope"><code>--selftest</code>：50 条规则逐条用改坏的样例验证。</p>
 </section>
 
 <section aria-labelledby="verify">
@@ -917,7 +918,7 @@ FAIL: 排版 0 条 · 发现 1 条 · 退出码 2</span></pre>
       <ul class="rules">
         <li>PNG 导出失败返回 4；各产物状态记录在 <code>*.result.json</code></li>
         <li>换方向：<code>--orient vertical</code>（阶段类图示）</li>
-        <li>换 VI：<code>--brand "#RRGGBB"</code>；换标题栏：<code>--titlebar outline|gray|brand|dark</code></li>
+        <li>换 VI：<code>--brand "#RRGGBB"</code>；换标题栏：<code>--titlebar plain|outline|gray|brand|dark</code></li>
       </ul>
     </div>
   </div>
@@ -925,7 +926,7 @@ FAIL: 排版 0 条 · 发现 1 条 · 退出码 2</span></pre>
 
 
 <footer>
-  <span>Saan Diagram v1.2.0 · 作者 Yishan · MIT</span>
+  <span>Saan Diagram v1.3.0 · 作者 Yishan · MIT</span>
   <span><a href="https://github.com/yishan/saan-diagram" target="_blank" rel="noopener">github.com/yishan/saan-diagram</a></span>
   <span><a href="https://github.com/yishan/saan-diagram#readme">English README</a> · <a href="https://github.com/yishan/saan-diagram/blob/main/README.zh-CN.md">中文说明</a></span>
   <span>参考 cathrynlavery/diagram-design</span>

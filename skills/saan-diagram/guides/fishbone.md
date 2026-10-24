@@ -1,6 +1,6 @@
 # 鱼骨图
 
-> 用 `python3 scripts/render.py --guide fishbone` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `uv run scripts/render.py --guide fishbone` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 鱼骨图（`layout: fishbone`）
 讲"一个结果背后有哪些原因"。右侧是问题（主色浅底），一条主骨，原因大类交替排在上下，每类的原因挂在各自的骨上。

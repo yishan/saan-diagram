@@ -3,7 +3,7 @@ name: "saan-diagram"
 description: "Create consistent business diagrams from descriptions, requirements, or whiteboard screenshots. Use for business architecture, process flows, role handoffs, data relationships, and milestones in English or Chinese. Render HTML/SVG/PNG; publish to a Feishu/Lark whiteboard when requested. Not for sequence diagrams, state machines, physical database schemas, or task-level Gantt charts."
 metadata:
   author: "Yishan"
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Saan Diagram
@@ -46,7 +46,7 @@ For sequence diagrams, state machines, physical database schemas, or task-level 
 
 ## Establish necessary context
 
-Infer the diagram type from the request and source. Unless specified, use horizontal orientation, the default blue brand color, an outlined title bar, and HTML + PNG delivery. Ask only when missing information changes business meaning, the delivery target, or the scope of an external write. Reuse existing authorization and preferences.
+Infer the diagram type from the request and source. Unless specified, use horizontal orientation, the default blue brand color, a borderless title bar, and HTML + PNG delivery. Ask only when missing information changes business meaning, the delivery target, or the scope of an external write. Reuse existing authorization and preferences.
 
 - Do not invent core functions, controls, completion states, role permissions, or other missing business facts.
 - Only when whiteboard delivery is selected, run `python3 scripts/wb_publish.py --probe` and read `guides/feishu.md`. Local rendering does not require a Feishu probe.
@@ -57,10 +57,10 @@ Infer the diagram type from the request and source. Unless specified, use horizo
 Run commands from the installed skill root, or use absolute paths to its scripts and resources.
 
 ```bash
-python3 scripts/render.py --init audit > pay.yaml
-python3 scripts/render.py --guide verify
+uv run scripts/render.py --init audit > pay.yaml
+uv run scripts/render.py --guide verify
 # Edit the spec content and set its output language before rendering.
-python3 scripts/render.py pay.yaml --all
+uv run scripts/render.py pay.yaml --all
 ```
 
 For an English starting point, copy a matching file from `assets/en/`, such as `approval-flow.yaml`, `platform-layers.yaml`, or `release-timeline.yaml`. These are examples, not business rules.
@@ -69,7 +69,7 @@ For an English starting point, copy a matching file from `assets/en/`, such as `
 2. Start with the nearest template and adapt its content and language.
 3. Remove redundant decoration and repeated wording. Preserve business steps, branches, roles, and controls; never remove facts to fit the layout or pass validation.
 4. Run `--all`. Fix layout errors using the reported guidance, then rerun. Handle business findings as described below.
-5. Inspect the generated PNG with the available image tool for overlaps, text, and routing. If PNG generation fails, fix its dependencies, or agree on HTML/SVG delivery and inspect that output. Passing script checks is not visual acceptance.
+5. Inspect the generated PNG with the available image tool for overlaps, text, and routing. If PNG generation fails, read the error in the result file (usually no browser found; set `SAAN_CHROME`), or agree on HTML/SVG delivery and inspect that output. Passing script checks is not visual acceptance.
 6. Deliver the requested artifacts and their editable spec.
 
 ## Visual constraints
@@ -77,7 +77,8 @@ For an English starting point, copy a matching file from `assets/en/`, such as `
 - Business nodes are neutral gray. Internal systems use the brand color; external systems use a lighter tint. Use no more than three core highlights. Pale orange highlights one capability category, named by `special: {label: ...}` with `kind: special`.
 - Never shrink text to force a fit. Node labels have a 10-unit width budget; ordinary edge labels have 8 units. A CJK character counts as 1 unit and a typical Latin character as 0.5. These are width budgets, not English word limits. Keep English words intact; abbreviate only when meaning remains clear. Use the layout's measured fit checks and inspect the result.
 - Connectors are orthogonal, do not cross nodes or share overlapping strokes, and retain a visible segment before the arrowhead.
-- The default title bar is white with an outline and does not consume a core highlight.
+- Align connected elements: put vertically connected nodes in the same `lane` and horizontally connected nodes in the same `row`, so an edge bends at most once. The renderer nudges slightly-off neighbors into line; auto-routed edges that still bend twice fail lint (G5).
+- The default title bar is borderless (`titlebar: plain`) and does not consume a core highlight.
 - Correct problematic routing or colors in source diagrams and identify substantive corrections in the delivery notes.
 
 Read `--guide style` for detailed visual rules and `--guide lint` for rule-specific fixes.
@@ -114,4 +115,9 @@ Before delivery: validation passes, the main process is understandable from its 
 
 Install the entire skill directory, including `scripts/`, `guides/`, and `assets/`. Guides and templates are loaded on demand from their source files; do not load them all or reconstruct a missing renderer from memory.
 
-Python dependencies are in `requirements.txt`; PNG dependencies are in `requirements-png.txt`. After installation or updates, run `python3 scripts/render.py --selftest`. Self-tests validate examples and rule triggers; they do not replace inspection of the current diagram or whiteboard readback.
+**Only two prerequisites**, neither needs a virtual environment:
+
+- **uv**: `render.py` declares its PyYAML dependency inline (PEP 723), so `uv run scripts/render.py …` prepares and caches the environment automatically. Without uv, run `pip install -r requirements.txt` and use `python3 scripts/render.py …`. `wb_publish.py` uses only the standard library; run it with `python3`.
+- **A local Chrome** (or Chromium / Edge / Brave): PNGs are screenshots from the system browser in headless mode; Playwright is not needed. If the browser is installed in a non-default location, set `SAAN_CHROME=<path to executable>`.
+
+After installation or updates, run `uv run scripts/render.py --selftest`. Self-tests validate examples and rule triggers; they do not replace inspection of the current diagram or whiteboard readback.

@@ -11,10 +11,11 @@ Turn business descriptions, requirements documents, and whiteboard screenshots i
 Saan Diagram is an agent skill for Claude Code, Codex, and other compatible agents. The model writes a YAML spec using stages, lanes, and rows instead of pixel coordinates or colors. `render.py` calculates positions, routes, colors, typography, and legends. Diagrams must pass `--lint` before delivery.
 
 - **14 diagram types** sharing one visual language.
-- **49 validation rules** implemented in code. `--selftest` checks that deliberately broken examples trigger every rule.
+- **50 validation rules** implemented in code. `--selftest` checks that deliberately broken examples trigger every rule.
 - **Preserve business findings:** missing controls, bypass paths, data sinks, and conflicting responsibilities are reported as findings. Once the user confirms the current situation, the findings appear in the diagram legend.
 - **Process path verification:** check reachability, control-point bypasses, separation of duties, and dead ends in the modeled process.
 - **Reserve color for systems and core functions:** business nodes use neutral gray, with at most three core highlights per diagram.
+- **Aligned elements, fewer bends:** connected nodes that are slightly off are lined up automatically, and auto-routed edges bend at most once; an edge that still needs two bends is reported (G5).
 - **Choose your output:** HTML, SVG, PNG, or Feishu/Lark whiteboard publishing through the bundled script. Whiteboard instructions are loaded only when needed.
 
 The canonical `SKILL.md` is in English. The agent follows the output language you specify, or the language of your request when you do not specify one. Chinese templates remain available alongside English examples.
@@ -58,7 +59,7 @@ npx skills add yishan/saan-diagram --skill saan-diagram -a claude-code
 npx skills add yishan/saan-diagram --skill saan-diagram -a codex
 ```
 
-Use a Node.js version supported by the current skills CLI. The CLI installs the complete skill directory; install Python and PNG rendering dependencies separately as described below.
+Use a Node.js version supported by the current skills CLI. The CLI installs the complete skill directory; see the dependencies below (uv and a local Chrome are enough for most desktops).
 
 The skills.sh directory and rankings are driven by CLI installation telemetry. Having an installation command does not establish that the skill is listed, and successful installation does not validate rendering or whiteboard publishing. See the [CLI documentation](https://github.com/vercel-labs/skills) and [listing FAQ](https://skills.sh/docs/faq).
 
@@ -81,29 +82,23 @@ Zip the complete `skills/saan-diagram/` directory, keeping `saan-diagram/` as th
 
 | Purpose | Requirements |
 |---|---|
-| Validation and HTML/SVG output | Python 3.9+ and `pyyaml` |
-| PNG export | `playwright` and Chromium |
+| Validation and HTML/SVG output | Python 3.9+ and [uv](https://docs.astral.sh/uv/) (fetches `pyyaml` automatically); or `pip install -r requirements.txt` |
+| PNG export | A local Chrome, Chromium, Edge, or Brave (headless screenshot; set `SAAN_CHROME` for non-default locations) |
 | Feishu/Lark whiteboard publishing | An authenticated [`lark-cli`](https://github.com/larksuite), plus Node.js for `@larksuite/whiteboard-cli` |
 
 ## Standalone renderer
 
 ```bash
 cd skills/saan-diagram
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-# Install these only if you need PNG output:
-python -m pip install -r requirements-png.txt
-python -m playwright install chromium
-python3 scripts/render.py --init audit > pay.yaml     # Starter template (14 types)
-python3 scripts/render.py --guide verify              # Detailed guide for a topic
-python3 scripts/render.py pay.yaml --all              # Validate, verify paths, export HTML/PNG/whiteboard DSL
-python3 scripts/render.py --selftest                  # Validate examples and exercise every rule
+uv run scripts/render.py --init audit > pay.yaml     # Starter template (14 types)
+uv run scripts/render.py --guide verify              # Detailed guide for a topic
+uv run scripts/render.py pay.yaml --all              # Validate, verify paths, export HTML/PNG/whiteboard DSL
+uv run scripts/render.py --selftest                  # Validate examples and exercise every rule
 ```
 
 Exit codes: `0` requested operation succeeded · `1` layout issues · `2` unconfirmed business findings · `3` invalid spec · `4` failed or incomplete artifact generation.
 
-Rendering also writes `<slug>.result.json` with the status of each artifact. A PNG export failure returns `4` while preserving successfully generated HTML and whiteboard DSL. Request HTML/SVG explicitly when PNG is not needed. Use `--result-json PATH` to choose a result file; this option also provides machine-readable results with `--lint`.
+Rendering also writes `<slug>.result.json` with the status of each artifact. Without uv, `pip install -r requirements.txt` once and replace `uv run` with `python3`. PNGs come from the system browser; in containers without one, install Chromium (running as root adds `--no-sandbox` automatically). A PNG export failure returns `4` while preserving successfully generated HTML and whiteboard DSL. Request HTML/SVG explicitly when PNG is not needed. Use `--result-json PATH` to choose a result file; this option also provides machine-readable results with `--lint`.
 
 ## Output language
 
@@ -119,7 +114,7 @@ English examples: [approval flow](skills/saan-diagram/assets/en/approval-flow.ya
 
 ```bash
 cd skills/saan-diagram
-python3 scripts/render.py assets/en/approval-flow.yaml --all --outdir out
+uv run scripts/render.py assets/en/approval-flow.yaml --all --outdir out
 ```
 
 Quote YAML labels such as `"Yes"`, `"No"`, `"On"`, and `"Off"` so the YAML parser does not treat them as booleans. English labels wrap at word boundaries. Keep technical identifiers intact and shorten long labels without losing their meaning.
@@ -167,7 +162,7 @@ Publishing results are saved to `<slug>.wb.publish.json`. Successful readback an
 | Core business function `core: true` | Light brand background and brand border; at most 3 per diagram |
 | Highlighted capability `special` | Light orange; category named by `special.label`, such as “AI capabilities” |
 | Business flow / data integration / configuration dependency | Solid / dotted / purple dashed line |
-| Title bar | White with an outline by default; optional `gray`, `brand`, or `dark` |
+| Title bar | Borderless by default; optional `outline`, `gray`, `brand`, or `dark` |
 
 See [SKILL.md](skills/saan-diagram/SKILL.md) for the canonical instructions, or the [Chinese reading version](docs/SKILL.zh-CN.md).
 
@@ -185,14 +180,24 @@ See [SKILL.md](skills/saan-diagram/SKILL.md) for the canonical instructions, or 
 
 Run from the repository root:
 
+The tests import the renderer directly, so install PyYAML first (`python3 -m pip install -r skills/saan-diagram/requirements.txt`) or prefix each command with `uv run --with pyyaml`.
+
 ```bash
-python3 skills/saan-diagram/scripts/render.py --selftest
+uv run skills/saan-diagram/scripts/render.py --selftest
 python3 -m unittest discover -s tests -v
 python3 scripts/render_smoke.py            # Validate 14 original + 3 English examples and their SVG/whiteboard DSL output
-python3 scripts/render_smoke.py --png      # Also export PNGs in a real browser
+python3 scripts/render_smoke.py --png      # Also export PNGs with the local Chrome
 ```
 
-GitHub Actions runs a Python version matrix, behavioral regression tests, and browser export checks. The self-test's 49/49 count measures rule-trigger coverage, not complete branch coverage, visual correctness, or actual business permissions. Whiteboard publishing tests use mocked subprocesses and do not access user boards.
+GitHub Actions runs a Python version matrix, behavioral regression tests, and browser export checks. The self-test's 50/50 count measures rule-trigger coverage, not complete branch coverage, visual correctness, or actual business permissions. Whiteboard publishing tests use mocked subprocesses and do not access user boards.
+
+### Upgrading from v1.2
+
+- PNG export uses the local Chrome, Chromium, Edge, or Brave in headless mode. Playwright and `requirements-png.txt` are no longer needed; set `SAAN_CHROME` when the browser is in a non-default location.
+- `render.py` declares PyYAML inline, so `uv run scripts/render.py …` needs no virtual environment. `pip install -r requirements.txt` with `python3` still works. Existing virtual environments and Playwright browser caches can be removed.
+- The title bar is now borderless by default (`titlebar: plain`). Set `titlebar: outline` to keep the previous white bar with a 1px border.
+- Connected free nodes that are less than half a lane or row apart are aligned before routing; set `align: false` to keep the declared positions. Diagonal neighbors get a single-bend route when the path is clear.
+- New rule **G5**: an auto-routed edge that still bends twice fails lint. Put connected nodes in the same `lane` or `row`, or set `route` explicitly for intentional detours such as return loops. `--selftest` now checks 50 rule triggers.
 
 ### Upgrading from v1.1
 

@@ -1,6 +1,6 @@
 # 文字与配色
 
-> 用 `python3 scripts/render.py --guide style` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `uv run scripts/render.py --guide style` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 文字
 | 角色 | 字号 / 字重 | 规则 |
@@ -18,7 +18,7 @@ spec 里只写一个主色，其余颜色都从它推导，**不在 spec 里写�
 
 ```yaml
 brand: "#0F7B6C"      # VI 主色；不写 = 飞书蓝 #3370FF
-titlebar: outline     # outline（默认，白底线框）| gray | brand | dark
+titlebar: plain       # plain（默认，无边框）| outline（白底线框）| gray | brand | dark
 ```
 
 | 用途 | 推导方式 |

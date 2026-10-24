@@ -1,6 +1,6 @@
 # 流程分析三件套：数据流图 / 审计流程图 / 机会流程图
 
-> 用 `python3 scripts/render.py --guide profile` 输出本文；起步模板用 `--init <示例名>`。
+> 用 `uv run scripts/render.py --guide profile` 输出本文；起步模板用 `--init <示例名>`。
 
 ## 流程分析三件套（`profile`）
 同一个 stages 引擎，加一个 `profile` 打开对应的校验规则。规则是这几种图的"约束语言"，比画法更重要。

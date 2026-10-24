@@ -92,7 +92,7 @@ def validate_spec(spec):
     for key, choices in {
         "orientation": ("horizontal", "vertical"),
         "language": ("en", "zh-CN"),
-        "titlebar": ("outline", "gray", "brand", "dark"),
+        "titlebar": ("plain", "outline", "gray", "brand", "dark"),
         "column_semantics": ("roles", "stages", "layout"),
         "profile": ("dfd", "audit", "opportunity"),
     }.items():
@@ -114,7 +114,8 @@ def validate_spec(spec):
                         fail(loc, "需要字符串")
                     if key in ("id", "actor"):
                         text(item, loc)
-                if key in ("core", "main", "frame", "break", "swimlane", "vertical") and not isinstance(item, bool):
+                if (key in ("core", "main", "frame", "break", "swimlane", "vertical") or (key == "align" and path == "spec")) \
+                        and not isinstance(item, bool):
                     fail(loc, "需要 true 或 false")
                 numeric = key in ("row", "lane", "drow", "width", "entity_w", "lanes", "grid", "row_step", "cols", "height", "w", "size", "step_wrap") or (key in ("x", "y") and path != "spec")
                 if numeric and item is not None:

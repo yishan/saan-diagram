@@ -3,6 +3,7 @@ import contextlib
 import copy
 import io
 import json
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -349,6 +350,84 @@ class PublisherTests(unittest.TestCase):
             code, message = w.export("fake", path)
         self.assertEqual(code, 1)
         self.assertEqual(path.read_bytes(), b"stale")
+
+
+class LayoutTests(unittest.TestCase):
+    def route_of(self, d, a, b):
+        return next(pts for e, pts, _ in d.all_routes() if e["a"].id == a and e["b"].id == b)
+
+    def test_titlebar_is_borderless_by_default(self):
+        svg = r.build_spec(flow())[1]
+        bar = re.search(r'<rect x="[\d.]+" y="0.5"[^>]*/>', svg).group(0)
+        self.assertNotIn("stroke=", bar)
+        outlined = r.build_spec(dict(flow(), titlebar="outline"))[1]
+        self.assertIn("stroke=", re.search(r'<rect x="[\d.]+" y="0.5"[^>]*/>', outlined).group(0))
+
+    def test_slightly_offset_neighbours_are_aligned(self):
+        sp = flow()
+        sp["nodes"][1].update(col="a", lane=0.3, row=2.5)
+        d = r.build_spec(sp)[0]
+        a, b = d.nodes["start"], d.nodes["end"]
+        self.assertAlmostEqual(a.cx, b.cx)
+        self.assertEqual(r._bends(self.route_of(d, "start", "end")), 0)
+        sp["align"] = False
+        d = r.build_spec(sp)[0]
+        self.assertNotAlmostEqual(d.nodes["start"].cx, d.nodes["end"].cx)
+
+    def test_diagonal_neighbours_bend_once(self):
+        sp = flow()
+        sp["nodes"][1]["row"] = 3
+        d = r.build_spec(sp)[0]
+        self.assertEqual(r._bends(self.route_of(d, "start", "end")), 1)
+        self.assertNotIn("G5", [c for c, _ in r.lint(d)])
+
+    def test_unavoidable_double_bend_is_reported_unless_explicit(self):
+        sp = flow()
+        sp["nodes"][1]["row"] = 1.05     # 26px lower: too far to align, too close for one bend
+        d = r.build_spec(sp)[0]
+        self.assertEqual(r._bends(self.route_of(d, "start", "end")), 2)
+        self.assertIn("G5", [c for c, _ in r.lint(d)])
+        sp["edges"][0]["route"] = "hvh"
+        self.assertNotIn("G5", [c for c, _ in r.lint(r.build_spec(sp)[0])])
+
+
+class ChromeSnapshotTests(unittest.TestCase):
+    def test_saan_chrome_override_must_exist(self):
+        with patch.dict("os.environ", {"SAAN_CHROME": "/no/such/browser"}):
+            with self.assertRaises(FileNotFoundError):
+                r.find_chrome()
+        with patch.dict("os.environ", {"SAAN_CHROME": sys.executable}):
+            self.assertEqual(r.find_chrome(), sys.executable)
+
+    def test_snapshot_sizes_window_to_svg_viewbox(self):
+        calls = []
+
+        def fake_run(cmd, **kw):
+            calls.append(cmd)
+            shot = next(a for a in cmd if a.startswith("--screenshot=")).split("=", 1)[1]
+            Path(shot).write_bytes(b"\x89PNG\r\n\x1a\n")
+            return SimpleNamespace(returncode=0, stderr="")
+
+        with tempfile.TemporaryDirectory() as td:
+            page = Path(td) / "d.html"
+            page.write_text('<html><body><svg viewBox="0 0 640.5 300"><rect/></svg></body></html>', encoding="utf-8")
+            with patch.object(r, "find_chrome", return_value="chrome"), patch("subprocess.run", fake_run):
+                r.snapshot(page, Path(td) / "d.png", scale=2)
+            self.assertTrue((Path(td) / "d.png").exists())
+        cmd = calls[0]
+        self.assertEqual(cmd[0], "chrome")
+        self.assertIn("--headless", cmd)
+        self.assertIn("--window-size=641,300", cmd)
+        self.assertIn("--force-device-scale-factor=2", cmd)
+
+    def test_snapshot_reports_browser_failure(self):
+        with tempfile.TemporaryDirectory() as td:
+            page = Path(td) / "d.html"
+            page.write_text('<svg viewBox="0 0 10 10"></svg>', encoding="utf-8")
+            with patch.object(r, "find_chrome", return_value="chrome"), \
+                    patch("subprocess.run", return_value=SimpleNamespace(returncode=1, stderr="boom")):
+                with self.assertRaises(RuntimeError):
+                    r.snapshot(page, Path(td) / "d.png")
 
 
 if __name__ == "__main__":

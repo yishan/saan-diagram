@@ -22,8 +22,8 @@ edges:
   - {from: 提交需求, to: 审核立项, kind: flow, route: vh}
   - {from: 审核立项, to: 发布公告, kind: flow}
   - {from: 发布公告, to: 投标报价, kind: flow, route: vh}
-  - {from: 投标报价, to: 评审打分, kind: flow, route: vh}
-  - {from: 评审打分, to: ok, kind: flow, route: vhv}
+  - {from: 投标报价, to: 评审打分, kind: flow, route: hv}
+  - {from: 评审打分, to: ok, kind: flow}
   - {from: ok, to: 签订合同, kind: flow, route: hv, label: 是, label_at: end}
   - {from: ok, to: 发布公告, kind: return, route: ll, offset: 16, label: 否·重招}
   - {from: 签订合同, to: 履约验收, kind: flow, route: vh}

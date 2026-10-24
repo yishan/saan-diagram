@@ -1,13 +1,13 @@
 # Saan Diagram（saan-diagram）
 
-> 作者：Yishan · 版本 v1.2.0
+> 作者：Yishan · 版本 v1.3.0
 > 本文为中文阅读版；Agent 的统一执行入口是 [SKILL.md](../skills/saan-diagram/SKILL.md)，不要同时加载两份。
 
 把业务描述、需求文档、白板截图转成**统一规范的业务图示**。模型只写 YAML spec（用阶段 / 泳道 / 行定位，不写像素和颜色），坐标、走线、配色、图例都由 `render.py` 计算，校验不通过不能交付。
 
 **核心原则：统一的是约束语言，不是具体方案。**
 
-本文只放每次都要用的内容。某类图的详细写法用 `python3 scripts/render.py --guide <主题>` 按需读取，不要一次读全。
+本文只放每次都要用的内容。某类图的详细写法用 `uv run scripts/render.py --guide <主题>` 按需读取，不要一次读全。
 
 ---
 
@@ -50,7 +50,7 @@
 
 ## 1. 确认必要信息
 
-从请求和材料推断图型。方向、配色没有要求时用横向、飞书蓝、线框标题栏；交付方式没有要求时用 HTML + PNG。只在信息缺失会改变业务含义、交付目标或外部写入范围时提问。已有授权和偏好直接沿用。
+从请求和材料推断图型。方向、配色没有要求时用横向、飞书蓝、无边框标题栏；交付方式没有要求时用 HTML + PNG。只在信息缺失会改变业务含义、交付目标或外部写入范围时提问。已有授权和偏好直接沿用。
 
 - 需要澄清时，用当前平台的提问工具或普通消息一次说明关键问题；不依赖特定工具名称。
 - 仅在用户选择飞书交付时运行 `python3 scripts/wb_publish.py --probe`，读取 `guides/feishu.md`。本地出图不探测飞书。
@@ -62,16 +62,16 @@
 ## 2. 工作流
 
 ```bash
-python3 scripts/render.py --init audit > pay.yaml        # ① 从最接近的模板起步，改内容，不从零写
-python3 scripts/render.py --guide stages                 # ② 只在拿不准写法时读对应主题
-python3 scripts/render.py pay.yaml --all                 # ③ 校验 + 路径验证 + HTML + PNG + 画板 DSL，一条命令
+uv run scripts/render.py --init audit > pay.yaml        # ① 从最接近的模板起步，改内容，不从零写
+uv run scripts/render.py --guide stages                 # ② 只在拿不准写法时读对应主题
+uv run scripts/render.py pay.yaml --all                 # ③ 校验 + 路径验证 + HTML + PNG + 画板 DSL，一条命令
 ```
 
 1. **抽取**材料里的阶段、主线步骤、模块、内外部系统、连线、判断、核心业务；材料是图片就逐项读出来。
 2. **起步**：`--init <模板>` 输出一份能通过校验的完整示例，在它上面改。
 3. **精简**：删除冗余装饰和重复描述，保留业务节点、分支、角色与控制关系；不能为了排版或通过校验删掉业务事实。
 4. **出图**：`--all`。失败时每条问题后面都附了修法，按修法改 spec 再跑。
-5. **查看生成图**：用当前平台的图像工具检查 PNG 的遮挡、文字和走线。PNG 失败时先修依赖；用户同意改交 HTML/SVG 后，仍需用可用的预览工具查看。只通过脚本校验不等于视觉验收。
+5. **查看生成图**：用当前平台的图像工具检查 PNG 的遮挡、文字和走线。PNG 失败时先看结果文件里的错误（通常是找不到浏览器，用 `SAAN_CHROME` 指定）；用户同意改交 HTML/SVG 后，仍需用可用的预览工具查看。只通过脚本校验不等于视觉验收。
 6. **交付**：按 §5。
 
 ---
@@ -81,7 +81,8 @@ python3 scripts/render.py pay.yaml --all                 # ③ 校验 + 路径�
 - **颜色只留给"系统"和"核心"**：业务节点一律中性灰；系统块用 VI 主色（内部实心、外部提亮）；核心底色全图 ≤3 处；浅橙色只给"重点能力"一类（`kind: special`，名称在 `special: {label: AI 能力}` 里声明），一张图只突出一类。
 - **字不缩**：节点名 ≤10 个宽度单位、普通连线标签 ≤8 个宽度单位（CJK 字符计 1，一般拉丁字符计 0.5）；放不下就精简措辞，最小 12px。
 - **线是正交的**：不画斜线，不穿节点，不叠线，箭头前要有可见的线段。
-- **标题栏默认白底线框**，不占颜色预算。
+- **元素对齐，线最多折一次**：上下相接的节点放同一 `lane`，左右相接的放同一 `row`。渲染器会把差一点没对齐的相邻节点自动对齐；auto 走线仍折两次会报 G5。
+- **标题栏默认无边框**（`titlebar: plain`），不占颜色预算。
 - **原图里的穿线、错色不要照搬**，交付说明里写"原图 X 处已按规则修正"。
 
 完整的文字与配色规则：`--guide style`；全部校验规则与修法：`--guide lint`。
@@ -130,4 +131,9 @@ accept:
 
 本 skill 必须完整安装：`scripts/`、`guides/`、`assets/` 都属于运行包。`--guide` 和 `--init` 直接读取指南与示例文件，它们是唯一维护源。无需读取全部源码或全部指南。
 
-Python 依赖见 `requirements.txt`，PNG 依赖见 `requirements-png.txt`。缺少运行包时按 README 重新安装；不能凭记忆重写渲染器。首次安装或更新后运行 `python3 scripts/render.py --selftest`。自测验证示例与规则触发，不替代当前产物的视觉检查或飞书回读。
+**前置工具只有两样**，都不需要虚拟环境：
+
+- **uv**：`render.py` 文件头用 PEP 723 声明了 PyYAML 依赖，`uv run scripts/render.py …` 会自动准备并缓存环境。没有 uv 时，也可以 `pip install -r requirements.txt` 后用 `python3 scripts/render.py …`。`wb_publish.py` 只用标准库，直接 `python3` 运行。
+- **本机 Chrome**（或 Chromium / Edge / Brave）：PNG 由系统浏览器 headless 截图生成，不需要 Playwright。浏览器装在非默认位置时，设置环境变量 `SAAN_CHROME=<可执行文件路径>`。
+
+缺少运行包时按 README 重新安装；不能凭记忆重写渲染器。首次安装或更新后运行 `uv run scripts/render.py --selftest`。自测验证示例与规则触发，不替代当前产物的视觉检查或飞书回读。

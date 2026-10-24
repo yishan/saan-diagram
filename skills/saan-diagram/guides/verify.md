@@ -1,6 +1,6 @@
 # 流程路径验证（verify）
 
-> 用 `python3 scripts/render.py --guide verify` 输出本文。
+> 用 `uv run scripts/render.py --guide verify` 输出本文。
 
 流程图、泳道图、审计流程图画的其实是一个**业务声明**："付款前必须经过三单一致""审批和执行不是同一个人"。`verify` 把这些声明交给脚本，对图上的流程做可达性与控制点绕过检查，而不是靠人看。几十毫秒，不用装任何东西。
 

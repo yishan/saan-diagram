@@ -1,7 +1,7 @@
 {
   "name": "saan-diagram",
   "displayName": "Saan Diagram",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Create business diagrams in English or Chinese with a consistent visual language, YAML specs, layout validation, and process path verification. Export HTML/SVG/PNG or publish to a Feishu/Lark whiteboard.",
   "author": {
     "name": "Yishan"
