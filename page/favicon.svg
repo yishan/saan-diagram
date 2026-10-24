@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Saan Diagram in miniature: gray business node → brand system block, one orthogonal bend.
+       Edges sit on even units and strokes on odd units, so the 16px icon stays pixel-crisp. -->
+  <rect width="32" height="32" rx="7" fill="#FFFFFF"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="6.5" fill="none" stroke="#DEE0E3"/>
+  <rect x="4" y="4" width="10" height="8" rx="2" fill="#C3C8D0"/>
+  <rect x="18" y="18" width="10" height="10" rx="2" fill="#3370FF"/>
+  <path d="M9 12V21a2 2 0 0 0 2 2H16.5" fill="none" stroke="#1F2329" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M13.5 20.25L16.5 23L13.5 25.75" fill="none" stroke="#1F2329" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

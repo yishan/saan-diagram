@@ -38,3 +38,7 @@ mv page/examples/accepted.png page/img/accepted.png
 ```
 
 Confirm both the reported finding and the rendered image before publishing.
+
+## Icons
+
+`favicon.svg` is the source icon: a gray business node connected to a brand-blue system block by a single-bend connector, drawn on a 32-unit grid so the 16 px rendering stays crisp. `favicon.ico` (16, 32, and 48 px) and `apple-touch-icon.png` (180 px, opaque white background without the border) are exported from it. Re-export both after changing the SVG.
