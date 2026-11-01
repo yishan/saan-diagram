@@ -79,7 +79,7 @@ skills.sh 的目录与排名由 CLI 安装统计驱动；本仓库有安装命�
 
 | 用途 | 需要 |
 |---|---|
-| 校验与出 HTML / SVG | Python 3.9+ 和 [uv](https://docs.astral.sh/uv/)（自动获取 `pyyaml`）；或 `pip install -r requirements.txt` |
+| 校验与出 HTML / SVG | Python 3.9+ 和 [uv](https://docs.astral.sh/uv/)（自动获取 `pyyaml`）；或 `pip install -r requirements.txt`；或用 `.json` spec，只需标准库 |
 | 导出 PNG | 本机 Chrome / Chromium / Edge / Brave（headless 截图；装在非默认位置时设 `SAAN_CHROME`） |
 | 写入飞书画板 | [`lark-cli`](https://github.com/larksuite) 并已登录，Node.js（用于 `@larksuite/whiteboard-cli`） |
 
@@ -95,7 +95,7 @@ uv run scripts/render.py --selftest                  # 自测：示例全部通�
 
 退出码：0 本次请求通过 · 1 排版问题 · 2 未确认的业务发现 · 3 spec 输入错误 · 4 产物生成失败或不完整。
 
-出图自动生成 `<slug>.result.json`，记录每个产物的状态。没有 uv 时，先 `pip install -r requirements.txt`，再把命令里的 `uv run` 换成 `python3`。PNG 由系统浏览器截图；容器里没有浏览器时安装 Chromium 即可（以 root 运行会自动加 `--no-sandbox`）。PNG 失败会返回 4，保留已生成的 HTML 和画板 DSL；若只需要 HTML/SVG，请显式使用对应参数。`--result-json PATH` 可指定结果文件，配合 `--lint` 也可取得机器可读结果。
+出图自动生成 `<slug>.result.json`，记录每个产物的状态。没有 uv 时，先 `pip install -r requirements.txt`，再把命令里的 `uv run` 换成 `python3`。没有 PyYAML 时，把 spec 写成 `.json`（字段相同；`--init audit --json` 可输出 JSON 模板），再运行 `python3 scripts/render.py pay.json --all`。PNG 由系统浏览器截图；容器里没有浏览器时安装 Chromium 即可（以 root 运行会自动加 `--no-sandbox`）。PNG 失败会返回 4，保留已生成的 HTML 和画板 DSL；若只需要 HTML/SVG，请显式使用对应参数。`--result-json PATH` 可指定结果文件，配合 `--lint` 也可取得机器可读结果。
 
 ## 输出语言
 

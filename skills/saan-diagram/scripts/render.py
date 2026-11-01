@@ -6,7 +6,7 @@
 """saan-diagram renderer v1.3.0 (stages | layers | er | org | fishbone | timeline | quadrant | idef0): YAML spec -> HTML / SVG / PNG / Feishu whiteboard DSL.
 
 Usage (uv reads the inline dependencies above; no venv needed):
-  uv run render.py spec.yaml [-o out.html] [--svg out.svg] [--png out.png]
+  uv run render.py spec.yaml|spec.json [-o out.html] [--svg out.svg] [--png out.png]
                     [--wb out.wb.json] [--brand "#3370FF"] [--titlebar plain|outline|gray|brand|dark]
                     [--orient horizontal|vertical] [--lint]
 
@@ -20,8 +20,10 @@ from pathlib import Path
 
 try:
     import yaml
-except ImportError:  # pragma: no cover
-    sys.exit("需要 PyYAML：用 uv run scripts/render.py … 运行，或先 pip install -r requirements.txt")
+except ImportError:  # .json specs, --guide and plain --init work without PyYAML; YAML specs and --selftest need it
+    yaml = None
+
+NEED_YAML = "需要 PyYAML：用 uv run scripts/render.py … 运行，或先 pip install -r requirements.txt"
 
 from spec_validation import SpecError, load_spec, validate_spec
 from i18n import tr, join_labels
@@ -3864,6 +3866,8 @@ def add_notes_wb(dsl, W, H, t, lines):
 
 # ---------------------------------------------------------------- 自测：每条规则都要见过它失败
 def _load_example(name):
+    if yaml is None:
+        raise SpecError(NEED_YAML + "（起步模板是 YAML）")
     return yaml.safe_load(EXAMPLES[name])
 
 
@@ -3967,6 +3971,9 @@ ALL_CODES = {"A1", "AU1", "AU2", "B1", "C1", "D1", "D2", "DF1", "DF2", "DF3", "E
 
 
 def selftest():
+    if yaml is None:
+        print(NEED_YAML + "（自测要读 YAML 示例）")
+        sys.exit(3)
     _m_setup()
     bad = 0
     print("① 示例全部通过（含已确认的发现）")
@@ -4009,6 +4016,7 @@ def main():
     ap.add_argument("--all", action="store_true", help="一次完成：校验 → HTML + PNG + 画板 DSL（推荐）")
     ap.add_argument("--outdir", help="--all 的输出目录（默认与 spec 同目录）")
     ap.add_argument("--init", nargs="?", const="list", help="打印起步模板：arch flow paths swim dfd audit opportunity layers er org fishbone timeline quadrant idef0")
+    ap.add_argument("--json", action="store_true", help="配合 --init：以 JSON 输出模板（写成 .json spec 后只需 Python 标准库）")
     ap.add_argument("--guide", nargs="?", const="list", help="打印某类图的详细写法：" + " ".join(sorted(GUIDES) or ["…"]))
     ap.add_argument("--selftest", action="store_true", help="自测：示例全部通过 + 每条规则都能被改坏样例触发")
     ap.add_argument("-o", "--out", help="输出 HTML（默认与 spec 同名）")
@@ -4037,7 +4045,14 @@ def main():
         if a.init == "list" or name not in EXAMPLES:
             print("可用模板：" + "  ".join(f"{k}（{v}）" for k, v in INIT_ALIAS.items()))
             sys.exit(0 if a.init == "list" else 3)
-        print(EXAMPLES[name])
+        if a.json:
+            try:
+                print(json.dumps(_load_example(name), ensure_ascii=False, indent=2, default=str))
+            except SpecError as ex:
+                print(ex)
+                sys.exit(3)
+        else:
+            print(EXAMPLES[name])
         return
     if not a.spec:
         ap.error("需要 spec 文件；或用 --init / --guide / --selftest")

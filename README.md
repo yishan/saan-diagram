@@ -82,7 +82,7 @@ Zip the complete `skills/saan-diagram/` directory, keeping `saan-diagram/` as th
 
 | Purpose | Requirements |
 |---|---|
-| Validation and HTML/SVG output | Python 3.9+ and [uv](https://docs.astral.sh/uv/) (fetches `pyyaml` automatically); or `pip install -r requirements.txt` |
+| Validation and HTML/SVG output | Python 3.9+ and [uv](https://docs.astral.sh/uv/) (fetches `pyyaml` automatically); or `pip install -r requirements.txt`; or `.json` specs with the standard library only |
 | PNG export | A local Chrome, Chromium, Edge, or Brave (headless screenshot; set `SAAN_CHROME` for non-default locations) |
 | Feishu/Lark whiteboard publishing | An authenticated [`lark-cli`](https://github.com/larksuite), plus Node.js for `@larksuite/whiteboard-cli` |
 
@@ -98,7 +98,7 @@ uv run scripts/render.py --selftest                  # Validate examples and exe
 
 Exit codes: `0` requested operation succeeded · `1` layout issues · `2` unconfirmed business findings · `3` invalid spec · `4` failed or incomplete artifact generation.
 
-Rendering also writes `<slug>.result.json` with the status of each artifact. Without uv, `pip install -r requirements.txt` once and replace `uv run` with `python3`. PNGs come from the system browser; in containers without one, install Chromium (running as root adds `--no-sandbox` automatically). A PNG export failure returns `4` while preserving successfully generated HTML and whiteboard DSL. Request HTML/SVG explicitly when PNG is not needed. Use `--result-json PATH` to choose a result file; this option also provides machine-readable results with `--lint`.
+Rendering also writes `<slug>.result.json` with the status of each artifact. Without uv, `pip install -r requirements.txt` once and replace `uv run` with `python3`. Without PyYAML, write the spec as `.json` (same fields; `--init audit --json` prints a JSON template) and run `python3 scripts/render.py pay.json --all`. PNGs come from the system browser; in containers without one, install Chromium (running as root adds `--no-sandbox` automatically). A PNG export failure returns `4` while preserving successfully generated HTML and whiteboard DSL. Request HTML/SVG explicitly when PNG is not needed. Use `--result-json PATH` to choose a result file; this option also provides machine-readable results with `--lint`.
 
 ## Output language
 

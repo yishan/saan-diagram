@@ -118,6 +118,7 @@ Install the entire skill directory, including `scripts/`, `guides/`, and `assets
 **Only two prerequisites**, neither needs a virtual environment:
 
 - **uv**: `render.py` declares its PyYAML dependency inline (PEP 723), so `uv run scripts/render.py …` prepares and caches the environment automatically. Without uv, run `pip install -r requirements.txt` and use `python3 scripts/render.py …`. `wb_publish.py` uses only the standard library; run it with `python3`.
+- **No PyYAML at all?** Write the spec as `.json` (same fields as YAML) and run `python3 scripts/render.py spec.json --all` with the standard library only. `uv run scripts/render.py --init audit --json` prints a starter template as JSON. YAML specs, `--selftest`, and `--init --json` still need PyYAML and exit with code `3` and a fix when it is missing.
 - **A local Chrome** (or Chromium / Edge / Brave): PNGs are screenshots from the system browser in headless mode; Playwright is not needed. If the browser is installed in a non-default location, set `SAAN_CHROME=<path to executable>`.
 
 After installation or updates, run `uv run scripts/render.py --selftest`. Self-tests validate examples and rule triggers; they do not replace inspection of the current diagram or whiteboard readback.

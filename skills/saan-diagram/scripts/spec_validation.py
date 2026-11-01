@@ -1,10 +1,14 @@
 """Input validation before layout. Business findings remain renderer rules."""
 import datetime
+import json
 import math
 import re
 from pathlib import Path
 
-import yaml
+try:
+    import yaml
+except ImportError:  # only YAML specs need PyYAML; .json specs use the standard library
+    yaml = None
 
 
 class SpecError(ValueError):
@@ -70,10 +74,25 @@ def date_value(value, path):
 
 
 def load_spec(path):
+    """Read a .json spec with the standard library, anything else as YAML (needs PyYAML)."""
     try:
-        spec = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+        raw = Path(path).read_text(encoding="utf-8")
     except (OSError, UnicodeError) as ex:
         raise SpecError(f"{path}: 无法读取 spec（{ex.__class__.__name__}）") from ex
+    if Path(path).suffix.lower() == ".json":
+        try:
+            spec = json.loads(raw)
+        except json.JSONDecodeError as ex:
+            raise SpecError(f"{path}: JSON 第 {ex.lineno} 行，第 {ex.colno} 列；{ex.msg}") from ex
+        except RecursionError as ex:
+            raise SpecError(f"{path}: JSON 嵌套过深") from ex
+        validate_spec(spec)
+        return spec
+    if yaml is None:
+        raise SpecError(f"{path}: 读取 YAML spec 需要 PyYAML：用 uv run scripts/render.py 运行、"
+                        f"pip install -r requirements.txt，或把 spec 写成 .json（只需 Python 标准库）")
+    try:
+        spec = yaml.safe_load(raw)
     except yaml.YAMLError as ex:
         mark = getattr(ex, "problem_mark", None)
         location = f"第 {mark.line + 1} 行，第 {mark.column + 1} 列" if mark else "格式错误"

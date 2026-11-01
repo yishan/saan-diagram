@@ -134,6 +134,7 @@ accept:
 **前置工具只有两样**，都不需要虚拟环境：
 
 - **uv**：`render.py` 文件头用 PEP 723 声明了 PyYAML 依赖，`uv run scripts/render.py …` 会自动准备并缓存环境。没有 uv 时，也可以 `pip install -r requirements.txt` 后用 `python3 scripts/render.py …`。`wb_publish.py` 只用标准库，直接 `python3` 运行。
+- **完全没有 PyYAML？** 把 spec 写成 `.json`（字段与 YAML 相同），用 `python3 scripts/render.py spec.json --all` 运行，只需 Python 标准库。`uv run scripts/render.py --init audit --json` 以 JSON 输出起步模板。YAML spec、`--selftest` 和 `--init --json` 仍需 PyYAML，缺少时以退出码 `3` 结束并给出修法。
 - **本机 Chrome**（或 Chromium / Edge / Brave）：PNG 由系统浏览器 headless 截图生成，不需要 Playwright。浏览器装在非默认位置时，设置环境变量 `SAAN_CHROME=<可执行文件路径>`。
 
 缺少运行包时按 README 重新安装；不能凭记忆重写渲染器。首次安装或更新后运行 `uv run scripts/render.py --selftest`。自测验证示例与规则触发，不替代当前产物的视觉检查或飞书回读。

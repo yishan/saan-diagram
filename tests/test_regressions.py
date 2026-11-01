@@ -352,6 +352,52 @@ class PublisherTests(unittest.TestCase):
         self.assertEqual(path.read_bytes(), b"stale")
 
 
+class JsonSpecTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def as_json(self, name):
+        path = self.root / f"{name}.json"
+        path.write_text(json.dumps(r._load_example(name), ensure_ascii=False, default=str), encoding="utf-8")
+        return path
+
+    def test_every_example_renders_the_same_from_json(self):
+        for name in r.EXAMPLES:
+            with self.subTest(name=name):
+                from_yaml = r.build_spec(r._load_example(name), slug=name)[1]
+                from_json = r.build_spec(r.load_spec(self.as_json(name)), slug=name)[1]
+                self.assertEqual(from_json, from_yaml)
+
+    def test_json_syntax_error_reports_line_and_column(self):
+        bad = self.root / "bad.json"
+        bad.write_text('{"columns": [\n  {"id": "a",}\n]}', encoding="utf-8")
+        with self.assertRaises(SpecError) as cm:
+            r.load_spec(bad)
+        self.assertIn("JSON 第 2 行", str(cm.exception))
+
+    def test_json_specs_need_no_pyyaml(self):
+        import spec_validation as sv
+        path = self.as_json("2-flow")
+        yaml_path = self.root / "2-flow.yaml"
+        yaml_path.write_text(r.EXAMPLES["2-flow"], encoding="utf-8")
+        with patch.object(sv, "yaml", None):
+            self.assertEqual(r.load_spec(path)["title"], r._load_example("2-flow")["title"])
+            with self.assertRaises(SpecError) as cm:
+                r.load_spec(yaml_path)
+        self.assertIn("PyYAML", str(cm.exception))
+        self.assertIn(".json", str(cm.exception))
+
+    def test_init_json_round_trips(self):
+        p = subprocess.run([sys.executable, str(SCRIPTS / "render.py"), "--init", "timeline", "--json"],
+                           capture_output=True, text=True)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertEqual(json.loads(p.stdout), json.loads(json.dumps(r._load_example("platform-timeline"), default=str)))
+
+
 class LayoutTests(unittest.TestCase):
     def route_of(self, d, a, b):
         return next(pts for e, pts, _ in d.all_routes() if e["a"].id == a and e["b"].id == b)
