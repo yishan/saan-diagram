@@ -3,7 +3,7 @@ name: "saan-diagram"
 description: "Create consistent business diagrams from descriptions, requirements, or whiteboard screenshots. Use for business architecture, process flows, role handoffs, data relationships, and milestones in English or Chinese. Render HTML/SVG/PNG; publish to a Feishu/Lark whiteboard when requested. Not for sequence diagrams, state machines, physical database schemas, or task-level Gantt charts."
 metadata:
   author: "Yishan"
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Saan Diagram
@@ -25,24 +25,29 @@ Turn business information into diagrams with a consistent visual language. Write
 
 When a user requests a diagram, proceed. For an explanation-only request, use this skill only if a diagram materially helps communicate relationships.
 
-| What the user needs | Diagram | `--init` | `--guide` |
-|---|---|---|---|
-| Modules by stage and connected systems | Architecture view | `arch` | `stages` |
-| Main process with decisions and returns | Process flow | `flow` | `stages` |
-| Different approaches across common stages | Path comparison | `paths` | `stages` |
-| Handoffs between roles | Swimlane | `swim` | `stages` |
-| Data sources, processing, and storage | Data flow | `dfd` | `profile` |
-| Documents and controls | Audit flow | `audit` | `profile`, `verify` |
-| Value-adding versus other steps | Opportunity flow | `opportunity` | `profile` |
-| Platform layers and integrations | Layered architecture | `layers` | `layers` |
-| Entities, relationships, and cardinality | Entity relationship | `er` | `er` |
-| Reporting lines and declared access scopes | Organization and data isolation | `org` | `org` |
-| Causes behind an outcome | Fishbone | `fishbone` | `fishbone` |
-| Milestones and schedule variance | Timeline | `timeline` | `timeline` |
-| Priorities across two dimensions | Quadrant | `quadrant` | `quadrant` |
-| Activity inputs, controls, outputs, and mechanisms | IDEF0 | `idef0` | `idef0` |
+Start with one question: does the diagram explain **what exists** or **how work runs**? Architecture nodes are capabilities; flow nodes are business actions. Do not mix them in one diagram. Swimlanes are a flow option, not a separate diagram decision.
 
-For sequence diagrams, state machines, physical database schemas, or task-level Gantt charts, choose a suitable tool such as Mermaid or a database modeler. For mixed needs, choose the main organizing axis: stages, step order, roles, or technical layers. Do not add swimlanes, alternate paths, or highlighted capabilities when the source does not call for them.
+| What the user needs | Diagram | Variant | `--init` | `--guide` |
+|---|---|---|---|---|
+| What exists | Architecture | By lifecycle stage, with connected systems | `arch` | `stages` |
+| What exists | Architecture | By platform layer, with integrations | `layers` | `layers` |
+| How work runs | Flow | One process with decisions and returns | `flow` | `stages` |
+| How work runs | Flow | Handoffs between roles | `swim` | `stages` |
+| How work runs | Flow | End-to-end overview across systems | `overview` | `stages` |
+| How work runs | Flow | Documents and controls | `audit` | `profile`, `verify` |
+| How work runs | Flow | Value-adding versus other steps | `opportunity` | `profile` |
+| Different approaches across common stages | Path comparison | | `paths` | `stages` |
+| Activity inputs, controls, outputs, and mechanisms | IDEF0 | | `idef0` | `idef0` |
+| Data sources, processing, and storage | Data flow | | `dfd` | `profile` |
+| Entities, relationships, and cardinality | Entity relationship | | `er` | `er` |
+| Reporting lines and declared access scopes | Organization and data isolation | | `org` | `org` |
+| Causes behind an outcome | Fishbone | | `fishbone` | `fishbone` |
+| Priorities across two dimensions | Quadrant | | `quadrant` | `quadrant` |
+| Milestones and schedule variance | Timeline | | `timeline` | `timeline` |
+
+Choose the flow variant by purpose. An overview shows the forward path only. Approval and audit flows must keep decisions and returns, because removing them hides control risk.
+
+For sequence diagrams, state machines, physical database schemas, or task-level Gantt charts, choose a suitable tool such as Mermaid or a database modeler. For mixed needs, decide what exists versus how work runs first, then choose the axis: stages or layers, step order, roles, or systems. Do not add swimlanes, alternate paths, or highlighted capabilities when the source does not call for them.
 
 ## Establish necessary context
 
@@ -74,10 +79,12 @@ For an English starting point, copy a matching file from `assets/en/`, such as `
 
 ## Visual constraints
 
-- Business nodes are neutral gray. Internal systems use the brand color; external systems use a lighter tint. Use no more than three core highlights. Pale orange highlights one capability category, named by `special: {label: ...}` with `kind: special`.
+- Business nodes are neutral gray. Internal systems use the brand color; external systems use a lighter tint. Use no more than three core highlights by default; `core_limit` raises the limit when the user asks. Pale orange highlights one capability category, named by `special: {label: ...}` with `kind: special`.
 - Never shrink text to force a fit. Node labels have a 10-unit width budget; ordinary edge labels have 8 units. A CJK character counts as 1 unit and a typical Latin character as 0.5. These are width budgets, not English word limits. Keep English words intact; abbreviate only when meaning remains clear. Use the layout's measured fit checks and inspect the result.
 - Connectors are orthogonal, do not cross nodes or share overlapping strokes, and retain a visible segment before the arrowhead.
 - Align connected elements: put vertically connected nodes in the same `lane` and horizontally connected nodes in the same `row`, so an edge bends at most once. The renderer nudges slightly-off neighbors into line; auto-routed edges that still bend twice fail lint (G5).
+- Keep shapes distinguishable from their background and text legible: `CT1` / `CT2` check contrast on every diagram. Put white items on tinted zones instead of stacking similar grays.
+- For overview flows: no internal role lanes by default, business actions as nodes, forward path only, borderless tinted zones (`kind: zone`), solid gray connectors (`connector_style: solid`). Approval and audit flows must keep decisions and returns.
 - The default title bar is borderless (`titlebar: plain`) and does not consume a core highlight.
 - Correct problematic routing or colors in source diagrams and identify substantive corrections in the delivery notes.
 
@@ -106,7 +113,7 @@ Renderer exit codes: `0` success, `1` layout errors, `2` unconfirmed business fi
 ## Delivery
 
 - **HTML + PNG:** confirm both artifact statuses are `generated`. `--all` also creates `<slug>.wb.json`. Show the PNG and provide the spec location. Future edits belong in the spec; `--orient` and `--brand` change presentation.
-- **Feishu/Lark:** use `scripts/wb_publish.py`; do not construct direct write commands. Read `--guide feishu` first. Exit `20` means review the exported existing board and choose a write mode; a failed read is not an empty board. Exit `10` is a confirmation gate: relay it and use `--pass=--yes` only when requested by the gate and authorized by the user. Exit `21` means the write succeeded but readback failed: retry with `--verify-only`, not another write. Exit `0` still requires distinguishing conversion, readback-only, and write-plus-readback in the result JSON, then inspecting the exported image. Do not create a document when the user has not supplied a target.
+- **Feishu/Lark:** use `scripts/wb_publish.py`; do not construct direct write commands. Read `--guide feishu` first. Exit `20` means review the exported existing board and choose a write mode; a failed read is not an empty board. Exit `10` is a confirmation gate: relay it and use `--pass=--yes` only when requested by the gate and authorized by the user. Exit `21` means the write succeeded but readback failed: retry with `--verify-only`, not another write. Exit `0` still requires distinguishing conversion, readback-only, and write-plus-readback in the result JSON, then inspecting the exported image. Do not create a document when the user has not supplied a target. To keep existing boards, add one with `--resolve-doc <url> --new-board`. Feishu previews render asynchronously and can look incomplete: check `readback.nodes` before reporting a problem.
 - **Both:** deliver the PNG first, then follow the authorized whiteboard workflow.
 
 Before delivery: validation passes, the main process is understandable from its main nodes and solid edges, systems have connections, and assumptions and confirmed findings are disclosed in the selected language.

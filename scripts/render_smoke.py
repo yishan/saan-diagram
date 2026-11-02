@@ -19,8 +19,8 @@ def main():
     out = Path(args.outdir).resolve()
     out.mkdir(parents=True, exist_ok=True)
     examples = sorted((skill / "assets").glob("*.yaml"))
-    if len(examples) != 14:
-        raise RuntimeError(f"Expected 14 shipped examples, found {len(examples)}")
+    if len(examples) != 15:
+        raise RuntimeError(f"Expected 15 shipped examples, found {len(examples)}")
     english = sorted((skill / "assets/en").glob("*.yaml"))
     if len(english) != 3:
         raise RuntimeError(f"Expected 3 English examples, found {len(english)}")

@@ -75,3 +75,12 @@ side:                             # 跨层的右侧列
 links:
   - {from: integ, to: ext, kind: bidir, label: 集成}
 ```
+
+## 接口标注
+
+`links` 可以写清两侧传什么：`{from: integ, to: ext, kind: bidir, line: solid, label: 财务推送与回写}`。
+
+- 文字放不进两列之间的缝时，自动逐字竖排在箭头上方；也可以写 `label_orient: vertical | horizontal` 指定。
+- 想每个外部系统一条说明时，把 `links` 的端点写成对应的 section id。
+- `system_style: unified` 可以把内部、外部系统画成同一种颜色。
+- 核心区块里的条目自动用白底，保证和浅蓝底分得开。

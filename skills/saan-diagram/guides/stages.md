@@ -169,3 +169,38 @@ paths:                            # 可选；单独使用 = 主流程图
 - `bus`、`emphasis`、`no_arrow`
 
 **命令行**：`--orient horizontal|vertical`、`--brand "#RRGGBB"`、`--titlebar plain|outline|gray|brand|dark` 覆盖 spec 里的同名设置。`--orient` 只对 stages 布局有效；`--brand` / `--titlebar` / `--wb` 所有布局都支持。
+
+## 总览流程图（`--init overview`）
+
+给管理层或跨部门讲“业务怎么走”时用。默认写法和泳道图不同：
+
+- **泳道：** 只分“上游系统—业务平台—下游系统”三条，**默认不写内部角色泳道**。要讲角色交接时才用 `--init swim`。
+- **节点：** 写业务动作（合同评审、结算审批），不写功能菜单。要呈现功能清单，用分层架构图或架构视图，不要混在流程图里。
+- **范围：** 默认只画正向主线，不画判断、退回、反结账。**审批和审计流程例外，必须保留判断和退回**，否则会藏掉控制风险，这类图用 `--init swim` 或 `--init audit`。
+- **分区：** 用无边框浅底（`kind: zone`），不用虚线框。
+- **连线：** 写 `connector_style: solid`，系统对接用灰色实线；也可以逐条写 `line: solid`。
+
+```yaml
+connector_style: solid
+overlays:
+  - {kind: zone, label: 合同订立, title_align: right, targets: [合同评审, 合同签订]}
+  - {kind: zone, tone: core, label: 履约结算, targets: [合同结算, 结算审批]}   # tone: neutral（默认）| core | warm
+```
+
+分区内的普通模块（`module`）自动改成白底。分区标题默认靠左，有连线从上方进入时写 `title_align: right` 或 `center`，避开连线。`tone: warm` 用来标扩展接入位和规划项。
+
+## 其他可配置项
+
+| 配置 | 作用 |
+|---|---|
+| `core_limit: 6` | 放宽核心高亮上限（默认 3）。高亮越多重点越弱，确需时再放宽 |
+| `system_style: unified` | 内部、外部系统画成同一种颜色；`system_color: "#RRGGBB"` 可指定，图例合并成“系统” |
+
+## 竖向版式（`orientation: vertical`）的转置
+
+`columns` 变成自上而下的泳道，`row` 变成从左到右。走线和分组都会转置，写 spec 时要按“横向描述”来想：
+
+- `route: h` 画出来是竖线，`route: v` 画出来是横线；
+- `hv` 是先竖后横，`vh` 是先横后竖；`ll` 走上方，`rr` 走下方；
+- `grid: 1` 是横排一行，`grid: 4` 是竖排四行；
+- `lanes` 必须是整数，`lane` 可以是小数。

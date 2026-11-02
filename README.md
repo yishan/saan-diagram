@@ -10,7 +10,7 @@ Turn business descriptions, requirements documents, and whiteboard screenshots i
 
 Saan Diagram is an agent skill for Claude Code, Codex, and other compatible agents. The model writes a YAML spec using stages, lanes, and rows instead of pixel coordinates or colors. `render.py` calculates positions, routes, colors, typography, and legends. Diagrams must pass `--lint` before delivery.
 
-- **14 diagram types** sharing one visual language.
+- **15 diagram types** sharing one visual language, with contrast checks on shapes and text.
 - **50 validation rules** implemented in code. `--selftest` checks that deliberately broken examples trigger every rule.
 - **Preserve business findings:** missing controls, bypass paths, data sinks, and conflicting responsibilities are reported as findings. Once the user confirms the current situation, the findings appear in the diagram legend.
 - **Process path verification:** check reachability, control-point bypasses, separation of duties, and dead ends in the modeled process.
@@ -24,22 +24,25 @@ The canonical `SKILL.md` is in English. The agent follows the output language yo
 
 ## Supported diagrams
 
+First decide whether the diagram explains what exists or how work runs. Swimlanes are a flow option, not a separate decision.
+
 | What you need to show | Diagram | Spec structure | Example |
 |---|---|---|---|
-| Modules in each stage and the systems they connect to | Architecture view | `columns` + `nodes` + `edges` | [1-arch](skills/saan-diagram/assets/1-arch.yaml) |
-| A main process with decisions and returns | Process flow | `paths` | [2-flow](skills/saan-diagram/assets/2-flow.yaml) |
+| What exists: modules in each stage and connected systems | Architecture, by stage | `columns` + `nodes` + `edges` | [1-arch](skills/saan-diagram/assets/1-arch.yaml) |
+| What exists: platform layers and external connections | Architecture, by layer | `layout: layers` | [biz-platform](skills/saan-diagram/assets/biz-platform.yaml) |
+| How work runs: a main process with decisions and returns | Flow | `paths` | [2-flow](skills/saan-diagram/assets/2-flow.yaml) |
+| How work runs: handoffs between roles | Flow, swimlane | Columns represent roles | [4-swim](skills/saan-diagram/assets/4-swim.yaml) |
+| How work runs: end-to-end overview across systems | Flow, overview | Upstream, platform, and downstream lanes + `kind: zone` | [5-overview](skills/saan-diagram/assets/5-overview.yaml) |
+| How work runs: documents and key controls | Flow, audit | `profile: audit` | [payment-audit](skills/saan-diagram/assets/payment-audit.yaml) |
+| How work runs: steps that do not add value | Flow, opportunity | `profile: opportunity` | [vendor-opportunity](skills/saan-diagram/assets/vendor-opportunity.yaml) |
 | Different approaches across the same stages | Path comparison | Multiple `paths` rows | [3-paths](skills/saan-diagram/assets/3-paths.yaml) |
-| Handoffs between roles | Swimlane diagram | Columns represent roles | [4-swim](skills/saan-diagram/assets/4-swim.yaml) |
+| Inputs, controls, outputs, and mechanisms for each activity | IDEF0 function model | `layout: idef0` | [proc-idef0](skills/saan-diagram/assets/proc-idef0.yaml) |
 | Where data comes from, how it is processed, and where it is stored | Data flow diagram | `profile: dfd` | [bid-dfd](skills/saan-diagram/assets/bid-dfd.yaml) |
-| Documents and key controls | Audit flowchart | `profile: audit` | [payment-audit](skills/saan-diagram/assets/payment-audit.yaml) |
-| Steps that do not add value | Opportunity flowchart | `profile: opportunity` | [vendor-opportunity](skills/saan-diagram/assets/vendor-opportunity.yaml) |
-| Platform layers and external connections | Layered architecture | `layout: layers` | [biz-platform](skills/saan-diagram/assets/biz-platform.yaml) |
 | Business entities, relationships, and cardinality | Entity relationship diagram | `layout: er` | [procurement-er](skills/saan-diagram/assets/procurement-er.yaml) |
 | Reporting lines and declared data access boundaries | Organization chart with data isolation | `layout: org` | [group-org](skills/saan-diagram/assets/group-org.yaml) |
 | Causes behind an outcome | Fishbone diagram | `layout: fishbone` | [bid-fishbone](skills/saan-diagram/assets/bid-fishbone.yaml) |
-| Milestone dates and schedule variance | Milestone timeline | `layout: timeline` | [platform-timeline](skills/saan-diagram/assets/platform-timeline.yaml) |
 | Priorities across two dimensions | Quadrant chart | `layout: quadrant` | [ai-quadrant](skills/saan-diagram/assets/ai-quadrant.yaml) |
-| Inputs, controls, outputs, and mechanisms for each activity | IDEF0 function model | `layout: idef0` | [proc-idef0](skills/saan-diagram/assets/proc-idef0.yaml) |
+| Milestone dates and schedule variance | Milestone timeline | `layout: timeline` | [platform-timeline](skills/saan-diagram/assets/platform-timeline.yaml) |
 
 Sequence diagrams, state machines, physical database schemas, and task-level Gantt charts are outside this skill's scope. Use tools such as Mermaid or a database modeling tool for those tasks.
 
@@ -90,7 +93,7 @@ Zip the complete `skills/saan-diagram/` directory, keeping `saan-diagram/` as th
 
 ```bash
 cd skills/saan-diagram
-uv run scripts/render.py --init audit > pay.yaml     # Starter template (14 types)
+uv run scripts/render.py --init audit > pay.yaml     # Starter template (15 types)
 uv run scripts/render.py --guide verify              # Detailed guide for a topic
 uv run scripts/render.py pay.yaml --all              # Validate, verify paths, export HTML/PNG/whiteboard DSL
 uv run scripts/render.py --selftest                  # Validate examples and exercise every rule
@@ -185,7 +188,7 @@ The tests import the renderer directly, so install PyYAML first (`python3 -m pip
 ```bash
 uv run skills/saan-diagram/scripts/render.py --selftest
 python3 -m unittest discover -s tests -v
-python3 scripts/render_smoke.py            # Validate 14 original + 3 English examples and their SVG/whiteboard DSL output
+python3 scripts/render_smoke.py            # Validate 15 original + 3 English examples and their SVG/whiteboard DSL output
 python3 scripts/render_smoke.py --png      # Also export PNGs with the local Chrome
 ```
 
@@ -204,7 +207,7 @@ GitHub Actions runs a Python version matrix, behavioral regression tests, and br
 - The skill entry point and plugin discovery descriptions are now in English, with explicit output-language precedence.
 - Set `language: en` for English captions. Existing Chinese specs retain their default behavior.
 - English wrapping preserves words. Capability chips and architecture rails account for Latin text width.
-- `--selftest` still checks the 14 original templates and 49 rule triggers. Regression tests check both locales across all 14 diagram types; smoke rendering also includes 3 realistic English examples.
+- `--selftest` still checks the 15 original templates and 52 rule triggers. Regression tests check both locales across all 14 diagram types; smoke rendering also includes 3 realistic English examples.
 
 ### Upgrading from v1.0
 
@@ -218,7 +221,7 @@ GitHub Actions runs a Python version matrix, behavioral regression tests, and br
 
 The static introduction page lives in [`page/`](page/README.md) and is hosted on Vercel. The Vercel project uses `page` as its Root Directory and `main` as its production branch. No build step is required.
 
-Run `python3 scripts/sync_page.py` after updating the skill examples or preview images to refresh the page's 14 embedded specs, images, and version label.
+Run `python3 scripts/sync_page.py` after updating the skill examples or preview images to refresh the page's 15 embedded specs, images, and version label.
 
 ## Acknowledgments
 
