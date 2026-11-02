@@ -11,7 +11,7 @@ Turn business descriptions, requirements documents, and whiteboard screenshots i
 Saan Diagram is an agent skill for Claude Code, Codex, and other compatible agents. The model writes a YAML spec using stages, lanes, and rows instead of pixel coordinates or colors. `render.py` calculates positions, routes, colors, typography, and legends. Diagrams must pass `--lint` before delivery.
 
 - **15 diagram types** sharing one visual language, with contrast checks on shapes and text.
-- **50 validation rules** implemented in code. `--selftest` checks that deliberately broken examples trigger every rule.
+- **52 validation rules** implemented in code. `--selftest` checks that deliberately broken examples trigger every rule.
 - **Preserve business findings:** missing controls, bypass paths, data sinks, and conflicting responsibilities are reported as findings. Once the user confirms the current situation, the findings appear in the diagram legend.
 - **Process path verification:** check reachability, control-point bypasses, separation of duties, and dead ends in the modeled process.
 - **Reserve color for systems and core functions:** business nodes use neutral gray, with at most three core highlights per diagram.
