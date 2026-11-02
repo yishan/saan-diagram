@@ -10,8 +10,8 @@
 
 Saan Diagram 是一个可用于 Claude Code、Codex 等 Agent 的 Skill。模型只写一份 YAML spec，用阶段、泳道、行来定位，不写像素也不写颜色；坐标、走线、配色、字号和图例都由 `render.py` 计算。`--lint` 不通过，就不能交付。
 
-- **14 种图示**，共用一套视觉语法
-- **50 条校验规则**，写在脚本里，不靠模型记忆；`--selftest` 证明每条规则都能被故意改坏的样例触发
+- **15 种图示**，共用一套视觉语法，并校验形状和文字的对比度
+- **52 条校验规则**，写在脚本里，不靠模型记忆；`--selftest` 证明每条规则都能被故意改坏的样例触发
 - **业务发现不许被"修掉"**：失控点、绕过控制、数据黑洞、权限交叉等问题会原样报告，用户确认后写进图例
 - **流程路径验证**：检查流程图的可达性与控制点绕过路径，检查控制点不可绕过、岗位分离、没有死路
 - **颜色只留给"系统"和"核心"**：业务节点一律中性灰，核心色全图不超过 3 处
@@ -22,22 +22,25 @@ Saan Diagram 是一个可用于 Claude Code、Codex 等 Agent 的 Skill。模型
 
 ## 支持的图示
 
+先分清要讲的是“有什么”还是“怎么走”。泳道只是流程图的一种分列方式。
+
 | 你要表达的是 | 图示 | 写法 | 示例 |
 |---|---|---|---|
-| 各阶段有哪些模块，接哪些系统 | 架构视图 | `columns` + `nodes` + `edges` | [1-arch](skills/saan-diagram/assets/1-arch.yaml) |
-| 一条主流程，含判断和回退 | 主流程视图 | `paths` | [2-flow](skills/saan-diagram/assets/2-flow.yaml) |
+| 有什么：各阶段有哪些模块，接哪些系统 | 架构图 · 按阶段 | `columns` + `nodes` + `edges` | [1-arch](skills/saan-diagram/assets/1-arch.yaml) |
+| 有什么：平台由哪些层组成、对外接什么 | 架构图 · 按层 | `layout: layers` | [biz-platform](skills/saan-diagram/assets/biz-platform.yaml) |
+| 怎么走：一条主流程，含判断和回退 | 流程图 | `paths` | [2-flow](skills/saan-diagram/assets/2-flow.yaml) |
+| 怎么走：多个角色之间的交接 | 流程图 · 泳道 | `columns` = 角色 | [4-swim](skills/saan-diagram/assets/4-swim.yaml) |
+| 怎么走：跨系统的端到端总览 | 流程图 · 总览 | 上游、平台、下游三条泳道 + `kind: zone` | [5-overview](skills/saan-diagram/assets/5-overview.yaml) |
+| 怎么走：单据与关键控制点 | 流程图 · 审计 | `profile: audit` | [payment-audit](skills/saan-diagram/assets/payment-audit.yaml) |
+| 怎么走：哪些环节不增值 | 流程图 · 机会 | `profile: opportunity` | [vendor-opportunity](skills/saan-diagram/assets/vendor-opportunity.yaml) |
 | 几种方式各走过哪些阶段 | 路径对比视图 | `paths` 多行 | [3-paths](skills/saan-diagram/assets/3-paths.yaml) |
-| 多个角色之间的交接 | 泳道图 | `columns` = 角色 | [4-swim](skills/saan-diagram/assets/4-swim.yaml) |
+| 每个活动受什么约束、靠谁完成 | IDEF0 功能模型 | `layout: idef0` | [proc-idef0](skills/saan-diagram/assets/proc-idef0.yaml) |
 | 数据从哪来、经过哪些处理、存到哪 | 数据流图 | `profile: dfd` | [bid-dfd](skills/saan-diagram/assets/bid-dfd.yaml) |
-| 单据与关键控制点 | 审计流程图 | `profile: audit` | [payment-audit](skills/saan-diagram/assets/payment-audit.yaml) |
-| 哪些环节不增值 | 机会流程图 | `profile: opportunity` | [vendor-opportunity](skills/saan-diagram/assets/vendor-opportunity.yaml) |
-| 平台由哪些层组成、对外接什么 | 分层架构图 | `layout: layers` | [biz-platform](skills/saan-diagram/assets/biz-platform.yaml) |
 | 业务对象及其关系、几对几 | 实体关系图 | `layout: er` | [procurement-er](skills/saan-diagram/assets/procurement-er.yaml) |
 | 谁管谁，谁能看到谁的数据 | 组织架构图 + 数据隔离 | `layout: org` | [group-org](skills/saan-diagram/assets/group-org.yaml) |
 | 一个结果背后有哪些原因 | 鱼骨图 | `layout: fishbone` | [bid-fishbone](skills/saan-diagram/assets/bid-fishbone.yaml) |
-| 关键节点什么时候到、偏了多少 | 里程碑时间线 | `layout: timeline` | [platform-timeline](skills/saan-diagram/assets/platform-timeline.yaml) |
 | 两个维度上该先做哪个 | 四象限图 | `layout: quadrant` | [ai-quadrant](skills/saan-diagram/assets/ai-quadrant.yaml) |
-| 每个活动受什么约束、靠谁完成 | IDEF0 功能模型 | `layout: idef0` | [proc-idef0](skills/saan-diagram/assets/proc-idef0.yaml) |
+| 关键节点什么时候到、偏了多少 | 里程碑时间线 | `layout: timeline` | [platform-timeline](skills/saan-diagram/assets/platform-timeline.yaml) |
 
 时序交互、状态流转、物理表结构、按任务排期的甘特图不在范围内，建议用 Mermaid 或数据库建模工具。
 
@@ -87,7 +90,7 @@ skills.sh 的目录与排名由 CLI 安装统计驱动；本仓库有安装命�
 
 ```bash
 cd skills/saan-diagram
-uv run scripts/render.py --init audit > pay.yaml     # 起步模板（14 种）
+uv run scripts/render.py --init audit > pay.yaml     # 起步模板（15 种）
 uv run scripts/render.py --guide verify              # 某类图的详细写法
 uv run scripts/render.py pay.yaml --all              # 校验 + 路径验证 + HTML + PNG + 画板 DSL
 uv run scripts/render.py --selftest                  # 自测：示例全部通过 + 每条规则都能失败
@@ -180,7 +183,7 @@ python3 scripts/wb_publish.py pay.wb.json --token <wbcn…> --verify-only
 ```bash
 uv run skills/saan-diagram/scripts/render.py --selftest
 python3 -m unittest discover -s tests -v
-python3 scripts/render_smoke.py            # 14 个原示例 + 3 个英文示例：校验、SVG、画板 DSL
+python3 scripts/render_smoke.py            # 15 个原示例 + 3 个英文示例：校验、SVG、画板 DSL
 python3 scripts/render_smoke.py --png      # 另用本机 Chrome 实际导出 PNG
 ```
 
@@ -199,7 +202,7 @@ GitHub Actions 运行 Python 版本矩阵、行为回归测试和浏览器导出
 - 技能入口和插件发现描述改为英文，明确输出语言优先级。
 - 英文图示设置 `language: en`；已有中文 spec 保持默认行为。
 - 英文按词换行，分层图能力节点和侧栏根据拉丁文本宽度布局。
-- `--selftest` 仍验证 14 份原模板与 49 条规则；回归测试覆盖 14 类图示的语言行为，出图检查另含 3 份实际英文示例。
+- `--selftest` 仍验证 15 份原模板与 52 条规则；回归测试覆盖 14 类图示的语言行为，出图检查另含 3 份实际英文示例。
 
 ### 从 v1.0 升级
 
@@ -213,7 +216,7 @@ GitHub Actions 运行 Python 版本矩阵、行为回归测试和浏览器导出
 
 静态介绍页源码放在 [`page/`](page/README.md)，由 Vercel 托管。项目的 Root Directory 为 `page`，生产分支为 `main`，不需要构建步骤。
 
-修改技能示例或预览图后，运行 `python3 scripts/sync_page.py`，同步页面中的 14 份 spec、图片和版本标识。
+修改技能示例或预览图后，运行 `python3 scripts/sync_page.py`，同步页面中的 15 份 spec、图片和版本标识。
 
 ## 致谢
 

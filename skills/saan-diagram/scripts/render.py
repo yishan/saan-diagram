@@ -35,9 +35,9 @@ from i18n import tr, join_labels
 DEFAULT_BRAND = "#3370FF"   # 飞书蓝
 PRESETS = {"gray": DEFAULT_BRAND, "blue": "#1456F0"}   # backward-compatible `theme:` names
 NEUTRAL = {
-    "paper": "#FFFFFF", "rule": "#E4E6EB", "ink": "#1F2329", "muted": "#4E5969", "soft": "#646A73",
-    "node": "#F2F3F5", "hub": "#DEE0E3", "node_text": "#1F2329", "frame": "#BBBFC4",
-    "header": "#1F2329", "meta": "#7B7FF5", "ai_fill": "#FDEBD8", "ai_stroke": "#F5C99B",
+    "paper": "#FFFFFF", "rule": "#D5D8DE", "ink": "#1F2329", "muted": "#4E5969", "soft": "#4E5563",
+    "node": "#E3E5EA", "hub": "#D0D3D9", "node_text": "#1F2329", "frame": "#BBBFC4",
+    "header": "#1F2329", "meta": "#5E62D6", "ai_fill": "#FDEBD8", "ai_stroke": "#F5C99B",
 }
 TITLEBARS = ("plain", "outline", "gray", "brand", "dark")
 
@@ -79,6 +79,18 @@ def on(bg, ink=NEUTRAL["ink"]):
     return "#FFFFFF" if contrast(bg, "#FFFFFF") >= contrast(bg, ink) else ink
 
 
+def apply_system_style(t, spec):
+    """system_style: unified 把内部、外部系统画成同一种颜色（system_color 可指定）。"""
+    style = spec.get("system_style", "split")
+    if style not in ("split", "unified"):
+        raise SpecError(f"system_style '{style}' 无效，可选 split | unified")
+    if style == "unified":
+        c = spec.get("system_color") or t["sys_ext"]
+        _rgb(c)
+        t.update({"sys_int": c, "sys_ext": c, "sys_int_text": on(c), "sys_ext_text": on(c), "sys_unified": True})
+    return t
+
+
 def make_theme(brand=None, titlebar="plain"):
     brand = brand or DEFAULT_BRAND
     try:
@@ -89,10 +101,23 @@ def make_theme(brand=None, titlebar="plain"):
         raise SpecError(f"titlebar '{titlebar}' 无效，可选 {TITLEBARS}")
     t = dict(NEUTRAL)
     sys_ext = mix(brand, "#FFFFFF", 0.45)
+    tint = mix(brand, "#FFFFFF", 0.86)
+    # 文字和描边用主色时要看得清：不够 4.5:1 就往深色压一点（VI 色相不变），深底白字同理
+    accent, sys_int = brand, brand
+    for k in range(1, 21):
+        if contrast(accent, tint) >= 4.5:
+            break
+        accent = mix(brand, "#0B1B3A", k * 0.05)
+    if contrast(sys_int, "#FFFFFF") < 4.5 and contrast(sys_int, NEUTRAL["ink"]) < 4.5:
+        for k in range(1, 21):
+            sys_int = mix(brand, "#0B1B3A", k * 0.05)
+            if contrast(sys_int, "#FFFFFF") >= 4.5:
+                break
     t.update({
-        "accent": brand, "accent_tint": mix(brand, "#FFFFFF", 0.86), "accent_zone": mix(brand, "#FFFFFF", 0.94),
-        "sys_int": brand, "sys_int_text": on(brand),
+        "accent": accent, "accent_tint": tint, "accent_zone": mix(brand, "#FFFFFF", 0.88),
+        "sys_int": sys_int, "sys_int_text": on(sys_int),
         "sys_ext": sys_ext, "sys_ext_text": on(sys_ext),
+        "zone": "#E9ECF1", "zone_core": mix(brand, "#FFFFFF", 0.88), "zone_warm": "#FCEBD3",
     })
     bar = {"plain": t["paper"], "outline": t["paper"], "gray": "#EDEEF0", "brand": brand, "dark": "#2B2F36"}[titlebar]
     # plain（默认）：白底无边框，只有标题文字；outline：白底 + 中性灰 1px 线框；其余为实心底色，边框与底色同色
@@ -213,6 +238,7 @@ class Diagram:
         preset = PRESETS.get(theme or spec.get("theme") or "gray", DEFAULT_BRAND)
         self.t = make_theme(brand or spec.get("brand") or preset,
                             titlebar or spec.get("titlebar") or "plain")
+        apply_system_style(self.t, spec)
         self.t["language"] = spec.get("language", "zh-CN")
         self.t["special_label"], self.t["special_prefix"] = special_info(spec)
         self.vertical = (orient or spec.get("orientation") or "horizontal") == "vertical"
@@ -800,7 +826,8 @@ class Diagram:
             return t["ink"], 1.5, "", "flow"
         if k == "meta":
             return t["meta"], 1.2, "5,4", "meta"
-        return t["muted"], 1.2, "2,3", "data"
+        solid = e.get("line", self.spec.get("connector_style")) == "solid"
+        return t["muted"], 1.2, "" if solid else "2,3", "data"
 
     def _path_d(self, pts):
         d = f"M{pts[0][0]:.1f},{pts[0][1]:.1f}"
@@ -820,6 +847,8 @@ class Diagram:
         t = self.t
         fill = {"module": t["node"], "hub": t["hub"], "optional": t["paper"], "decision": t["paper"],
                 "ai": t["ai_fill"], "label": "none", "doc": t["paper"], "store": t["paper"]}[n.kind]
+        if n.kind == "module" and self.in_zone(n):
+            fill = t["paper"]
         stroke, dash, weight = None, None, 600 if n.kind == "hub" else 400
         if n.kind == "optional":
             stroke, dash = t["frame"], "4,3"
@@ -865,7 +894,7 @@ class Diagram:
                  f"Q{n.r - w4:.1f},{yb + 8:.1f} {n.cx:.1f},{yb:.1f} T{n.x:.1f},{yb:.1f} Z")
             A(f'<path d="{d}" fill="{fill}"{sa}/>')
         elif n.kind == "store":   # 数据存储（Gane-Sarson）：右侧开口 + 左侧编号格
-            A(f'<rect x="{n.x:.1f}" y="{n.y:.1f}" width="{n.w:.1f}" height="{n.h:.1f}" fill="{fill}"/>')
+            A(f'<rect data-ct="stroked" x="{n.x:.1f}" y="{n.y:.1f}" width="{n.w:.1f}" height="{n.h:.1f}" fill="{fill}"/>')
             A(f'<path d="M{n.r:.1f},{n.y:.1f} H{n.x:.1f} V{n.b:.1f} H{n.r:.1f}" fill="none" stroke="{stroke}"/>')
             if n.sub:
                 A(f'<line x1="{n.x + 28:.1f}" y1="{n.y:.1f}" x2="{n.x + 28:.1f}" y2="{n.b:.1f}" stroke="{stroke}"/>')
@@ -935,6 +964,8 @@ class Diagram:
         whole = all(r in self.containers for r in targets)
         pad, grow = (0, 24) if whole else (8, 16)
         top = ov.get("title_pos") == "top"
+        if ov.get("kind") == "zone":
+            pad, grow, top = 12, 26, True
         x = min(b.x for b in boxes) - pad
         y = min(b.y for b in boxes) - pad - (grow if top else 0)
         r = max(b.r for b in boxes) + pad
@@ -945,6 +976,13 @@ class Diagram:
         t = self.t
         x, y, r, bt, top = self.overlay_rect(ov)
         kind = ov.get("kind", "ai")
+        if kind == "zone":
+            A(f'<rect x="{x:.1f}" y="{y:.1f}" width="{r-x:.1f}" height="{bt-y:.1f}" rx="10" fill="{self.zone_fill(ov)}"/>')
+            al = ov.get("title_align", "left")
+            tx, an = {"left": (x + 12, "start"), "center": ((x + r) / 2, "middle"), "right": (r - 12, "end")}[al]
+            c = t["accent"] if ov.get("tone") == "core" else t["ink"]
+            A(f'<text x="{tx:.1f}" y="{y+18:.1f}" text-anchor="{an}" fill="{c}" font-size="13" font-weight="600">{esc(ov.get("label", ""))}</text>')
+            return
         if kind == "ai":
             A(f'<rect x="{x:.1f}" y="{y:.1f}" width="{r-x:.1f}" height="{bt-y:.1f}" rx="4" fill="{t["ai_fill"]}"/>')
             col = t["ink"]
@@ -956,6 +994,21 @@ class Diagram:
             A(f'<text x="{(x+r)/2:.1f}" y="{y+13:.1f}" text-anchor="middle" fill="{col}" font-size="{FS}" font-weight="500">{esc(label)}</text>')
         else:
             A(f'<text x="{r-8:.1f}" y="{bt-4:.1f}" text-anchor="end" fill="{col}" font-size="{FS}" font-weight="500">{esc(label)}</text>')
+
+    def zone_fill(self, ov):
+        t = self.t
+        tone = ov.get("tone", "neutral")
+        if tone not in ("neutral", "core", "warm"):
+            raise SpecError(f"zone 的 tone '{tone}' 无效，可选 neutral | core | warm")
+        return ov.get("fill") or {"neutral": t["zone"], "core": t["zone_core"], "warm": t["zone_warm"]}[tone]
+
+    def _zones(self):
+        if getattr(self, "_zone_rects", None) is None:
+            self._zone_rects = [self.overlay_rect(ov)[:4] for ov in self.spec.get("overlays") or [] if ov.get("kind") == "zone"]
+        return self._zone_rects
+
+    def in_zone(self, n):
+        return any(x <= n.x and n.r <= r and y <= n.y and n.b <= b for x, y, r, b in self._zones())
 
     def legend_items(self):
         t = self.t
@@ -971,14 +1024,20 @@ class Diagram:
         if "decision" in used_n: it.append(("diamond", t["paper"], t["ink"], tr(self.t, '判断')))
         if "optional" in used_n: it.append(("rect", t["paper"], t["frame"], tr(self.t, '可选环节')))
         if any(c.frame for c in self.containers.values()): it.append(("rect", "none", t["frame"], tr(self.t, '业务域')))
-        if "system" in used_n: it.append(("sys", t["sys_int"], None, tr(self.t, '内部系统')))
-        if "external" in used_n: it.append(("sys", t["sys_ext"], None, tr(self.t, '外部实体') if dfd else tr(self.t, '外部服务')))
+        if "system" in used_n and not (t.get("sys_unified") and "external" in used_n):
+            it.append(("sys", t["sys_int"], None, tr(self.t, '系统') if t.get("sys_unified") else tr(self.t, '内部系统')))
+        if "external" in used_n: it.append(("sys", t["sys_ext"], None, tr(self.t, '外部实体') if dfd else (tr(self.t, '系统') if t.get("sys_unified") else tr(self.t, '外部服务'))))
         if "flow" in used_e: it.append(("line", "flow", None, tr(self.t, '业务主流程')))
-        if used_e & {"data", "return", "bidir"}: it.append(("line", "data", None, tr(self.t, '数据 / 集成 / 推送')))
+        dl = [e for e in self.edges if e["kind"] in ("data", "return", "bidir")]
+        if dl:
+            it.append(("line", "link" if all(self.edge_style(e)[2] == "" for e in dl) else "data", None, tr(self.t, '数据 / 集成 / 推送')))
         if "meta" in used_e: it.append(("line", "meta", None, tr(self.t, '配置 / 委托关系')))
         if any(e.get("emphasis") for e in self.edges): it.append(("line", "accent", None, tr(self.t, '关键路径')))
         if "ai" in ovk or "ai" in used_n: it.append(("rect", t["ai_fill"], None, t["special_label"]))
         if "scope" in ovk: it.append(("rect", "none", t["soft"], tr(self.t, '范围标注')))
+        for tone, lab in (("neutral", '业务域'), ("core", '核心业务域'), ("warm", '扩展与规划')):
+            if any(ov.get("kind") == "zone" and ov.get("tone", "neutral") == tone for ov in self.spec.get("overlays") or []):
+                it.append(("rect", {"neutral": t["zone"], "core": t["zone_core"], "warm": t["zone_warm"]}[tone], None, tr(self.t, lab)))
         if "doc" in used_n: it.append(("rect", t["paper"], t["muted"], tr(self.t, '单据 / 文档')))
         if "store" in used_n: it.append(("rect", t["paper"], t["muted"], tr(self.t, '数据存储')))
         if self.controls(): it.append(("rect", t["ink"], None, tr(self.t, '控制点')))
@@ -1010,9 +1069,10 @@ class Diagram:
             elif kind == "sys":
                 A(f'<rect x="{x}" y="{y+1}" width="28" height="18" rx="6" fill="{c}"/>'); x += 36
             else:
-                col = {"flow": t["ink"], "data": t["muted"], "meta": t["meta"], "accent": t["accent"]}[c]
-                dash = {"flow": "", "data": ' stroke-dasharray="2,3"', "meta": ' stroke-dasharray="5,4"', "accent": ""}[c]
-                A(f'<path d="M{x},{y+10} L{x+30},{y+10}" stroke="{col}" stroke-width="1.5" fill="none"{dash} marker-end="url(#{slug}-m-{c})"/>'); x += 40
+                col = {"flow": t["ink"], "data": t["muted"], "link": t["muted"], "meta": t["meta"], "accent": t["accent"]}[c]
+                dash = {"flow": "", "data": ' stroke-dasharray="2,3"', "link": "", "meta": ' stroke-dasharray="5,4"', "accent": ""}[c]
+                mk = "data" if c == "link" else c
+                A(f'<path d="M{x},{y+10} L{x+30},{y+10}" stroke="{col}" stroke-width="1.5" fill="none"{dash} marker-end="url(#{slug}-m-{mk})"/>'); x += 40
             A(f'<text x="{x}" y="{y+14}" fill="{t["ink"]}" font-size="{FS}">{esc(label)}</text>')
         ny = y + 44
         for k, line in enumerate(self.notes()):
@@ -1077,6 +1137,12 @@ def to_wb_dsl(d, route_mode="fixed"):
                           borderWidth=1 if c.frame else 0, borderRadius=8))
     for ov in d.spec.get("overlays") or []:
         x, y, r, bt, top = d.overlay_rect(ov)
+        if ov.get("kind") == "zone":
+            zf = d.zone_fill(ov)
+            N.append(rect(x, y, r - x, bt - y, fillColor=zf, borderColor=zf, borderWidth=0, borderRadius=10))
+            al = ov.get("title_align", "left")
+            N.append(text(x + 12, y + 6, r - x - 24, 20, ov.get("label", ""), 13, t["accent"] if ov.get("tone") == "core" else t["ink"], al))
+            continue
         if ov.get("kind", "ai") == "ai":
             N.append(rect(x, y, r - x, bt - y, fillColor=t["ai_fill"], borderColor=t["ai_fill"], borderWidth=0, borderRadius=4))
             col = t["ink"]
@@ -1124,8 +1190,8 @@ def to_wb_dsl(d, route_mode="fixed"):
                       "borderColor": s or c, "borderWidth": 1 if s else 0,
                       **({"borderRadius": 6} if kind == "sys" else {})}); lx += 36
         else:
-            col = {"flow": t["ink"], "data": t["muted"], "meta": t["meta"], "accent": t["accent"]}[c]
-            style = {"flow": "solid", "data": "dotted", "meta": "dashed", "accent": "solid"}[c]
+            col = {"flow": t["ink"], "data": t["muted"], "link": t["muted"], "meta": t["meta"], "accent": t["accent"]}[c]
+            style = {"flow": "solid", "data": "dotted", "link": "solid", "meta": "dashed", "accent": "solid"}[c]
             N.append({"type": "connector", "id": rid("c"), "connector": {
                 "from": {"x": lx, "y": legend_y + 10}, "to": {"x": lx + 30, "y": legend_y + 10},
                 "lineShape": "straight", "lineColor": col, "lineWidth": 2, "lineStyle": style, "endArrow": "arrow"}})
@@ -1603,6 +1669,7 @@ def scene_wb(scene, t):
 def _theme_from(spec, theme, brand, titlebar):
     preset = PRESETS.get(theme or spec.get("theme") or "gray", DEFAULT_BRAND)
     t = make_theme(brand or spec.get("brand") or preset, titlebar or spec.get("titlebar") or "plain")
+    apply_system_style(t, spec)
     t["language"] = spec.get("language", "zh-CN")
     t["special_label"], t["special_prefix"] = special_info(spec)
     return t
@@ -1701,6 +1768,7 @@ class LayersDiagram:
             self.cores.append(label)
         style = {
             "chip": (t["node"], None, t["node_text"], 400, None),
+            "onzone": (t["paper"], None, t["node_text"], 400, None),
             "white": (t["paper"], t["rule"], t["node_text"], 400, None),
             "internal": (t["sys_int"], None, t["sys_int_text"], 500, None),
             "external": (t["sys_ext"], None, t["sys_ext_text"], 500, None),
@@ -1820,8 +1888,9 @@ class LayersDiagram:
         _titlebar(S, t, W, sp.get("title", tr(self.t, '总体架构')))
         legend = []
         if "core" in self.used: legend.append(("core", tr(self.t, '核心业务')))
-        if "sys" in self.used: legend.append(("sys", tr(self.t, '内部系统')))
-        if "ext" in self.used: legend.append(("ext", tr(self.t, '外部系统')))
+        if "sys" in self.used and not (t.get("sys_unified") and "ext" in self.used):
+            legend.append(("sys", tr(self.t, '系统') if t.get("sys_unified") else tr(self.t, '内部系统')))
+        if "ext" in self.used: legend.append(("ext", tr(self.t, '系统') if t.get("sys_unified") else tr(self.t, '外部系统')))
         if "ai" in self.used: legend.append(("ai", self.t["special_label"]))
         if "flow" in self.used: legend.append(("flow", tr(self.t, '流程推进')))
         if "more" in self.used: legend.append(("more", tr(self.t, '可扩展')))
@@ -1847,7 +1916,7 @@ class LayersDiagram:
         plans = [self._plan_block(b, bw) for b, bw in zip(blocks, widths)]
         h_in = max(p["h"] for p in plans)
         H = h_in + 2 * LPAD
-        S.rect(x, y, w, H, fill="#F7F8FA", rx=8, z=0, id=f"layer_{L['id']}")
+        S.rect(x, y, w, H, fill="#ECEEF2", rx=8, z=0, id=f"layer_{L['id']}")
         self.rects[L["id"]] = (x, y, w, H)
         bx = x + LPAD
         for b, bw, p in zip(blocks, widths, plans):
@@ -1890,7 +1959,7 @@ class LayersDiagram:
             return
         cols = p["cols"]
         iw = (w - 2 * LPAD - (cols - 1) * ITEM_GAP) / cols
-        base = "ai" if b.get("kind") == "ai" else "chip"
+        base = "ai" if b.get("kind") == "ai" else ("onzone" if b.get("core") else "chip")
         for k, it in enumerate(p["items"]):
             r, c = divmod(k, cols)
             self._chip(x + LPAD + c * (iw + ITEM_GAP), top + r * (ITEM_H + ITEM_GAP), iw, ITEM_H, it, base)
@@ -1919,7 +1988,7 @@ class LayersDiagram:
             if core:
                 self.cores.append(st.get("title"))
                 self.used.add("core")
-            S.rect(sx, y, sw, chip_h + 40 + LPAD, fill=t["accent_zone"] if core else "#F7F8FA",
+            S.rect(sx, y, sw, chip_h + 40 + LPAD, fill=t["accent_zone"] if core else "#ECEEF2",
                    stroke=t["accent"] if core else None, rx=8, z=1, id=st.get("id"))
             S.text(sx, y + 6, sw, 24, st.get("title", ""), 14, 600, t["accent"] if core else t["header"])
             steps = self._items(st.get("steps"))
@@ -2005,7 +2074,7 @@ class LayersDiagram:
         yy = y0
         for i, (it, nd) in enumerate(zip(items, need)):
             h = nd + max(0, free) / len(items)
-            S.rect(x, yy, self.rail_w, h, fill=t["node"] if i % 2 == 0 else "#F7F8FA", rx=8, text=it, fs=FS, weight=500,
+            S.rect(x, yy, self.rail_w, h, fill=t["node"] if i % 2 == 0 else "#ECEEF2", rx=8, text=it, fs=FS, weight=500,
                    color=t["muted"], vtext=True, z=0)
             yy += h + 4
 
@@ -2024,8 +2093,15 @@ class LayersDiagram:
         kind = l_.get("kind", "bidir")
         col = t["accent"] if l_.get("emphasis") else (t["ink"] if kind == "flow" else t["muted"])
         x1, x2 = a[0] + a[2] + 2, b[0] - 2
-        S.conn([(x1, yc), (x2, yc)], col, 2 if l_.get("emphasis") else 1.5, "" if kind == "flow" else "2,3",
-               start=kind == "bidir", end=True, z=3, label=l_.get("label"))
+        solid = kind == "flow" or l_.get("line", self.spec.get("connector_style")) == "solid"
+        lab = l_.get("label")
+        vertical = lab and l_.get("label_orient", "vertical" if text_w(lab) + 8 > x2 - x1 else "horizontal") == "vertical"
+        S.conn([(x1, yc), (x2, yc)], col, 2 if l_.get("emphasis") else 1.5, "" if solid else "2,3",
+               start=kind == "bidir", end=True, z=3, label=None if vertical else lab)
+        if vertical:   # 窄缝里的接口说明：逐字竖排在箭头上方，放不下就压到箭头上下两段
+            h = len(lab) * 16
+            ty = max(top, yc - 8 - h)
+            S.text((x1 + x2) / 2 - 10, ty, 20, h, "\n".join(lab), FS, 400, t["soft"], "center")
 
     # ---------------------------------------------------------------- outputs
     def svg(self, slug="biz"):
@@ -2112,7 +2188,7 @@ class ERDiagram:
                 continue
             gx, gy = min(m.x for m in mem) - 20, min(m.y for m in mem) - 36
             gr, gb = max(m.r for m in mem) + 20, max(m.b for m in mem) + 20
-            S.rect(gx, gy, gr - gx, gb - gy, fill="#FAFAFB", stroke=t["frame"], rx=8, dash="4,4", z=0)
+            S.rect(gx, gy, gr - gx, gb - gy, fill="#ECEEF2", stroke=t["frame"], rx=8, dash="4,4", z=0)
             S.text(gx + 12, gy + 6, gr - gx - 24, 20, g.get("label", ""), FS, 600, t["soft"], "left")
         for e in ents:
             self._entity(e, self.box[e["id"]])
@@ -2481,7 +2557,7 @@ class OrgDiagram:
                 fill, stroke, w_, col = t["paper"], t["frame"], 400, t["soft"]
                 self.used.add("virtual")
             else:
-                fill, stroke, w_, col = t["node"], None, 400, t["node_text"]
+                fill, stroke, w_, col = t["node"], t["frame"], 400, t["node_text"]
                 self.used.add("unit")
             S.rect(v["x"], v["y"], v["w"], v["h"], fill=fill, stroke=stroke, rx=6, dash="4,3" if kind == "virtual" else None,
                    text=v["label"] if not v["sub"] else None, fs=FS, weight=w_, color=col, z=2, id=f"org_{v['id']}")
@@ -3063,7 +3139,7 @@ class QuadrantDiagram(_SceneDiagram):
         obstacles = []
         for q, (qx, qy, ha, va) in geo.items():
             fz = q in focus
-            S.rect(qx, qy, half, half, fill=t["accent_zone"] if fz else "#FAFAFB", stroke=t["rule"], rx=0, z=0)
+            S.rect(qx, qy, half, half, fill=t["accent_zone"] if fz else "#ECEEF2", stroke=t["rule"], rx=0, z=0)
             info = qs.get(q) or {}
             if isinstance(info, str):
                 info = {"label": info}
@@ -3581,7 +3657,9 @@ FIX = {
     "R5": "标签改成以 special.prefix 开头；这张图不需要强制前缀就删掉 prefix。",
     "R6": "路径行只能沿阶段向前；要回头用 break: true 换行。",
     "E3": "meta 连线补 label（≤8 字）。",
-    "F1": "只留真正的核心（≤3 处），其余用 hub 表示主线。",
+    "F1": "只留真正的核心（默认 ≤3 处，确需更多时写 core_limit），其余用 hub 表示主线。",
+    "CT1": "形状和背景太接近：换深一档的底色，或加描边（白底分区内的模块用白底，普通模块不要叠在同色底上）。",
+    "CT2": "文字看不清：深底配白字、浅底配深字；分区底色不要太深。",
     "L1": "连线标签精简到 ≤8 字，写动作或数据名。",
     "L2": "用 label_at: start / end 把标签挪到经过空白的那一段。",
     "L3": "删掉能从布局看出来的标签，或换 label_at、拉开行距；数据流图用处理/存储交替排行 + label_at: 1。",
@@ -3626,7 +3704,7 @@ RESOURCE_ROOT = Path(__file__).resolve().parent.parent
 GUIDES = {p.stem: p for p in sorted((RESOURCE_ROOT / "guides").glob("*.md"))}
 EXAMPLES = {p.stem: p.read_text(encoding="utf-8") for p in sorted((RESOURCE_ROOT / "assets").glob("*.yaml"))}
 
-INIT_ALIAS = {"arch": "1-arch", "flow": "2-flow", "paths": "3-paths", "swim": "4-swim",
+INIT_ALIAS = {"arch": "1-arch", "flow": "2-flow", "paths": "3-paths", "swim": "4-swim", "overview": "5-overview",
               "dfd": "bid-dfd", "audit": "payment-audit", "opportunity": "vendor-opportunity",
               "layers": "biz-platform", "er": "procurement-er", "org": "group-org",
               "fishbone": "bid-fishbone", "timeline": "platform-timeline",
@@ -3634,6 +3712,11 @@ INIT_ALIAS = {"arch": "1-arch", "flow": "2-flow", "paths": "3-paths", "swim": "4
 
 
 def build_spec(spec, theme=None, brand=None, titlebar=None, orient=None, slug="biz"):
+    global MAX_CORE
+    limit = spec.get("core_limit", 3)
+    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1:
+        raise SpecError("core_limit 需要 ≥1 的整数")
+    MAX_CORE = limit
     validate_spec(spec)
     spec = _copy.deepcopy(spec)
     spec.pop("_special", None)
@@ -3777,9 +3860,86 @@ def verify_flow(d):
     return found, ok
 
 
+# ---------------------------------------------------------------- 对比度
+CT_ELEMENT, CT_CONTAINER, CT_STROKE, CT_TEXT = 1.15, 1.05, 1.3, 4.5
+
+
+def _ct_attr(tag, name):
+    m = _re.search(rf'\b{name}="([^"]*)"', tag)
+    return m.group(1) if m else None
+
+
+def _ct_color(v):
+    return v if v and _re.fullmatch(r"#[0-9a-fA-F]{6}", v) else None
+
+
+def contrast_findings(svg):
+    """按绘制顺序走一遍 SVG：每个形状和压在它下面的底色比，每段文字和它所在的底色比。
+    CT1 形状：小元素 ≥1.15、大分区 ≥1.05，或有 ≥1.3 的描边；CT2 文字 ≥4.5（≥18px 为 3）。"""
+    items = []
+    for m in _re.finditer(r"<(rect|text)\b([^>]*)>(?:([^<]*)</text>)?", svg):
+        kind, tag, body = m.group(1), m.group(2), m.group(3)
+        if kind == "rect":
+            try:
+                x, y, w, h = (float(_ct_attr(tag, a) or 0) for a in ("x", "y", "width", "height"))
+            except ValueError:
+                continue
+            items.append(("rect", x, y, w, h, _ct_color(_ct_attr(tag, "fill")), "#000000" if 'data-ct="stroked"' in tag else _ct_color(_ct_attr(tag, "stroke")),
+                          _ct_attr(tag, "fill"), _ct_attr(tag, "opacity")))
+        else:
+            try:
+                x, y = float(_ct_attr(tag, "x") or 0), float(_ct_attr(tag, "y") or 0)
+            except ValueError:
+                continue
+            items.append(("text", x, y, _ct_color(_ct_attr(tag, "fill")), float(_ct_attr(tag, "font-size") or 12), body or ""))
+    rects = [i for i in items if i[0] == "rect"]
+    has_child = set()
+    for i, a in enumerate(rects):
+        for b in rects[i + 1:]:
+            if a[1] <= b[1] and a[2] <= b[2] and a[1] + a[3] >= b[1] + b[3] and a[2] + a[4] >= b[2] + b[4] and b[3] > 2 and b[4] > 2:
+                has_child.add(i)
+                break
+    out, seen, painted, ri = [], set(), [], -1
+
+    def under(px, py, pw=0, ph=0):
+        for r in reversed(painted):
+            if r[1] <= px and r[2] <= py and r[1] + r[3] >= px + pw and r[2] + r[4] >= py + ph:
+                return r[5]
+        return "#FFFFFF"
+
+    for it in items:
+        if it[0] == "rect":
+            ri += 1
+            _, x, y, w, h, fill, stroke, raw, op = it
+            if not fill or w <= 2 or h <= 2 or (op and float(op) == 0):
+                continue
+            bg = under(x, y, w, h)
+            # 和底色完全相同又没描边的：标签遮罩、画布、无边框标题栏，都是有意不可见
+            mask = fill.upper() == bg.upper() and not stroke and (h <= 20 or w >= 400 or h > 60)
+            if not mask:
+                ok = contrast(fill, bg) >= (CT_CONTAINER if ri in has_child else CT_ELEMENT)
+                if stroke and contrast(stroke, bg) >= CT_STROKE:
+                    ok = True
+                if not ok and (fill, bg) not in seen:
+                    seen.add((fill, bg))
+                    out.append(("CT1", f"[CT1] 形状 {fill} 和背景 {bg} 对比度只有 {contrast(fill, bg):.2f}，看不出边界：换深一档或加描边"))
+            painted.append(it)
+        else:
+            _, x, y, fill, size, body = it
+            if not fill or not _re.search(r"[0-9A-Za-z\u4e00-\u9fff]", body):
+                continue
+            bg = under(x, y - size / 2)
+            need = 3 if size >= 18 else CT_TEXT
+            if contrast(fill, bg) < need and (fill, bg, "t") not in seen:
+                seen.add((fill, bg, "t"))
+                out.append(("CT2", f"[CT2] 文字『{body[:12]}』{fill} 在背景 {bg} 上对比度 {contrast(fill, bg):.2f}，低于 {need}"))
+    return out
+
+
 # ---------------------------------------------------------------- 校验汇总与分类
 def collect(d):
     found = d.lint() if hasattr(d, "lint") else lint(d)
+    found = list(found) + contrast_findings(d.svg("ct")[0])
     ok = []
     if isinstance(d, Diagram):
         f2, ok = verify_flow(d)
@@ -3901,6 +4061,8 @@ def _m_setup():
     M("G1", "两个节点放在同一格", "1-arch", lambda s: s["nodes"][1].update(col=s["nodes"][0]["col"], lane=s["nodes"][0].get("lane", 0), row=s["nodes"][0].get("row", 0)))
     M("T1", "节点名超过 10 字", "1-arch", lambda s: s["groups"][0]["items"].__setitem__(0, "需求填报与预算校验汇总表"))
     M("S1", "副标签写中文", "1-arch", lambda s: s["nodes"][0].update(sub="中文副标签"))
+    M("CT1", "分区底色和节点一样", "1-arch", lambda s: s.setdefault("overlays", []).append({"kind": "zone", "label": "分区", "fill": NEUTRAL["hub"], "targets": [next(n["label"] for n in s["nodes"] if n.get("kind") == "hub")]}))
+    M("CT2", "分区底色太深盖住文字", "1-arch", lambda s: s.setdefault("overlays", []).append({"kind": "zone", "label": "分区", "fill": "#4E5969", "targets": [next(n["label"] for n in s["nodes"] if n.get("kind") == "hub")]}))
     M("F1", "核心底色超过 3 处", "1-arch", lambda s: [n.update(core=True) for n in s["nodes"][:4]])
     M("E3", "meta 连线不带标签", "1-arch", lambda s: s["edges"].append({"from": s["nodes"][0]["label"], "to": s["nodes"][1]["label"], "kind": "meta", "route": "tt", "offset": 40}))
     M("L1", "连线标签超过 8 字", "1-arch", lambda s: s["edges"][0].update(label="这是一个非常长的连线标签"))
@@ -3967,7 +4129,7 @@ def _idef0_trim(s):
 ALL_CODES = {"A1", "AU1", "AU2", "B1", "C1", "D1", "D2", "DF1", "DF2", "DF3", "E3", "F1", "F2", "FB1",
              "G1", "G2", "G3", "G4", "G5", "ID1", "ID2", "ID3", "ID5", "K1", "L1", "L2", "L3", "O1", "O2", "O3", "O4",
              "Q1", "Q2", "Q3", "R1", "R3", "R5", "R6", "S1", "T1", "TL1", "TL2", "TL3", "V1", "W1",
-             "P1", "P2", "P3", "P4", "P5"}
+             "P1", "P2", "P3", "P4", "P5", "CT1", "CT2"}
 
 
 def selftest():

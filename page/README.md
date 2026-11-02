@@ -28,7 +28,7 @@ The directory name does not add `/page` to the public URL. `index.html` is serve
 
 ## Maintaining examples
 
-Update the skill's `assets/*.yaml` and the corresponding `docs/img/*.png` first, then run `python3 scripts/sync_page.py` (it only copies `docs/img/*.png`; re-render those first with `uv run skills/saan-diagram/scripts/render.py <spec> --all`). It refreshes the 14 embedded specs, preview images, and displayed skill version. Review any surrounding explanatory text when behavior changes.
+Update the skill's `assets/*.yaml` and the corresponding `docs/img/*.png` first, then run `python3 scripts/sync_page.py` (it only copies `docs/img/*.png`; re-render those first with `uv run skills/saan-diagram/scripts/render.py <spec> --all`). It refreshes the 15 embedded specs, preview images, and displayed skill version. Review any surrounding explanatory text when behavior changes.
 
 `examples/accepted.yaml` is a separate fictional example that intentionally records a control bypass. To regenerate its image (needs uv and a local Chrome), run from the repository root:
 

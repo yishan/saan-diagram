@@ -1,0 +1,61 @@
+# 示例 5 · 总览流程图：上游—平台—下游三条泳道，节点是业务动作，只画正向主线（虚构，仅示范写法）
+# 分区用无边框浅底（zone），系统对接用灰色实线（connector_style: solid）。
+# 审批、审计流程不要用这个模板：它们要保留判断和退回，用 swim / audit。
+title: 通用经营业务总览流程
+desc: 上游系统、业务平台、财务侧系统三条泳道；平台内按业务域推进，业态通过业务对接接入结算。
+language: zh-CN
+orientation: vertical
+connector_style: solid
+columns:
+  - {id: up, label: 上游系统, lanes: 2}
+  - {id: pf, label: 业务平台, lanes: 5}
+  - {id: down, label: 下游系统, lanes: 1}
+nodes:
+  - {label: 主数据系统, kind: system, owner: external, col: up, row: 0.6}
+  - {label: 招采系统, kind: system, owner: external, col: up, row: 5.6}
+  - {label: 业务系统, kind: system, owner: external, col: up, row: 10.2}
+  - {label: 维护基础资料, kind: hub, col: pf, lane: 1.4, row: 0.6}
+  - {label: 建立核算单元, kind: hub, col: pf, lane: 1.4, row: 2.4}
+  - {label: 合同评审, kind: hub, col: pf, lane: 1.4, row: 5.6}
+  - {label: 合同签订, kind: hub, col: pf, lane: 1.4, row: 7.4}
+  - {label: 履约金收付, col: pf, lane: 3, row: 5.6}
+  - {label: 产值完成填报, kind: hub, col: pf, lane: 1.4, row: 10.2}
+  - {label: 合同结算, kind: hub, col: pf, lane: 1.4, row: 12, core: true}
+  - {label: 开票收票, col: pf, lane: 3, row: 12}
+  - {label: 结算审批, kind: hub, col: pf, lane: 1.4, row: 13.8}
+  - {label: 数据封存, kind: hub, col: pf, lane: 1.4, row: 16.8}
+  - {label: 收入成本归集, kind: hub, col: pf, lane: 1.4, row: 18.6, core: true}
+  - {label: 期间结账, kind: hub, col: pf, lane: 1.4, row: 20.4}
+  - {label: 经营看板, col: pf, lane: 1.4, row: 23.4}
+  - {label: 管理报表, col: pf, lane: 3, row: 23.4}
+  - {id: ct1, label: 合同系统, kind: system, owner: external, col: down, row: 5.6}
+  - {label: 发票系统, kind: system, owner: external, col: down, row: 12}
+  - {id: ct2, label: 合同系统（结算）, kind: system, owner: external, col: down, row: 13.8}
+  - {label: 财务系统, kind: system, owner: external, col: down, row: 15.6}
+edges:
+  - {from: 主数据系统, to: 维护基础资料, kind: data, label: 客商人员, label_at: start}
+  - {from: 维护基础资料, to: 建立核算单元, kind: flow}
+  - {from: 建立核算单元, to: 合同评审, kind: flow}
+  - {from: 招采系统, to: 合同评审, kind: data, label: 成交通知书, label_at: start}
+  - {from: 合同评审, to: 合同签订, kind: flow}
+  - {from: 合同评审, to: 履约金收付, kind: flow}
+  - {from: 履约金收付, to: ct1, kind: bidir, label: 推送反写}
+  - {from: 合同签订, to: 产值完成填报, kind: flow}
+  - {from: 业务系统, to: 产值完成填报, kind: data, label: 业务结果, label_at: start}
+  - {from: 产值完成填报, to: 合同结算, kind: flow}
+  - {from: 合同结算, to: 开票收票, kind: flow}
+  - {from: 开票收票, to: 发票系统, kind: bidir, label: 开票验票}
+  - {from: 合同结算, to: 结算审批, kind: flow}
+  - {from: 结算审批, to: ct2, kind: bidir, label: 推送反写}
+  - {from: ct2, to: 财务系统, kind: bidir}
+  - {from: 结算审批, to: 数据封存, kind: flow}
+  - {from: 数据封存, to: 收入成本归集, kind: flow}
+  - {from: 收入成本归集, to: 期间结账, kind: flow}
+  - {from: 期间结账, to: 经营看板, kind: flow}
+  - {from: 经营看板, to: 管理报表, kind: flow}
+overlays:
+  - {kind: zone, title_align: right, label: 基础准备, targets: [维护基础资料, 建立核算单元]}
+  - {kind: zone, title_align: right, label: 合同订立, targets: [合同评审, 合同签订, 履约金收付]}
+  - {kind: zone, tone: core, title_align: right, label: 履约结算, targets: [产值完成填报, 合同结算, 开票收票, 结算审批]}
+  - {kind: zone, tone: core, title_align: right, label: 期间核算, targets: [数据封存, 收入成本归集, 期间结账]}
+  - {kind: zone, title_align: right, label: 经营呈现, targets: [经营看板, 管理报表]}

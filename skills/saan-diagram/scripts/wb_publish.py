@@ -68,20 +68,21 @@ def summary(r):
     return "已检测到 lark-cli 并已登录，可直接写入画板"
 
 
-def resolve_doc(url, create=False):
+def resolve_doc(url, create=False, new_board=False):
     code, out = sh(["lark-cli", "docs", "+fetch", "--doc", url, "--as", "user"])
     if code != 0:
         return code, {"error": out.strip()[-400:]}
-    toks = re.findall(r'<whiteboard[^>]*token="([^"]+)"', out)
-    if toks or not create:
+    toks = re.findall(r'<whiteboard[^>]*token=\\?"([^"\\]+)', out)
+    if not new_board and (toks or not create):
         return 0, {"whiteboards": toks}
-    doc_id = re.sub(r"[?#].*$", "", url).rstrip("/").split("/")[-1]
+    m = re.search(r'"document_id"\s*:\s*"([^"]+)"', out)   # 知识库链接的末段不是文档 id
+    doc_id = m.group(1) if m else re.sub(r"[?#].*$", "", url).rstrip("/").split("/")[-1]
     code, out = sh(["lark-cli", "docs", "+update", "--doc", doc_id, "--command", "append",
                     "--content", '<whiteboard type="blank"></whiteboard>', "--as", "user"])
     if code != 0:
         return code, {"error": out.strip()[-400:]}
     m = re.search(r'"block_token"\s*:\s*"([^"]+)"', out)
-    return (0, {"whiteboards": [m.group(1)], "created": True}) if m else (1, {"error": "已追加画板，但没读到 block_token：" + out[-300:]})
+    return (0, {"whiteboards": [m.group(1)], "created": True, "existing": toks}) if m else (1, {"error": "已追加画板，但没读到 block_token：" + out[-300:]})
 
 
 def export(token, path):
@@ -89,15 +90,29 @@ def export(token, path):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="saan-export-", dir=path.parent) as td:
-        fresh = Path(td) / "preview.png"
+        # 飞书预览图的格式由服务端决定（目前是 .jpg），路径带错扩展名会被 lark-cli 拒绝，所以不写扩展名
         code, out = sh(["lark-cli", "whiteboard", "+export", "--whiteboard-token", token,
-                       "--output-type", "preview", "--output", str(fresh), "--as", "user"])
+                       "--output-type", "preview", "--output", str(Path(td) / "preview"), "--as", "user"])
         if code:
             return code, out
-        if not fresh.is_file() or not fresh.stat().st_size:
+        made = [f for f in Path(td).iterdir() if f.is_file() and f.stat().st_size]
+        if not made:
             return 1, "命令返回成功，但没有生成新的核验图"
-        fresh.replace(path)
+        made[0].replace(path)
         return 0, out
+
+
+def count_nodes(token, outdir):
+    """飞书预览图常常是异步渲染、只显示一部分，不能单凭它判断内容丢失；节点数才是硬证据。"""
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="saan-raw-", dir=outdir) as td:
+        raw = Path(td) / "raw.json"
+        code, _ = sh(["lark-cli", "whiteboard", "+export", "--whiteboard-token", token,
+                      "--output-type", "raw", "--output", str(raw), "--as", "user"])
+        if code or not raw.is_file():
+            return None
+        d = json.loads(raw.read_text(encoding="utf-8"))
+        return len(d.get("nodes") or (d.get("data") or {}).get("nodes") or [])
 
 
 def _publish(a, result):
@@ -113,7 +128,7 @@ def _publish(a, result):
         result["error"] = "不允许的透传参数"
         return 3
     if a.verify_only:
-        after = outdir / f"{slug}.board.png"
+        after = outdir / f"{slug}.board.jpg"
         code, out = export(a.token, after)
         result["readback"] = {"status": "exported" if code == 0 and after.is_file() and after.stat().st_size else "failed", "path": str(after)}
         print(f"核验图：{after}" if result["readback"]["status"] == "exported" else "核验图导出失败：" + out[-400:])
@@ -177,7 +192,7 @@ def _publish(a, result):
         return 0
     # ③ 没决定写入方式：先看现有画板
     if not a.mode:
-        before = outdir / f"{slug}.before.png"
+        before = outdir / f"{slug}.before.jpg"
         code, out = export(a.token, before)
         result["before"] = {"status": "exported" if code == 0 else "failed", "path": str(before)}
         print(f"NEEDS_DECISION：现有画板预览已导出到 {before}" if code == 0 else f"NEEDS_DECISION：导出现有画板失败（{out.strip()[-200:]}）")
@@ -209,11 +224,11 @@ def _publish(a, result):
         time.sleep(2)
     result["write"] = "succeeded"
     # ⑤ 核验
-    after = outdir / f"{slug}.board.png"
+    after = outdir / f"{slug}.board.jpg"
     code, out = export(a.token, after)
     print(f"OK 已写入画板 {a.token}（{a.mode}，token {key}）")
     verified = code == 0 and after.is_file() and after.stat().st_size > 0
-    result["readback"] = {"status": "exported" if verified else "failed", "path": str(after)}
+    result["readback"] = {"status": "exported" if verified else "failed", "path": str(after), "nodes": count_nodes(a.token, outdir)}
     print(f"  写入后核验图：{after}（待人工/图像工具查看）" if verified else f"  写入成功，但导出核验图失败：{out.strip()[-200:]}；用 --verify-only 重试回读，不要重写")
     return 0 if verified else 21
 
@@ -257,6 +272,7 @@ def main():
     ap.add_argument("--fresh", action="store_true", help="忽略探测缓存")
     ap.add_argument("--resolve-doc", metavar="URL", help="列出文档里已有的画板 token")
     ap.add_argument("--create-board", action="store_true", help="与 --resolve-doc 同用：文档里没有画板时，在该文档末尾追加一块空画板（不新建文档）")
+    ap.add_argument("--new-board", action="store_true", help="与 --resolve-doc 同用：不管文档里有没有画板，都在末尾新增一块空画板；已有画板不受影响")
     a = ap.parse_args()
     if a.probe:
         r = probe(a.fresh)
@@ -264,7 +280,7 @@ def main():
         print(summary(r))
         return 0
     if a.resolve_doc:
-        code, res = resolve_doc(a.resolve_doc, a.create_board)
+        code, res = resolve_doc(a.resolve_doc, a.create_board, a.new_board)
         print(json.dumps(res, ensure_ascii=False))
         return code
     if not (a.wb and a.token):

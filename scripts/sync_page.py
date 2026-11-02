@@ -20,8 +20,8 @@ def main():
         return match[1] + html.escape(source.read_text(encoding='utf-8'), quote=False) + match[3]
 
     text, count = PATTERN.subn(replace, PAGE.read_text(encoding='utf-8'))
-    if count != 14:
-        raise SystemExit(f'Expected 14 embedded examples, found {count}; page not changed.')
+    if count != 15:
+        raise SystemExit(f'Expected 15 embedded examples, found {count}; page not changed.')
     version = json.loads((ROOT / '.claude-plugin' / 'plugin.json').read_text())['version']
     text = re.sub(r'(?<=Skill · )v[\d.]+|(?<=Saan Diagram )v[\d.]+', f'v{version}', text)
     PAGE.write_text(text, encoding='utf-8')
