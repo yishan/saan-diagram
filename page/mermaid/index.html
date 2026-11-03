@@ -12,8 +12,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-.back{font-size:13px;color:var(--muted);text-decoration:none}
-.back:hover{color:var(--ink)}
 /* Layout: Saan Diagram 的同系规范手册；每个示例左边是代码、右边是它渲染出的图，因为代码就是这个 skill 的产物 */
 :root{
   --paper:#F6F7F9; --sheet:#FFFFFF; --ink:#1F2329; --muted:#5B6370; --line:#DEE0E3; --soft:#EEF0F3;
@@ -40,36 +38,17 @@ p{margin:0}
 code{font-family:var(--f-mono);font-size:.86em}
 a{color:var(--accent)}
 a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
-.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 section{display:grid;gap:20px;padding-block:44px;border-top:1px solid var(--line);min-width:0}
-.hero{display:grid;gap:22px;padding-block:8px 40px}
-.titlebar{background:var(--sheet);border:1px solid var(--line);padding:22px 24px;display:grid;gap:6px}
-.titlebar h1{font-family:var(--f-display);font-weight:900;font-size:clamp(34px,6vw,58px);line-height:1.1;letter-spacing:.01em}
-.titlebar .sub{font-size:17px;color:var(--muted)}
-.thesis{font-family:var(--f-display);font-weight:600;font-size:clamp(19px,2.6vw,24px);line-height:1.6;max-width:30em}
-.thesis b{background:var(--accent-tint);padding:0 .2em;font-weight:inherit}
-.facts{display:flex;flex-wrap:wrap;gap:8px 28px;font-size:13px;color:var(--muted)}
-.facts strong{color:var(--ink);font-family:var(--f-mono);font-weight:500;font-size:15px;margin-right:4px}
 .tbl-wrap{overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:6px}
 table{border-collapse:collapse;width:100%;min-width:600px;font-size:13.5px}
 th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-weight:500;color:var(--muted);font-size:12px;letter-spacing:.06em}
 tbody th{color:var(--ink);font-size:13.5px;letter-spacing:0;white-space:nowrap}
 tr:last-child td,tr:last-child th{border-bottom:0}
-.pick-h{font-size:16px;margin:8px 0 -8px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
-.pick-h small{font-size:13.5px;font-weight:400;color:var(--muted)}
-.pick{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));border-top:1px solid var(--line)}
-.pick li{border-bottom:1px solid var(--line);min-width:0}
-.pick a{display:grid;grid-template-columns:7.5em 1fr auto;gap:10px;padding:11px 8px;color:var(--ink);text-decoration:none;align-items:baseline}
-.pick a:hover{background:var(--sheet)}
-.pick .nm{font-weight:700;font-size:14px}
-.pick .q{font-size:13px;color:var(--muted);line-height:1.6}
-.al{font-size:11.5px;border:1px solid var(--line);padding:1px 6px;border-radius:4px;color:var(--muted)}
 .gallery{display:grid;gap:28px}
 .ex{background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:18px;display:grid;gap:16px;scroll-margin-top:16px;min-width:0}
 .ex-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
 .ex-h h3{font-family:var(--f-display);font-weight:900;font-size:22px}
-.lay{background:var(--soft);padding:2px 8px;border-radius:4px;color:var(--muted)}
 .pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:14px;align-items:stretch}
 .pair.wide{grid-template-columns:minmax(0,1fr)}
 .pair.wide .fig{order:-1}
@@ -82,10 +61,6 @@ pre{margin:0;padding:10px 14px 14px;overflow:auto;font-size:12.5px;line-height:1
 pre code{font-size:inherit}
 .fig{display:flex;align-items:center;justify-content:center;background:var(--fig);border:1px solid var(--line);border-radius:6px;padding:12px;min-width:0;overflow:auto;cursor:default}
 .fig img{display:block;max-width:100%;height:auto}
-.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 24px;margin:0}
-.meta div{display:grid;gap:2px;min-width:0}
-.meta dt{font-size:12px;color:var(--muted);letter-spacing:.06em}
-.meta dd{margin:0;font-size:14px;line-height:1.65}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
 .panel{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;gap:12px;align-content:start;min-width:0}
 .panel h3{font-size:15px}
@@ -110,50 +85,261 @@ footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:
   pre{max-height:280px}
 }
 @media (max-width:560px){
-  .pick{grid-template-columns:minmax(0,1fr)}
-  .pick a{grid-template-columns:minmax(0,1fr) auto}
-  .pick .q{grid-column:1/-1;grid-row:2}
   .ex{padding:12px}
   h2{font-size:24px}
 }
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 </style>
+<link rel="stylesheet" href="../site.css">
+<script src="../site.js" defer></script>
 </head>
 <body>
-<div class="wrap">
+<main class="wrap">
 <header class="hero">
-  <a class="back" href="../">Saan Kits</a>
-  <div class="titlebar">
-    <h1>Saan Mermaid</h1>
-    <p class="sub">用 Mermaid 画业务图和技术图，并按控制点清单审查业务流程</p>
-  </div>
-  <p class="thesis">拿一份<b>独立的控制点清单</b>，审查流程有没有漏。</p>
-  <div class="facts">
-    <span><strong>12</strong>种写法</span>
-    <span><strong>9</strong>条业务规则</span>
-    <span><strong>5</strong>种角色配色</span>
-    <span><strong>≤3</strong>处核心色</span>
-  </div>
+  <nav class="site-nav" aria-label="技能导航"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="../mermaid/" aria-current="page">Mermaid</a></nav>
+  <h1>Saan Mermaid</h1>
+  <nav class="section-nav" aria-label="页内导航"><a href="#install">安装</a><a href="#pick">图示类型</a><a href="#gallery">示例</a><a href="#lint">校验</a><a href="#limits">兼容性</a></nav>
 </header>
 
-<section aria-labelledby="which">
-  <div class="narrow"><span class="eyebrow">先选工具</span><h2 id="which">看图用在哪</h2>
-  <p>同一张流程图两个 skill 都能画。放进文档和代码库的用 Saan Mermaid，拿去汇报或上飞书画板的用 <a href="../diagram/">Saan Diagram</a>。</p></div>
-  <div class="tbl-wrap"><table>
-    <thead><tr><th></th><th>Saan Mermaid</th><th>Saan Diagram</th></tr></thead>
-    <tbody>
-      <tr><th>产出</th><td>Mermaid 代码，可做 diff</td><td>图片、HTML、飞书画板</td></tr>
-      <tr><th>适合</th><td>README、Markdown、设计文档</td><td>汇报、对外交付、飞书画板</td></tr>
-      <tr><th>排版</th><td>自动布局，泳道能对齐，线路控制不了</td><td>引擎精确控制</td></tr>
-      <tr><th>质量保证</th><td>按控制点清单审查、配色校验、真实渲染、人工看图</td><td>几何、对比度和业务规则校验</td></tr>
-      <tr><th>独有的图</th><td>时序图、状态图、甘特图</td><td>IDEF0、组织架构与数据隔离</td></tr>
-    </tbody>
-  </table></div>
+<section aria-labelledby="install">
+  <div class="narrow"><h2 id="install">安装</h2></div>
+  <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-mermaid</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制Saan Mermaid安装命令" hidden>复制</button></div>
+  <p>本地校验需要 Python 3；渲染本页全部示例需要 Mermaid CLI 12。</p>
+</section>
+
+<section aria-labelledby="pick">
+  <div class="narrow"><h2 id="pick">图示类型</h2>
+  </div>
+  <div class="type-group"><h3 class="pick-h">架构图</h3><ul class="pick"><li><a href="#arch"><span class="nm">架构图 · 按阶段</span></a></li><li><a href="#layers"><span class="nm">架构图 · 按层</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">流程图</h3><ul class="pick"><li><a href="#flow"><span class="nm">流程图</span></a></li><li><a href="#swim"><span class="nm">流程图 · 泳道</span></a></li><li><a href="#overview"><span class="nm">流程图 · 总览</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">其他图示</h3><ul class="pick"><li><a href="#seq"><span class="nm">时序图</span></a></li><li><a href="#state"><span class="nm">状态图</span></a></li><li><a href="#er"><span class="nm">实体关系图</span></a></li><li><a href="#gantt"><span class="nm">甘特图</span></a></li><li><a href="#timeline"><span class="nm">时间线</span></a></li><li><a href="#quad"><span class="nm">四象限图</span></a></li><li><a href="#fish"><span class="nm">鱼骨图</span></a></li></ul></div>
+</section>
+
+<section aria-labelledby="gallery">
+  <div class="narrow"><h2 id="gallery">示例</h2>
+  <p>示例内容均为虚构。复制代码包含<a href="#theme">主题配置</a>；<a href="#limits">Beta 语法需确认平台版本</a>。</p></div>
+  <div class="gallery">
+<article class="ex" id="arch">
+  <header class="ex-h"><h3>架构图 · 按阶段</h3></header>
+  <div class="pair wide">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="arch" data-copy-prefix="theme" aria-label="复制架构图 · 按阶段代码（含主题配置）" hidden>复制</button></div><pre id="code-arch"><code>%% saan: arch
+flowchart LR
+  classDef external fill:#8FB0FF,stroke:#8FB0FF,color:#1F2329
+  subgraph contract[合同阶段]
+    direction TB
+    c1[合同台账]
+    c2[合同变更]
+  end
+  subgraph settle[结算阶段]
+    direction TB
+    s1[产值结算]
+    s2[支付管理]
+  end
+  subgraph ext[外部系统]
+    direction TB
+    fin[财务系统]:::external
+  end
+  contract --&gt; settle
+  s2 --&gt; fin
+</code></pre></div>
+    <a class="fig" href="img/arch.png" target="_blank" rel="noopener"><img src="img/arch.png" loading="lazy" alt="架构图 · 按阶段示例：每个阶段有哪些模块，接哪些系统。" style="width:716px"></a>
+  </div>
+  <p class="example-note">节点写能力，只画阶段之间和对外系统的连线。</p>
+</article>
+<article class="ex" id="layers">
+  <header class="ex-h"><h3>架构图 · 按层</h3></header>
+  <div class="pair">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="layers" data-copy-prefix="theme" aria-label="复制架构图 · 按层代码（含主题配置）" hidden>复制</button></div><pre id="code-layers"><code>block-beta
+  columns 3
+  app[&quot;应用层&quot;]:3
+  a1[&quot;合同管理&quot;] a2[&quot;结算管理&quot;] a3[&quot;经营分析&quot;]
+  data[&quot;数据层&quot;]:3
+  d1[&quot;主数据&quot;] d2[&quot;业务数据&quot;] d3[&quot;指标数据&quot;]
+</code></pre></div>
+    <a class="fig" href="img/layers.png" target="_blank" rel="noopener"><img src="img/layers.png" loading="lazy" alt="架构图 · 按层示例：平台由哪些层组成。" style="width:315px"></a>
+  </div>
+  <p class="example-note">Beta 语法，放不下侧栏。要标注对外接口或体系约束，改用 Saan Diagram。</p>
+</article>
+<article class="ex" id="flow">
+  <header class="ex-h"><h3>流程图</h3></header>
+  <div class="pair wide">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="flow" data-copy-prefix="theme" aria-label="复制流程图代码（含主题配置）" hidden>复制</button></div><pre id="code-flow"><code>%% saan: approval
+flowchart LR
+  classDef core fill:#E2EBFF,stroke:#2B5FD8,color:#1F2329
+  apply[提交申请] --&gt; check{审核通过?}
+  check --&gt;|是| sign[签订合同]:::core
+  check --&gt;|否| fix[退回修改]
+  fix -.-&gt; apply
+  sign --&gt; archive[合同归档]
+</code></pre></div>
+    <a class="fig" href="img/flow.png" target="_blank" rel="noopener"><img src="img/flow.png" loading="lazy" alt="流程图示例：一条流程怎么走，在哪里判断和退回。" style="width:784px"></a>
+  </div>
+  <p class="example-note">声明 saan: approval 后，缺判断或缺退回都会被查出来。退回用虚线。节点多时改成纵向。</p>
+</article>
+<article class="ex" id="swim">
+  <header class="ex-h"><h3>流程图 · 泳道</h3></header>
+  <div class="pair">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="swim" data-copy-prefix="theme" aria-label="复制流程图 · 泳道代码（含主题配置）" hidden>复制</button></div><pre id="code-swim"><code>%% saan: approval
+swimlane-beta LR
+  subgraph biz[业务部门]
+    apply[发起付款申请]
+    fix[修改申请]
+  end
+  subgraph fin[财务部门]
+    audit{审核单据}
+    pay[执行付款]
+  end
+  apply --&gt; audit
+  audit --&gt;|通过| pay
+  audit --&gt;|退回| fix
+  fix -.-&gt; apply
+</code></pre></div>
+    <a class="fig" href="img/swim.png" target="_blank" rel="noopener"><img src="img/swim.png" loading="lazy" alt="流程图 · 泳道示例：多个角色之间怎么交接。" style="width:702px"></a>
+  </div>
+  <p class="example-note">需要 Mermaid 12。泳道对齐，但线路和间距控制不了。泳道也是岗位分离检查的依据。</p>
+</article>
+<article class="ex" id="overview">
+  <header class="ex-h"><h3>流程图 · 总览</h3></header>
+  <div class="pair wide">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="overview" data-copy-prefix="theme" aria-label="复制流程图 · 总览代码（含主题配置）" hidden>复制</button></div><pre id="code-overview"><code>%% saan: overview
+flowchart LR
+  classDef core fill:#E2EBFF,stroke:#2B5FD8,color:#1F2329
+  classDef external fill:#8FB0FF,stroke:#8FB0FF,color:#1F2329
+  subgraph hub[经营平台]
+    direction LR
+    p1[签订合同] --&gt; p2[结算产值]:::core --&gt; p3[归集成本]
+  end
+  bid[招采系统]:::external --&gt;|中标结果| p1
+  p3 --&gt;|凭证数据| fin[财务系统]:::external
+</code></pre></div>
+    <a class="fig" href="img/overview.png" target="_blank" rel="noopener"><img src="img/overview.png" loading="lazy" alt="流程图 · 总览示例：跨系统看，业务从头到尾怎么走。" style="width:784px"></a>
+  </div>
+  <p class="example-note">只画正向主线，出现回路会被查出来。审批和审计流程不用这张。</p>
+</article>
+<article class="ex" id="seq">
+  <header class="ex-h"><h3>时序图</h3></header>
+  <div class="pair">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="seq" data-copy-prefix="theme" aria-label="复制时序图代码（含主题配置）" hidden>复制</button></div><pre id="code-seq"><code>sequenceDiagram
+  autonumber
+  participant U as 业务人员
+  participant P as 平台
+  participant F as 财务系统
+  U-&gt;&gt;P: 提交结算
+  P-&gt;&gt;F: 推送凭证
+  alt 校验通过
+    F--&gt;&gt;P: 返回凭证号
+  else 校验失败
+    F--&gt;&gt;P: 返回错误
+    P--&gt;&gt;U: 退回修改
+  end
+</code></pre></div>
+    <a class="fig" href="img/seq.png" target="_blank" rel="noopener"><img src="img/seq.png" loading="lazy" alt="时序图示例：系统之间按什么顺序交互，失败时怎么走。" style="width:650px"></a>
+  </div>
+  <p class="example-note">用 alt 写失败分支。消息文字避免冒号和分号。</p>
+</article>
+<article class="ex" id="state">
+  <header class="ex-h"><h3>状态图</h3></header>
+  <div class="pair wide">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="state" data-copy-prefix="theme" aria-label="复制状态图代码（含主题配置）" hidden>复制</button></div><pre id="code-state"><code>stateDiagram-v2
+  direction LR
+  [*] --&gt; 草稿
+  草稿 --&gt; 审批中: 提交
+  审批中 --&gt; 已生效: 通过
+  审批中 --&gt; 草稿: 退回
+  已生效 --&gt; 已归档: 归档
+  已归档 --&gt; [*]
+</code></pre></div>
+    <a class="fig" href="img/state.png" target="_blank" rel="noopener"><img src="img/state.png" loading="lazy" alt="状态图示例：一张单据有哪些状态，什么动作触发流转。" style="width:784px"></a>
+  </div>
+  <p class="example-note">每条流转都写触发动作。</p>
+</article>
+<article class="ex" id="er">
+  <header class="ex-h"><h3>实体关系图</h3></header>
+  <div class="pair wide">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="er" data-copy-prefix="theme" aria-label="复制实体关系图代码（含主题配置）" hidden>复制</button></div><pre id="code-er"><code>erDiagram
+  direction LR
+  合同 ||--o{ 结算单 : 产生
+  结算单 ||--|{ 付款单 : 拆分
+  供应商 ||--o{ 合同 : 签订
+</code></pre></div>
+    <a class="fig" href="img/er.png" target="_blank" rel="noopener"><img src="img/er.png" loading="lazy" alt="实体关系图示例：有哪些业务对象，彼此几对几。" style="width:740px"></a>
+  </div>
+  <p class="example-note">默认画到概念层。用户要字段时才写字段。</p>
+</article>
+<article class="ex" id="gantt">
+  <header class="ex-h"><h3>甘特图</h3></header>
+  <div class="pair wide">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="gantt" data-copy-prefix="theme" aria-label="复制甘特图代码（含主题配置）" hidden>复制</button></div><pre id="code-gantt"><code>gantt
+  title 上线计划（示例）
+  dateFormat YYYY-MM-DD
+  axisFormat %m-%d
+  todayMarker off
+  section 准备
+  需求确认 :done, a1, 2026-09-01, 15d
+  方案评审 :done, a2, after a1, 7d
+  section 实施
+  开发 :a3, after a2, 30d
+  联调测试 :a4, after a3, 14d
+  上线 :milestone, m1, after a4, 0d
+</code></pre></div>
+    <a class="fig" href="img/gantt.png" target="_blank" rel="noopener"><img src="img/gantt.png" loading="lazy" alt="甘特图示例：任务排期和前后依赖。" style="width:784px"></a>
+  </div>
+  <p class="example-note">用 after 写依赖，改一个任务的工期，后续任务自动顺延。</p>
+</article>
+<article class="ex" id="timeline">
+  <header class="ex-h"><h3>时间线</h3></header>
+  <div class="pair">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="timeline" data-copy-prefix="theme" aria-label="复制时间线代码（含主题配置）" hidden>复制</button></div><pre id="code-timeline"><code>timeline
+  title 平台里程碑（示例）
+  第一季度 : 需求确认
+  第二季度 : 合同模块上线 : 数据迁移
+  第三季度 : 结算模块上线
+</code></pre></div>
+    <a class="fig" href="img/timeline.png" target="_blank" rel="noopener"><img src="img/timeline.png" loading="lazy" alt="时间线示例：关键节点什么时候到。" style="width:784px"></a>
+  </div>
+  <p class="example-note">只表达时间，不表达计划和实际的偏差。要看偏差，改用 Saan Diagram。</p>
+</article>
+<article class="ex" id="quad">
+  <header class="ex-h"><h3>四象限图</h3></header>
+  <div class="pair">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="quad" data-copy-prefix="theme" aria-label="复制四象限图代码（含主题配置）" hidden>复制</button></div><pre id="code-quad"><code>%%{init: {&quot;quadrantChart&quot;: {&quot;pointTextPadding&quot;: 14}}}%%
+quadrantChart
+  title 优先级（示例）
+  x-axis 低投入 --&gt; 高投入
+  y-axis 低价值 --&gt; 高价值
+  quadrant-1 大项目
+  quadrant-2 先做
+  quadrant-3 暂缓
+  quadrant-4 慎做
+  经营预警: [0.3, 0.8]
+  智能问答: [0.7, 0.6]
+  报表换肤: [0.25, 0.2]
+</code></pre></div>
+    <a class="fig" href="img/quad.png" target="_blank" rel="noopener"><img src="img/quad.png" loading="lazy" alt="四象限图示例：一组事项在两个维度上该先做哪个。" style="width:500px"></a>
+  </div>
+  <p class="example-note">坐标是相对位置，不代表测算结果，标签要短。</p>
+</article>
+<article class="ex" id="fish">
+  <header class="ex-h"><h3>鱼骨图</h3></header>
+  <div class="pair">
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="fish" data-copy-prefix="theme" aria-label="复制鱼骨图代码（含主题配置）" hidden>复制</button></div><pre id="code-fish"><code>ishikawa-beta
+  付款延迟
+  流程
+    审批层级多
+    退回无时限
+  数据
+    单据不齐
+  系统
+    接口失败
+</code></pre></div>
+    <a class="fig" href="img/fish.png" target="_blank" rel="noopener"><img src="img/fish.png" loading="lazy" alt="鱼骨图示例：一个结果背后有哪些原因。" style="width:400px"></a>
+  </div>
+  <p class="example-note">Beta 语法，版本要求高。先确认文档平台能渲染。</p>
+</article>
+  </div>
 </section>
 
 <section aria-labelledby="lint">
-  <div class="narrow"><span class="eyebrow">审查流程</span><h2 id="lint">清单要在画图之前写好</h2>
-  <p>谁画图，就不该由谁定检查标准。先从制度或资料列出控制点，再画图或拿现有流程来查。清单最好由你提供；从资料提取的，结果会标明“不是独立依据”。下面这张图能正常渲染，但对照清单查出了问题。</p></div>
+  <div class="narrow"><h2 id="lint">流程审查</h2>
+  <p>先确定控制点清单，再审查流程。优先使用你提供的清单；从同一份资料提取时，结果会标明“不是独立依据”。</p></div>
   <div class="pair demo">
     <div class="democol"><div class="codebox"><div class="bar"><span>controls.txt，制度要求</span></div><pre><code>source: user
 control: 财务复核
@@ -192,238 +378,23 @@ swimlane-beta LR
   <p>业务发现要报告给你，不会为了通过校验而删线。确认属实又确实要保留的，写 <code>%% accept P1: 原因</code>，脚本会标为已确认。</p>
 </section>
 
-<section aria-labelledby="pick">
-  <div class="narrow"><span class="eyebrow">选型速查</span><h2 id="pick">先问：讲“有什么”，还是讲“怎么走”</h2>
-  <p>一段文字能说清的，就不画。架构和流程不混在一张图里。</p></div>
-  <h3 class="pick-h">有什么<small>节点是能力或功能</small></h3><ul class="pick"><li><a href="#arch"><span class="nm">架构图 · 按阶段</span><span class="q">每个阶段有哪些模块，接哪些系统。</span><code class="al">flowchart</code></a></li><li><a href="#layers"><span class="nm">架构图 · 按层</span><span class="q">平台由哪些层组成。</span><code class="al">block-beta</code></a></li></ul><h3 class="pick-h">怎么走<small>节点是业务动作，泳道只是分列方式</small></h3><ul class="pick"><li><a href="#flow"><span class="nm">流程图</span><span class="q">一条流程怎么走，在哪里判断和退回。</span><code class="al">flowchart</code></a></li><li><a href="#swim"><span class="nm">流程图 · 泳道</span><span class="q">多个角色之间怎么交接。</span><code class="al">swimlane-beta</code></a></li><li><a href="#overview"><span class="nm">流程图 · 总览</span><span class="q">跨系统看，业务从头到尾怎么走。</span><code class="al">flowchart</code></a></li></ul><h3 class="pick-h">其他问题<small>时序、状态、对象、进度、优先级和原因</small></h3><ul class="pick"><li><a href="#seq"><span class="nm">时序图</span><span class="q">系统之间按什么顺序交互，失败时怎么走。</span><code class="al">sequenceDiagram</code></a></li><li><a href="#state"><span class="nm">状态图</span><span class="q">一张单据有哪些状态，什么动作触发流转。</span><code class="al">stateDiagram-v2</code></a></li><li><a href="#er"><span class="nm">实体关系图</span><span class="q">有哪些业务对象，彼此几对几。</span><code class="al">erDiagram</code></a></li><li><a href="#gantt"><span class="nm">甘特图</span><span class="q">任务排期和前后依赖。</span><code class="al">gantt</code></a></li><li><a href="#timeline"><span class="nm">时间线</span><span class="q">关键节点什么时候到。</span><code class="al">timeline</code></a></li><li><a href="#quad"><span class="nm">四象限图</span><span class="q">一组事项在两个维度上该先做哪个。</span><code class="al">quadrantChart</code></a></li><li><a href="#fish"><span class="nm">鱼骨图</span><span class="q">一个结果背后有哪些原因。</span><code class="al">ishikawa-beta</code></a></li></ul>
-</section>
-
-<section aria-labelledby="gallery">
-  <div class="narrow"><span class="eyebrow">示例</span><h2 id="gallery">每张图都附上画它的代码</h2>
-  <p>内容都是示例。复制时会带上下面的主题配置，粘贴后颜色不变。</p></div>
-  <div class="gallery">
-<article class="ex" id="arch">
-  <header class="ex-h"><h3>架构图 · 按阶段</h3><code class="lay">flowchart + subgraph</code></header>
-  <div class="pair wide">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="arch">复制</button></div><pre id="code-arch"><code>%% saan: arch
-flowchart LR
-  classDef external fill:#8FB0FF,stroke:#8FB0FF,color:#1F2329
-  subgraph contract[合同阶段]
-    direction TB
-    c1[合同台账]
-    c2[合同变更]
-  end
-  subgraph settle[结算阶段]
-    direction TB
-    s1[产值结算]
-    s2[支付管理]
-  end
-  subgraph ext[外部系统]
-    direction TB
-    fin[财务系统]:::external
-  end
-  contract --&gt; settle
-  s2 --&gt; fin
-</code></pre></div>
-    <a class="fig" href="#arch"><img src="img/arch.png" loading="lazy" alt="架构图 · 按阶段示例：每个阶段有哪些模块，接哪些系统。" style="width:716px"></a>
+<section aria-labelledby="which">
+  <div class="narrow"><h2 id="which">工具对比</h2>
   </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>每个阶段有哪些模块，接哪些系统。</dd></div><div><dt>注意</dt><dd>节点写能力，只画阶段之间和对外系统的连线。</dd></div></dl>
-</article>
-<article class="ex" id="layers">
-  <header class="ex-h"><h3>架构图 · 按层</h3><code class="lay">block-beta</code></header>
-  <div class="pair">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="layers">复制</button></div><pre id="code-layers"><code>block-beta
-  columns 3
-  app[&quot;应用层&quot;]:3
-  a1[&quot;合同管理&quot;] a2[&quot;结算管理&quot;] a3[&quot;经营分析&quot;]
-  data[&quot;数据层&quot;]:3
-  d1[&quot;主数据&quot;] d2[&quot;业务数据&quot;] d3[&quot;指标数据&quot;]
-</code></pre></div>
-    <a class="fig" href="#layers"><img src="img/layers.png" loading="lazy" alt="架构图 · 按层示例：平台由哪些层组成。" style="width:315px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>平台由哪些层组成。</dd></div><div><dt>注意</dt><dd>Beta 语法，放不下侧栏。要标注对外接口或体系约束，改用 Saan Diagram。</dd></div></dl>
-</article>
-<article class="ex" id="flow">
-  <header class="ex-h"><h3>流程图</h3><code class="lay">flowchart</code></header>
-  <div class="pair wide">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="flow">复制</button></div><pre id="code-flow"><code>%% saan: approval
-flowchart LR
-  classDef core fill:#E2EBFF,stroke:#2B5FD8,color:#1F2329
-  apply[提交申请] --&gt; check{审核通过?}
-  check --&gt;|是| sign[签订合同]:::core
-  check --&gt;|否| fix[退回修改]
-  fix -.-&gt; apply
-  sign --&gt; archive[合同归档]
-</code></pre></div>
-    <a class="fig" href="#flow"><img src="img/flow.png" loading="lazy" alt="流程图示例：一条流程怎么走，在哪里判断和退回。" style="width:784px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>一条流程怎么走，在哪里判断和退回。</dd></div><div><dt>注意</dt><dd>声明 saan: approval 后，缺判断或缺退回都会被查出来。退回用虚线。节点多时改成纵向。</dd></div></dl>
-</article>
-<article class="ex" id="swim">
-  <header class="ex-h"><h3>流程图 · 泳道</h3><code class="lay">swimlane-beta</code></header>
-  <div class="pair">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="swim">复制</button></div><pre id="code-swim"><code>%% saan: approval
-swimlane-beta LR
-  subgraph biz[业务部门]
-    apply[发起付款申请]
-    fix[修改申请]
-  end
-  subgraph fin[财务部门]
-    audit{审核单据}
-    pay[执行付款]
-  end
-  apply --&gt; audit
-  audit --&gt;|通过| pay
-  audit --&gt;|退回| fix
-  fix -.-&gt; apply
-</code></pre></div>
-    <a class="fig" href="#swim"><img src="img/swim.png" loading="lazy" alt="流程图 · 泳道示例：多个角色之间怎么交接。" style="width:702px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>多个角色之间怎么交接。</dd></div><div><dt>注意</dt><dd>需要 Mermaid 12。泳道对齐，但线路和间距控制不了。泳道也是岗位分离检查的依据。</dd></div></dl>
-</article>
-<article class="ex" id="overview">
-  <header class="ex-h"><h3>流程图 · 总览</h3><code class="lay">flowchart + subgraph</code></header>
-  <div class="pair wide">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="overview">复制</button></div><pre id="code-overview"><code>%% saan: overview
-flowchart LR
-  classDef core fill:#E2EBFF,stroke:#2B5FD8,color:#1F2329
-  classDef external fill:#8FB0FF,stroke:#8FB0FF,color:#1F2329
-  subgraph hub[经营平台]
-    direction LR
-    p1[签订合同] --&gt; p2[结算产值]:::core --&gt; p3[归集成本]
-  end
-  bid[招采系统]:::external --&gt;|中标结果| p1
-  p3 --&gt;|凭证数据| fin[财务系统]:::external
-</code></pre></div>
-    <a class="fig" href="#overview"><img src="img/overview.png" loading="lazy" alt="流程图 · 总览示例：跨系统看，业务从头到尾怎么走。" style="width:784px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>跨系统看，业务从头到尾怎么走。</dd></div><div><dt>注意</dt><dd>只画正向主线，出现回路会被查出来。审批和审计流程不用这张。</dd></div></dl>
-</article>
-<article class="ex" id="seq">
-  <header class="ex-h"><h3>时序图</h3><code class="lay">sequenceDiagram</code></header>
-  <div class="pair">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="seq">复制</button></div><pre id="code-seq"><code>sequenceDiagram
-  autonumber
-  participant U as 业务人员
-  participant P as 平台
-  participant F as 财务系统
-  U-&gt;&gt;P: 提交结算
-  P-&gt;&gt;F: 推送凭证
-  alt 校验通过
-    F--&gt;&gt;P: 返回凭证号
-  else 校验失败
-    F--&gt;&gt;P: 返回错误
-    P--&gt;&gt;U: 退回修改
-  end
-</code></pre></div>
-    <a class="fig" href="#seq"><img src="img/seq.png" loading="lazy" alt="时序图示例：系统之间按什么顺序交互，失败时怎么走。" style="width:650px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>系统之间按什么顺序交互，失败时怎么走。</dd></div><div><dt>注意</dt><dd>用 alt 写失败分支。消息文字避免冒号和分号。</dd></div></dl>
-</article>
-<article class="ex" id="state">
-  <header class="ex-h"><h3>状态图</h3><code class="lay">stateDiagram-v2</code></header>
-  <div class="pair wide">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="state">复制</button></div><pre id="code-state"><code>stateDiagram-v2
-  direction LR
-  [*] --&gt; 草稿
-  草稿 --&gt; 审批中: 提交
-  审批中 --&gt; 已生效: 通过
-  审批中 --&gt; 草稿: 退回
-  已生效 --&gt; 已归档: 归档
-  已归档 --&gt; [*]
-</code></pre></div>
-    <a class="fig" href="#state"><img src="img/state.png" loading="lazy" alt="状态图示例：一张单据有哪些状态，什么动作触发流转。" style="width:784px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>一张单据有哪些状态，什么动作触发流转。</dd></div><div><dt>注意</dt><dd>每条流转都写触发动作。</dd></div></dl>
-</article>
-<article class="ex" id="er">
-  <header class="ex-h"><h3>实体关系图</h3><code class="lay">erDiagram</code></header>
-  <div class="pair wide">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="er">复制</button></div><pre id="code-er"><code>erDiagram
-  direction LR
-  合同 ||--o{ 结算单 : 产生
-  结算单 ||--|{ 付款单 : 拆分
-  供应商 ||--o{ 合同 : 签订
-</code></pre></div>
-    <a class="fig" href="#er"><img src="img/er.png" loading="lazy" alt="实体关系图示例：有哪些业务对象，彼此几对几。" style="width:740px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>有哪些业务对象，彼此几对几。</dd></div><div><dt>注意</dt><dd>默认画到概念层。用户要字段时才写字段。</dd></div></dl>
-</article>
-<article class="ex" id="gantt">
-  <header class="ex-h"><h3>甘特图</h3><code class="lay">gantt</code></header>
-  <div class="pair wide">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="gantt">复制</button></div><pre id="code-gantt"><code>gantt
-  title 上线计划（示例）
-  dateFormat YYYY-MM-DD
-  axisFormat %m-%d
-  todayMarker off
-  section 准备
-  需求确认 :done, a1, 2026-09-01, 15d
-  方案评审 :done, a2, after a1, 7d
-  section 实施
-  开发 :a3, after a2, 30d
-  联调测试 :a4, after a3, 14d
-  上线 :milestone, m1, after a4, 0d
-</code></pre></div>
-    <a class="fig" href="#gantt"><img src="img/gantt.png" loading="lazy" alt="甘特图示例：任务排期和前后依赖。" style="width:784px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>任务排期和前后依赖。</dd></div><div><dt>注意</dt><dd>用 after 写依赖，改一个任务的工期，后续任务自动顺延。</dd></div></dl>
-</article>
-<article class="ex" id="timeline">
-  <header class="ex-h"><h3>时间线</h3><code class="lay">timeline</code></header>
-  <div class="pair">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="timeline">复制</button></div><pre id="code-timeline"><code>timeline
-  title 平台里程碑（示例）
-  第一季度 : 需求确认
-  第二季度 : 合同模块上线 : 数据迁移
-  第三季度 : 结算模块上线
-</code></pre></div>
-    <a class="fig" href="#timeline"><img src="img/timeline.png" loading="lazy" alt="时间线示例：关键节点什么时候到。" style="width:784px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>关键节点什么时候到。</dd></div><div><dt>注意</dt><dd>只表达时间，不表达计划和实际的偏差。要看偏差，改用 Saan Diagram。</dd></div></dl>
-</article>
-<article class="ex" id="quad">
-  <header class="ex-h"><h3>四象限图</h3><code class="lay">quadrantChart</code></header>
-  <div class="pair">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="quad">复制</button></div><pre id="code-quad"><code>%%{init: {&quot;quadrantChart&quot;: {&quot;pointTextPadding&quot;: 14}}}%%
-quadrantChart
-  title 优先级（示例）
-  x-axis 低投入 --&gt; 高投入
-  y-axis 低价值 --&gt; 高价值
-  quadrant-1 大项目
-  quadrant-2 先做
-  quadrant-3 暂缓
-  quadrant-4 慎做
-  经营预警: [0.3, 0.8]
-  智能问答: [0.7, 0.6]
-  报表换肤: [0.25, 0.2]
-</code></pre></div>
-    <a class="fig" href="#quad"><img src="img/quad.png" loading="lazy" alt="四象限图示例：一组事项在两个维度上该先做哪个。" style="width:500px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>一组事项在两个维度上该先做哪个。</dd></div><div><dt>注意</dt><dd>坐标是相对位置，不代表测算结果，标签要短。</dd></div></dl>
-</article>
-<article class="ex" id="fish">
-  <header class="ex-h"><h3>鱼骨图</h3><code class="lay">ishikawa-beta</code></header>
-  <div class="pair">
-    <div class="codebox"><div class="bar"><span>代码</span><button type="button" class="copy" data-copy="fish">复制</button></div><pre id="code-fish"><code>ishikawa-beta
-  付款延迟
-  流程
-    审批层级多
-    退回无时限
-  数据
-    单据不齐
-  系统
-    接口失败
-</code></pre></div>
-    <a class="fig" href="#fish"><img src="img/fish.png" loading="lazy" alt="鱼骨图示例：一个结果背后有哪些原因。" style="width:400px"></a>
-  </div>
-  <dl class="meta"><div><dt>回答的问题</dt><dd>一个结果背后有哪些原因。</dd></div><div><dt>注意</dt><dd>Beta 语法，版本要求高。先确认文档平台能渲染。</dd></div></dl>
-</article>
-  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th></th><th>Saan Mermaid</th><th>Saan Diagram</th></tr></thead>
+    <tbody>
+      <tr><th>产出</th><td>Mermaid 代码，可做 diff</td><td>图片、HTML、飞书画板</td></tr>
+      <tr><th>适合</th><td>README、Markdown、设计文档</td><td>汇报、对外交付、飞书画板</td></tr>
+      <tr><th>排版</th><td>自动布局，泳道能对齐，线路控制不了</td><td>引擎精确控制</td></tr>
+      <tr><th>质量保证</th><td>按控制点清单审查、配色校验、真实渲染、人工看图</td><td>几何、对比度和业务规则校验</td></tr>
+      <tr><th>独有的图</th><td>时序图、状态图、甘特图</td><td>IDEF0、组织架构与数据隔离</td></tr>
+    </tbody>
+  </table></div>
 </section>
 
 <section aria-labelledby="rules">
-  <div class="narrow"><span class="eyebrow">规则</span><h2 id="rules">画什么，以及哪些语法容易出错</h2></div>
+  <div class="narrow"><h2 id="rules">绘图规则</h2></div>
   <div class="two">
     <div class="panel"><h3>画法规则</h3><ul class="rules">
       <li>只画来源支持的内容，假设写在图外。</li>
@@ -447,7 +418,7 @@ quadrantChart
 </section>
 
 <section aria-labelledby="theme">
-  <div class="narrow"><span class="eyebrow">配色</span><h2 id="theme">颜色表示角色，不选主题</h2>
+  <div class="narrow"><h2 id="theme">主题配置</h2>
   <p>放在每张图最顶部，换一个平台也不用重新配。页面有深色模式时，要再看一眼效果。</p></div>
   <div class="sw">
     <div><i style="background:#E3E5EA;color:#1F2329">业务节点</i><span>默认，不用写</span></div>
@@ -458,7 +429,7 @@ quadrantChart
     <div><i style="background:#FDEBD8;color:#1F2329;outline:1px solid #F5C99B;outline-offset:-1px">ai</i><span>AI 能力</span></div>
   </div>
   <p>和 Saan Diagram 同一套色值。自造颜色、用 <code>style</code> 单独改色、核心节点超过 3 个，校验都不放行。</p>
-  <div class="block"><div class="bar"><span>frontmatter</span><button type="button" class="copy" data-copy="theme">复制</button></div><pre id="code-theme"><code>---
+  <div class="block"><div class="bar"><span>frontmatter</span><button type="button" class="copy" data-copy="theme" aria-label="复制主题配置" hidden>复制</button></div><pre id="code-theme"><code>---
 config:
   theme: base
   themeVariables:
@@ -482,7 +453,7 @@ config:
 </section>
 
 <section aria-labelledby="check">
-  <div class="narrow"><span class="eyebrow">交付前</span><h2 id="check">语法通过不代表能看</h2>
+  <div class="narrow"><h2 id="check">交付检查</h2>
   <p>脚本会一起检查错误占位图和图宽，宽度超过 1200 就提醒。自动布局可能挤成一团，所以每张图还要看一眼。</p></div>
   <div class="block"><pre><code>mmdc -i diagram.mmd -o diagram.svg -b white -q
 python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code></pre></div>
@@ -496,7 +467,7 @@ python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code><
 </section>
 
 <section aria-labelledby="limits">
-  <div class="narrow"><span class="eyebrow">局限</span><h2 id="limits">目前做不到的</h2></div>
+  <div class="narrow"><h2 id="limits">兼容性与限制</h2></div>
   <div class="two">
     <div class="panel"><h3>泳道依赖 Mermaid 12</h3><p style="font-size:13.5px"><code>swimlane-beta</code> 能对齐泳道，但泳道之间没有分隔，线路也可能绕到外侧。低版本平台只能退回分组框，各列对不齐。</p></div>
     <div class="panel"><h3>平台版本不同</h3><p style="font-size:13.5px">每个平台内置的 Mermaid 版本不同。本页的图用 Mermaid CLI 12.2 渲染，还没在 GitHub 或飞书文档里测过。</p></div>
@@ -506,13 +477,8 @@ python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code><
   </div>
 </section>
 
-<section aria-labelledby="install">
-  <div class="narrow"><span class="eyebrow">安装</span><h2 id="install">需要 Python 3 和 Mermaid CLI 12</h2></div>
-  <div class="block"><pre><code>npx skills add yishan/saankits --skill saan-mermaid</code></pre></div>
-</section>
-
 <section aria-labelledby="ask">
-  <div class="narrow"><span class="eyebrow">怎么用</span><h2 id="ask">直接说要画什么、放在哪</h2></div>
+  <div class="narrow"><h2 id="ask">请求示例</h2></div>
   <ul class="rules">
     <li>“这是付款流程和制度要求，帮我查有没有能绕过财务复核的路径。”</li>
     <li>“用 Mermaid 画一下付款审批流程，放进这份设计文档。付款前必须经过财务复核。”</li>
@@ -521,21 +487,9 @@ python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code><
   </ul>
 </section>
 
-<footer><span>Saan Mermaid v1.0.0，作者 Yishan，MIT</span><a href="../">Saan Kits</a><a href="../diagram/">Saan Diagram</a><a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid">源码</a></footer>
-</div>
-<script>
-const FM=document.getElementById('code-theme').textContent.trim()+'\n';
-document.querySelectorAll('.copy').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const id=btn.dataset.copy, el=document.getElementById('code-'+id);
-    const text=id==='theme'?FM:FM+el.textContent;
-    const done=m=>{btn.textContent=m;setTimeout(()=>{btn.textContent='复制'},1600)};
-    const pick=()=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);done('已选中，请手动复制')};
-    if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>done('已复制'),pick)}else{pick()}
-  });
-});
-document.querySelectorAll('a.fig').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));
-</script>
+<footer><a href="https://github.com/yishan/saankits/blob/main/skills/saan-mermaid/SKILL.md">SKILL.md</a><span>Saan Mermaid v1.0.0，作者 Yishan，MIT</span><a href="../">Saan Kits</a><a href="../diagram/">Saan Diagram</a><a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid">源码</a></footer>
+</main>
+
 
 </body>
 </html>

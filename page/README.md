@@ -21,6 +21,10 @@ python3 -m http.server 8768 --directory page
 
 Open http://localhost:8768. No package installation or build command is needed.
 
+Run `python3 scripts/check_site.py` before publishing. It checks local links and anchors, image alt text, copy targets, and embedded examples against the skill sources. CI runs the same check.
+
+`site.css` shares navigation, headings, and copy controls. `site.js` copies each `data-copy` source and its optional `data-copy-prefix` (the Mermaid theme). If clipboard access fails, it selects the same complete text in a read-only field. Without JavaScript, commands, examples, and links remain available; copy buttons stay hidden.
+
 ## Vercel
 
 Connect `yishan/saankits` and use these project settings:

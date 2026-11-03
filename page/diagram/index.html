@@ -41,18 +41,8 @@ p{margin:0}
 code{font-family:var(--f-mono);font-size:.86em}
 a{color:var(--accent)}
 a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
-.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 section{display:grid;gap:20px;padding-block:44px;border-top:1px solid var(--line)}
 
-/* hero: 一个线框标题栏 —— 对应 skill 的 titlebar: outline（默认已改为无边框的 plain） */
-.hero{display:grid;gap:22px;padding-block:8px 40px}
-.titlebar{border:1px solid var(--ink);background:var(--sheet);padding:22px 24px;display:grid;gap:6px}
-.titlebar h1{font-family:var(--f-display);font-weight:900;font-size:clamp(34px,6vw,58px);line-height:1.1;letter-spacing:.01em}
-.titlebar .sub{font-size:17px;color:var(--muted)}
-.thesis{font-family:var(--f-display);font-weight:600;font-size:clamp(19px,2.6vw,24px);line-height:1.6;max-width:30em}
-.thesis b{background:var(--accent-tint);color:var(--ink);padding:0 .2em}
-.facts{display:flex;flex-wrap:wrap;gap:8px 28px;font-size:13px;color:var(--muted)}
-.facts strong{color:var(--ink);font-family:var(--f-mono);font-weight:500;font-size:15px;margin-right:4px}
 
 /* pipeline: 真实的先后顺序，所以编号 */
 .pipe{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;counter-reset:s}
@@ -80,30 +70,15 @@ section{display:grid;gap:20px;padding-block:44px;border-top:1px solid var(--line
 .rules li::marker{color:var(--muted)}
 
 /* 选型速查 = 示例目录 */
-.pick{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));border-top:1px solid var(--line)}
-.pick li{border-bottom:1px solid var(--line);min-width:0}
-.pick a{display:grid;grid-template-columns:28px 7.5em 1fr;gap:10px;padding:11px 8px;color:var(--ink);text-decoration:none;align-items:baseline}
-.pick a:hover{background:var(--sheet)}
-.pick .n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
-.pick-h{font-size:16px;margin:22px 0 10px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}.pick-h small{font-size:13.5px;font-weight:400;color:var(--muted)}
-.pick .nm{font-weight:700;font-size:14px}
-.pick .q{font-size:13px;color:var(--muted);line-height:1.6}
 .nope{font-size:13.5px;color:var(--muted)}
 
 /* 示例 */
 .gallery{display:grid;gap:28px}
 .ex{background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:18px;display:grid;gap:16px;scroll-margin-top:16px;min-width:0}
 .ex-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
-.ex-h .n{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
 .ex-h h3{font-family:var(--f-display);font-weight:900;font-size:22px}
-.lay{background:var(--soft);padding:2px 8px;border-radius:4px;color:var(--muted)}
 .fig{display:block;background:var(--fig);border:1px solid var(--line);border-radius:4px;padding:8px;overflow:hidden}
 .fig img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain;margin:0 auto}
-.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 24px;margin:0}
-.meta div{display:grid;gap:2px;min-width:0}
-.meta dt{font-size:12px;color:var(--muted);letter-spacing:.06em}
-.meta dd{margin:0;font-size:14px;line-height:1.65;overflow-wrap:anywhere}
-.meta dd.lint{font-family:var(--f-mono);font-size:12.5px}
 details{border-top:1px dashed var(--line);padding-top:10px}
 summary{cursor:pointer;font-size:13px;color:var(--muted)}
 pre{margin:10px 0 0;background:var(--soft);border-radius:6px;padding:14px;overflow-x:auto;font-size:12.5px;line-height:1.6;max-height:420px}
@@ -123,8 +98,6 @@ tr:last-child td{border-bottom:0}
 .tag{font-family:var(--f-mono);font-size:11px;border:1px solid var(--ink);padding:0 6px;border-radius:3px;white-space:nowrap}
 footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 24px}
 @media (max-width:560px){
-  .pick a{grid-template-columns:24px 1fr}
-  .pick .q{grid-column:2}
   .ex{padding:12px}
   h2{font-size:24px}
 }
@@ -132,8 +105,6 @@ footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:
 
 /* v1.0 新增 */
 .init{background:transparent;border:1px solid var(--line);padding:1px 7px;border-radius:4px;color:var(--muted)}
-.pick a{grid-template-columns:28px 7.5em 1fr auto}
-.pick .al{font-size:11.5px;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:0 5px;align-self:center}
 .cmds{display:grid;gap:10px}
 .cmd{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr);gap:4px;min-width:0}
 .cmd code{font-size:13px;overflow-wrap:anywhere}
@@ -150,144 +121,67 @@ footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:
 .callout{border-left:3px solid var(--ink);padding:4px 0 4px 14px;font-size:14px;max-width:46em}
 .btn{display:inline-block;border:1px solid var(--ink);color:var(--ink);text-decoration:none;padding:6px 14px;border-radius:4px;font-size:13.5px}
 .btn:hover{background:var(--sheet)}
-@media (max-width:560px){.pick a{grid-template-columns:24px 1fr}.pick .al{grid-column:2;justify-self:start}}
 .inst{min-width:0;table-layout:fixed}
 .inst th:first-child{width:18%}
 .inst code{overflow-wrap:anywhere;white-space:normal}
 @media (max-width:560px){.inst th:first-child{width:28%}.inst th,.inst td{padding:10px}}
 .inst td:first-child{font-family:var(--f-body);font-size:13.5px;font-weight:500}
 </style>
+<link rel="stylesheet" href="../site.css">
+<script src="../site.js" defer></script>
 </head>
 <body>
 
-<div class="wrap">
+<main class="wrap">
 
 <header class="hero">
-  <a href="../" style="font-size:13px;color:var(--muted);text-decoration:none">Saan Kits</a>
-  <span class="eyebrow">Skill · v1.0.0 · 作者 Yishan · MIT</span>
-  <div class="titlebar">
-    <h1>Saan Diagram</h1>
-    <p class="sub">把业务描述、需求文档、白板截图，转成同一套规范下的中英文业务图示</p>
-  </div>
-  <p class="thesis">统一的是<b>约束语言</b>，不是具体方案。</p>
-  <div class="facts">
-    <span><strong>15</strong>种图示</span>
-    <span><strong>52</strong>条校验规则</span>
-        <span><strong>≤3</strong>处核心色</span>
-  </div>
+  <nav class="site-nav" aria-label="技能导航"><a href="../">Saan Kits</a><a href="../diagram/" aria-current="page">Diagram</a><a href="../mermaid/">Mermaid</a></nav>
+  <h1>Saan Diagram</h1>
+  <nav class="section-nav" aria-label="页内导航"><a href="#install">安装</a><a href="#pick">图示类型</a><a href="#gallery">示例</a><a href="#lint">校验</a><a href="#deliver">交付</a></nav>
 </header>
 
 <section aria-labelledby="install">
   <div class="narrow" style="display:grid;gap:10px">
-    <span class="eyebrow">安装</span>
-    <h2 id="install">按你用的地方装</h2>
+    <h2 id="install">安装</h2>
   </div>
-  <div class="tbl-wrap"><table class="inst">
-    <thead><tr><th>你用的是</th><th>怎么装</th></tr></thead>
+  <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-diagram</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制Saan Diagram安装命令" hidden>复制</button></div>
+  <details class="alternatives"><summary>其他安装方式</summary><div class="tbl-wrap"><table class="inst">
+    <thead><tr><th>平台</th><th>安装方式</th></tr></thead>
     <tbody>
-      <tr><td>npx（通用）</td><td><code>npx skills add yishan/saankits --skill saan-diagram</code></td></tr>
+
       <tr><td>Claude Code</td><td><code>/plugin marketplace add yishan/saankits</code><br><code>/plugin install saan-diagram@saan-diagram</code></td></tr>
       <tr><td>Claude.ai</td><td>将仓库中的 <a href="https://github.com/yishan/saankits/tree/main/skills/saan-diagram"><code>skills/saan-diagram/</code></a> 完整目录打成 zip（顶层为 <code>saan-diagram/</code>），在设置里上传</td></tr>
     </tbody>
-  </table></div>
-</section>
-
-<section aria-labelledby="how">
-  <div class="narrow" style="display:grid;gap:10px">
-    <span class="eyebrow">怎么工作</span>
-    <h2 id="how">写 spec，脚本出图</h2>
-  </div>
-  <ol class="pipe">
-    <li><b>抽取</b><span>阶段、节点、系统、连线</span></li>
-    <li><b>补齐必要信息</b><span>缺失的业务事实、交付目标</span></li>
-    <li><b>从模板起步</b><span><code>--init</code></span></li>
-    <li><b>精简表达</b><span>保留业务事实与控制点</span></li>
-    <li class="gate"><b>--all 校验</b><span>必须通过</span></li>
-    <li><b>亲眼看图</b><span>看 PNG</span></li>
-    <li><b>交付</b><span>HTML / PNG / 飞书画板</span></li>
-  </ol>
-  <p class="narrow">输出语言优先按你的明确要求，否则沿用请求的语言。英文图示使用 <code>language: en</code>，中文使用 <code>language: zh-CN</code>；模板的语言不决定交付语言。<a href="https://github.com/yishan/saankits/tree/main/skills/saan-diagram/assets/en">查看英文示例</a></p>
-</section>
-
-<section aria-labelledby="grammar">
-  <div class="narrow" style="display:grid;gap:10px">
-    <span class="eyebrow">视觉语法</span>
-    <h2 id="grammar">颜色只留给"系统"和"核心"</h2>
-    <p>业务节点一律中性灰，核心色全图 ≤3 处。</p>
-  </div>
-  <div class="grammar">
-    <div class="panel">
-      <h3>节点</h3>
-      <div class="sw">
-        <span class="chip c-hub">主线节点</span><span><code>hub</code> 主干、汇聚点</span>
-        <span class="chip c-mod">功能模块</span><span><code>module</code> 默认，中性浅灰</span>
-        <span class="chip c-int">内部系统</span><span><code>system · internal</code> VI 主色</span>
-        <span class="chip c-ext">外部服务</span><span><code>system · external</code> 主色提亮 45%</span>
-        <span class="chip c-core">核心业务</span><span><code>core: true</code> 全图 ≤3 处（F1）</span>
-        <span class="chip c-ai">重点能力</span><span><code>special</code> 一张图只突出一类，名称自定（如"AI 能力"）</span>
-      </div>
-    </div>
-    <div class="panel">
-      <h3>连线</h3>
-      <div class="lines">
-        <svg viewBox="0 0 76 12" aria-hidden="true"><path d="M2 6H68" stroke="var(--ink)" stroke-width="1.6" fill="none"/><path d="M66 2L72 6L66 10" stroke="var(--ink)" stroke-width="1.6" fill="none"/></svg><span><code>flow</code> 业务主流程</span>
-        <svg viewBox="0 0 76 12" aria-hidden="true"><path d="M2 6H68" stroke="var(--muted)" stroke-width="1.4" stroke-dasharray="2 3" fill="none"/><path d="M66 2L72 6L66 10" stroke="var(--muted)" stroke-width="1.4" fill="none"/></svg><span><code>data</code> 数据、集成、推送</span>
-        <svg viewBox="0 0 76 12" aria-hidden="true"><path d="M2 6H68" stroke="var(--meta)" stroke-width="1.4" stroke-dasharray="6 4" fill="none"/><path d="M66 2L72 6L66 10" stroke="var(--meta)" stroke-width="1.4" fill="none"/></svg><span><code>meta</code> 配置依赖，必须带标签</span>
-        <svg viewBox="0 0 76 12" aria-hidden="true"><path d="M2 6H68" stroke="var(--accent)" stroke-width="2.2" fill="none"/><path d="M66 2L72 6L66 10" stroke="var(--accent)" stroke-width="2.2" fill="none"/></svg><span><code>emphasis</code> 关键路径，全图只标一条</span>
-      </div>
-      <ul class="rules">
-        <li>只用正交折线，拐角半径 8，不画斜线</li>
-        <li>相连节点自动对齐，auto 连线最多折一次</li>
-        <li>标签放在线旁、不压线，也不压节点</li>
-        <li>箭头末段 ≥ 24px，箭头前要看得到线</li>
-      </ul>
-    </div>
-    <div class="panel">
-      <h3>文字与网格</h3>
-      <ul class="rules">
-        <li>节点名 ≤10 字，连线标签 ≤8 字；放不下就精简措辞，<b>不缩字号</b></li>
-        <li>中文最小 12px，不用等宽字体；等宽字体只给技术值（<code>SHA-256</code>）</li>
-        <li>所有结构尺寸都落在 4px 网格上</li>
-        <li>标题栏默认无边框，不占颜色预算</li>
-        <li>图例自动生成，只列图中实际用到的类型</li>
-        <li>泳道不是必备的：只有列本身有含义时才画</li>
-      </ul>
-    </div>
-  </div>
+  </table></div></details>
 </section>
 
 <section aria-labelledby="pick">
   <div class="narrow" style="display:grid;gap:10px">
-    <span class="eyebrow">选型速查</span>
-    <h2 id="pick">先问：你要表达的是什么</h2>
-    <p>一段文字能说清的，就不画。要画时先分清：讲“有什么”，还是讲“怎么走”。</p>
+    <h2 id="pick">图示类型</h2>
+
   </div>
-  <h3 class="pick-h">架构图<small>讲“有什么”：节点是能力或功能</small></h3>
-  <ol class="pick"><li><a href="#1-arch"><span class="n">01</span><span class="nm">架构视图</span><span class="q">业务能力全景：每个阶段有哪些模块，接哪些系统。</span><code class="al">arch</code></a></li><li><a href="#biz-platform"><span class="n">02</span><span class="nm">分层架构图</span><span class="q">平台由哪些层组成、对外接什么、受哪些体系约束。</span><code class="al">layers</code></a></li>
-  </ol>
-  <h3 class="pick-h">流程图<small>讲“怎么走”：节点是业务动作，泳道只是分列方式</small></h3>
-  <ol class="pick"><li><a href="#2-flow"><span class="n">03</span><span class="nm">主流程视图</span><span class="q">一条业务主流程怎么走，判断点在哪里分叉、回退到哪里。</span><code class="al">flow</code></a></li><li><a href="#4-swim"><span class="n">04</span><span class="nm">泳道图</span><span class="q">多个角色之间谁在什么时候做什么、在哪里交接。</span><code class="al">swim</code></a></li><li><a href="#5-overview"><span class="n">05</span><span class="nm">总览流程图</span><span class="q">跨系统看，业务从头到尾怎么走、在哪里和外部系统衔接。</span><code class="al">overview</code></a></li><li><a href="#payment-audit"><span class="n">06</span><span class="nm">审计流程图</span><span class="q">付款审批中有哪些单据、关键控制点在哪、各防什么风险。</span><code class="al">audit</code></a></li><li><a href="#vendor-opportunity"><span class="n">07</span><span class="nm">机会流程图</span><span class="q">流程里哪些环节不增值，最该砍的是哪几步。</span><code class="al">opportunity</code></a></li>
-  </ol>
-  <h3 class="pick-h">其他问题<small>比较方式、数据、组织、原因、优先级和进度</small></h3>
-  <ol class="pick"><li><a href="#3-paths"><span class="n">08</span><span class="nm">路径对比视图</span><span class="q">同一套阶段上，几种方式各走过哪些阶段、跳过哪些。</span><code class="al">paths</code></a></li><li><a href="#proc-idef0"><span class="n">09</span><span class="nm">IDEF0 功能模型</span><span class="q">每个活动受什么约束、靠谁完成、产出什么。</span><code class="al">idef0</code></a></li><li><a href="#bid-dfd"><span class="n">10</span><span class="nm">数据流图</span><span class="q">数据从哪来、经过哪些处理、存到哪、流向谁。</span><code class="al">dfd</code></a></li><li><a href="#procurement-er"><span class="n">11</span><span class="nm">实体关系图</span><span class="q">有哪些业务对象、彼此什么关系、几对几。</span><code class="al">er</code></a></li><li><a href="#group-org"><span class="n">12</span><span class="nm">组织架构图 + 数据隔离</span><span class="q">谁管谁之外，谁能看到谁的数据。</span><code class="al">org</code></a></li><li><a href="#bid-fishbone"><span class="n">13</span><span class="nm">鱼骨图</span><span class="q">一个结果背后有哪些原因，哪些已经验证。</span><code class="al">fishbone</code></a></li><li><a href="#ai-quadrant"><span class="n">14</span><span class="nm">四象限图</span><span class="q">一组事项在两个维度上，该先做哪个。</span><code class="al">quadrant</code></a></li><li><a href="#platform-timeline"><span class="n">15</span><span class="nm">里程碑时间线</span><span class="q">关键节点什么时候到、现在走到哪、偏了多少。</span><code class="al">timeline</code></a></li>
-  </ol>
-  <p class="nope">不画：时序图、状态图、物理表结构、甘特图。</p>
+  <div class="type-group"><h3 class="pick-h">架构图</h3>
+  <ol class="pick"><li><a href="#1-arch"><span class="nm">架构视图</span></a></li><li><a href="#biz-platform"><span class="nm">分层架构图</span></a></li>
+  </ol></div>
+  <div class="type-group"><h3 class="pick-h">流程图</h3>
+  <ol class="pick"><li><a href="#2-flow"><span class="nm">主流程视图</span></a></li><li><a href="#4-swim"><span class="nm">泳道图</span></a></li><li><a href="#5-overview"><span class="nm">总览流程图</span></a></li><li><a href="#payment-audit"><span class="nm">审计流程图</span></a></li><li><a href="#vendor-opportunity"><span class="nm">机会流程图</span></a></li>
+  </ol></div>
+  <div class="type-group"><h3 class="pick-h">其他图示</h3>
+  <ol class="pick"><li><a href="#3-paths"><span class="nm">路径对比视图</span></a></li><li><a href="#proc-idef0"><span class="nm">IDEF0 功能模型</span></a></li><li><a href="#bid-dfd"><span class="nm">数据流图</span></a></li><li><a href="#procurement-er"><span class="nm">实体关系图</span></a></li><li><a href="#group-org"><span class="nm">组织架构图 + 数据隔离</span></a></li><li><a href="#bid-fishbone"><span class="nm">鱼骨图</span></a></li><li><a href="#ai-quadrant"><span class="nm">四象限图</span></a></li><li><a href="#platform-timeline"><span class="nm">里程碑时间线</span></a></li>
+  </ol></div>
+  <p class="nope">时序图、状态图、甘特图使用 <a href="../mermaid/">Saan Mermaid</a>。物理表结构不在本技能范围内。</p>
 </section>
 
 <section aria-labelledby="gallery">
   <div class="narrow" style="display:grid;gap:10px">
-    <span class="eyebrow">示例全集</span>
-    <h2 id="gallery">15 张示例</h2>
+    <h2 id="gallery">示例</h2>
 
   </div>
   <div class="gallery">
 <article class="ex" id="1-arch">
-  <header class="ex-h"><span class="n">01</span><h3>架构视图</h3><code class="lay">stages</code><code class="init">--init arch</code></header>
+  <header class="ex-h"><h3>架构视图</h3><code class="init">--init arch</code></header>
   <a class="fig" href="img/1-arch.png" target="_blank" rel="noopener"><img src="img/1-arch.png" alt="架构视图示例：业务能力全景：每个阶段有哪些模块，接哪些系统。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>业务能力全景：每个阶段有哪些模块，接哪些系统。</dd></div>
-    <div><dt>画法要点</dt><dd>主干节点同一行；系统块按内外部归属分深浅；scope 叠加层标出&quot;二期建设&quot;。</dd></div>
-  </dl>
+  <p class="example-note">主干节点同一行；系统块按内外部归属分深浅；scope 叠加层标出&quot;二期建设&quot;。</p>
   <details><summary>spec · <code>1-arch.yaml</code></summary><pre><code># 示例 1 · 架构视图：采购平台功能架构
 title: 采购平台功能架构
 desc: 采购平台按需求计划、寻源采购、合同履约、结算评价四个阶段组织功能模块，并与预算、专家库、CA 签章、财务系统集成。
@@ -324,12 +218,9 @@ overlays:
 </code></pre></details>
 </article>
 <article class="ex" id="biz-platform">
-  <header class="ex-h"><span class="n">02</span><h3>分层架构图</h3><code class="lay">layout: layers</code><code class="init">--init layers</code></header>
+  <header class="ex-h"><h3>分层架构图</h3><code class="init">--init layers</code></header>
   <a class="fig" href="img/biz-platform.png" target="_blank" rel="noopener"><img src="img/biz-platform.png" alt="分层架构图示例：平台由哪些层组成、对外接什么、受哪些体系约束。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>平台由哪些层组成、对外接什么、受哪些体系约束。</dd></div>
-    <div><dt>画法要点</dt><dd>五条轨道：贯穿栏 · 层名 · 主体 · 右侧集成与内外部系统 · 贯穿栏；能力链把主流程嵌进分层图；浅橙色是重点能力，本图用来标 AI。</dd></div>
-  </dl>
+  <p class="example-note">五条轨道：贯穿栏 · 层名 · 主体 · 右侧集成与内外部系统 · 贯穿栏；能力链把主流程嵌进分层图；浅橙色是重点能力，本图用来标 AI。</p>
   <details><summary>spec · <code>biz-platform.yaml</code></summary><pre><code># 分层架构图示例：通用企业业务平台总体架构（虚构，仅示范写法）
 layout: layers
 title: 企业业务协同平台
@@ -398,12 +289,9 @@ links:
 </code></pre></details>
 </article>
 <article class="ex" id="2-flow">
-  <header class="ex-h"><span class="n">03</span><h3>主流程视图</h3><code class="lay">stages · paths</code><code class="init">--init flow</code></header>
+  <header class="ex-h"><h3>主流程视图</h3><code class="init">--init flow</code></header>
   <a class="fig" href="img/2-flow.png" target="_blank" rel="noopener"><img src="img/2-flow.png" alt="主流程视图示例：一条业务主流程怎么走，判断点在哪里分叉、回退到哪里。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>一条业务主流程怎么走，判断点在哪里分叉、回退到哪里。</dd></div>
-    <div><dt>画法要点</dt><dd>单条流程默认不画泳道，节点按固定步长等距排；判断菱形的出线标&quot;是 / 否&quot;。</dd></div>
-  </dl>
+  <p class="example-note">单条流程默认不画泳道，节点按固定步长等距排；判断菱形的出线标&quot;是 / 否&quot;。</p>
   <details><summary>spec · <code>2-flow.yaml</code></summary><pre><code># 主流程视图：单条流程，默认不画泳道（列只是排版网格），节点等距排列
 title: 采购业务主流程
 desc: 一次采购从提交需求、预算判断、寻源评标到合同签订与付款的主流程，含预算不足的回退分支。
@@ -434,12 +322,9 @@ verify:
 </code></pre></details>
 </article>
 <article class="ex" id="4-swim">
-  <header class="ex-h"><span class="n">04</span><h3>泳道图</h3><code class="lay">stages</code><code class="init">--init swim</code></header>
+  <header class="ex-h"><h3>泳道图</h3><code class="init">--init swim</code></header>
   <a class="fig" href="img/4-swim.png" target="_blank" rel="noopener"><img src="img/4-swim.png" alt="泳道图示例：多个角色之间谁在什么时候做什么、在哪里交接。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>多个角色之间谁在什么时候做什么、在哪里交接。</dd></div>
-    <div><dt>画法要点</dt><dd>列就是&quot;谁来做&quot;，节点自上而下按时间排；回退用 U 形绕行，不压主线。</dd></div>
-  </dl>
+  <p class="example-note">列就是&quot;谁来做&quot;，节点自上而下按时间排；回退用 U 形绕行，不压主线。</p>
   <details><summary>spec · <code>4-swim.yaml</code></summary><pre><code># 示例 4 · 泳道图：列 = 角色，自上而下 = 时间
 title: 公开招标协作泳道
 desc: 需求部门、采购部门、供应商、评审专家、财务部门在一次公开招标中的分工与交接。
@@ -483,12 +368,9 @@ verify:
 </code></pre></details>
 </article>
 <article class="ex" id="5-overview">
-  <header class="ex-h"><span class="n">05</span><h3>总览流程图</h3><code class="lay">stages</code><code class="init">--init overview</code></header>
+  <header class="ex-h"><h3>总览流程图</h3><code class="init">--init overview</code></header>
   <a class="fig" href="img/5-overview.png" target="_blank" rel="noopener"><img src="img/5-overview.png" alt="总览流程图示例：从上游系统到平台再到下游系统，业务怎么走。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>跨系统看，业务从头到尾怎么走、在哪里和外部系统衔接。</dd></div>
-    <div><dt>画法要点</dt><dd>不写内部角色泳道，节点是业务动作，只画正向主线，用无边框浅底分区。审批和审计流程不用这张，要保留判断和退回。</dd></div>
-  </dl>
+  <p class="example-note">不写内部角色泳道，节点是业务动作，只画正向主线，用无边框浅底分区。审批和审计流程不用这张，要保留判断和退回。</p>
   <details><summary>spec · <code>5-overview.yaml</code></summary><pre><code># 示例 5 · 总览流程图：上游—平台—下游三条泳道，节点是业务动作，只画正向主线（虚构，仅示范写法）
 # 分区用无边框浅底（zone），系统对接用灰色实线（connector_style: solid）。
 # 审批、审计流程不要用这个模板：它们要保留判断和退回，用 swim / audit。
@@ -553,12 +435,9 @@ overlays:
 </code></pre></details>
 </article>
 <article class="ex" id="payment-audit">
-  <header class="ex-h"><span class="n">06</span><h3>审计流程图</h3><code class="lay">profile: audit</code><code class="init">--init audit</code></header>
+  <header class="ex-h"><h3>审计流程图</h3><code class="init">--init audit</code></header>
   <a class="fig" href="img/payment-audit.png" target="_blank" rel="noopener"><img src="img/payment-audit.png" alt="审计流程图示例：付款审批中有哪些单据、关键控制点在哪、各防什么风险。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>付款审批中有哪些单据、关键控制点在哪、各防什么风险。</dd></div>
-    <div><dt>画法要点</dt><dd>图例下方自动生成&quot;控制点 → 风险&quot;清单；数一数每个部门有几个控制点，就知道是不是&quot;先放行再把关&quot;。</dd></div>
-  </dl>
+  <p class="example-note">图例下方自动生成&quot;控制点 → 风险&quot;清单；数一数每个部门有几个控制点，就知道是不是&quot;先放行再把关&quot;。</p>
   <details><summary>spec · <code>payment-audit.yaml</code></summary><pre><code># 审计流程图示例（profile: audit）：泳道 + 单据 + 控制点
 title: 合同付款审批审计流程
 desc: 合同付款从业务部门申请、采购部门核对验收、财务审核发票与三单匹配到出纳支付的审计流程，标出 4 个关键控制点及其防范的风险。
@@ -600,12 +479,9 @@ verify:
 </code></pre></details>
 </article>
 <article class="ex" id="vendor-opportunity">
-  <header class="ex-h"><span class="n">07</span><h3>机会流程图</h3><code class="lay">profile: opportunity</code><code class="init">--init opportunity</code></header>
+  <header class="ex-h"><h3>机会流程图</h3><code class="init">--init opportunity</code></header>
   <a class="fig" href="img/vendor-opportunity.png" target="_blank" rel="noopener"><img src="img/vendor-opportunity.png" alt="机会流程图示例：流程里哪些环节不增值，最该砍的是哪几步。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>流程里哪些环节不增值，最该砍的是哪几步。</dd></div>
-    <div><dt>画法要点</dt><dd>自动统计&quot;增值 X 个 · 非增值 Y 个（占 Z%）&quot;。</dd></div>
-  </dl>
+  <p class="example-note">自动统计&quot;增值 X 个 · 非增值 Y 个（占 Z%）&quot;。</p>
   <details><summary>spec · <code>vendor-opportunity.yaml</code></summary><pre><code># 机会流程图示例：增值 / 非增值两列，自动统计非增值占比
 title: 供应商准入机会流程
 desc: 供应商准入流程中增值环节与非增值环节（重复提交、等待、重复会签）的分布，用于识别优化机会。
@@ -631,12 +507,9 @@ edges:
 </code></pre></details>
 </article>
 <article class="ex" id="3-paths">
-  <header class="ex-h"><span class="n">08</span><h3>路径对比视图</h3><code class="lay">stages · paths</code><code class="init">--init paths</code></header>
+  <header class="ex-h"><h3>路径对比视图</h3><code class="init">--init paths</code></header>
   <a class="fig" href="img/3-paths.png" target="_blank" rel="noopener"><img src="img/3-paths.png" alt="路径对比视图示例：同一套阶段上，几种方式各走过哪些阶段、跳过哪些。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>同一套阶段上，几种方式各走过哪些阶段、跳过哪些。</dd></div>
-    <div><dt>画法要点</dt><dd>每行一种方式，对齐到同一组阶段列，跳过的阶段一眼可见。</dd></div>
-  </dl>
+  <p class="example-note">每行一种方式，对齐到同一组阶段列，跳过的阶段一眼可见。</p>
   <details><summary>spec · <code>3-paths.yaml</code></summary><pre><code># 示例 3 · 路径对比视图：不同采购方式走过哪些阶段
 title: 采购方式路径对比
 desc: 公开招标、询比采购、竞争谈判、单一来源四种方式在公告、响应、评审、定标、合同五个阶段上的路径差异。
@@ -679,12 +552,9 @@ paths:
 </code></pre></details>
 </article>
 <article class="ex" id="proc-idef0">
-  <header class="ex-h"><span class="n">09</span><h3>IDEF0 功能模型</h3><code class="lay">layout: idef0</code><code class="init">--init idef0</code></header>
+  <header class="ex-h"><h3>IDEF0 功能模型</h3><code class="init">--init idef0</code></header>
   <a class="fig" href="img/proc-idef0.png" target="_blank" rel="noopener"><img src="img/proc-idef0.png" alt="IDEF0 功能模型示例：每个活动受什么约束、靠谁完成、产出什么。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>每个活动受什么约束、靠谁完成、产出什么。</dd></div>
-    <div><dt>画法要点</dt><dd>输入左进、控制上进、输出右出、机制下进；自动点出单点依赖的机制、无制度控制的活动和返工回路。</dd></div>
-  </dl>
+  <p class="example-note">输入左进、控制上进、输出右出、机制下进；自动点出单点依赖的机制、无制度控制的活动和返工回路。</p>
   <details><summary>spec · <code>proc-idef0.yaml</code></summary><pre><code># IDEF0 示例：采购执行（A0）——输入在左、控制在上、输出在右、机制在下
 layout: idef0
 node: A0
@@ -716,12 +586,9 @@ mechanisms:
 </code></pre></details>
 </article>
 <article class="ex" id="bid-dfd">
-  <header class="ex-h"><span class="n">10</span><h3>数据流图</h3><code class="lay">profile: dfd</code><code class="init">--init dfd</code></header>
+  <header class="ex-h"><h3>数据流图</h3><code class="init">--init dfd</code></header>
   <a class="fig" href="img/bid-dfd.png" target="_blank" rel="noopener"><img src="img/bid-dfd.png" alt="数据流图示例：数据从哪来、经过哪些处理、存到哪、流向谁。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>数据从哪来、经过哪些处理、存到哪、流向谁。</dd></div>
-    <div><dt>画法要点</dt><dd>处理与存储交替排行；连线标签写数据名，不写动作。</dd></div>
-  </dl>
+  <p class="example-note">处理与存储交替排行；连线标签写数据名，不写动作。</p>
   <details><summary>spec · <code>bid-dfd.yaml</code></summary><pre><code># 数据流图示例（profile: dfd）：处理与存储交替，外部实体在两侧
 title: 电子投标数据流
 desc: 供应商投标文件从递交、开标、评审到形成评标报告的数据流，含外部实体、处理过程与数据存储。
@@ -755,12 +622,9 @@ edges:
 </code></pre></details>
 </article>
 <article class="ex" id="procurement-er">
-  <header class="ex-h"><span class="n">11</span><h3>实体关系图</h3><code class="lay">layout: er</code><code class="init">--init er</code></header>
+  <header class="ex-h"><h3>实体关系图</h3><code class="init">--init er</code></header>
   <a class="fig" href="img/procurement-er.png" target="_blank" rel="noopener"><img src="img/procurement-er.png" alt="实体关系图示例：有哪些业务对象、彼此什么关系、几对几。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>有哪些业务对象、彼此什么关系、几对几。</dd></div>
-    <div><dt>画法要点</dt><dd>两端标基数，标签写动词；虚线框表示业务域（限界上下文）。</dd></div>
-  </dl>
+  <p class="example-note">两端标基数，标签写动词；虚线框表示业务域（限界上下文）。</p>
   <details><summary>spec · <code>procurement-er.yaml</code></summary><pre><code># 实体关系图示例：采购核心数据模型
 layout: er
 title: 采购核心数据模型
@@ -788,12 +652,9 @@ relations:
 </code></pre></details>
 </article>
 <article class="ex" id="group-org">
-  <header class="ex-h"><span class="n">12</span><h3>组织架构图 + 数据隔离</h3><code class="lay">layout: org</code><code class="init">--init org</code></header>
+  <header class="ex-h"><h3>组织架构图 + 数据隔离</h3><code class="init">--init org</code></header>
   <a class="fig" href="img/group-org.png" target="_blank" rel="noopener"><img src="img/group-org.png" alt="组织架构图 + 数据隔离示例：谁管谁之外，谁能看到谁的数据。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>谁管谁之外，谁能看到谁的数据。</dd></div>
-    <div><dt>画法要点</dt><dd>嵌套 = 外层可见内层，并列 = 互相隔离；自动统计跨域授权，读写和委托越多，越像&quot;纸面隔离&quot;。</dd></div>
-  </dl>
+  <p class="example-note">嵌套 = 外层可见内层，并列 = 互相隔离；自动统计跨域授权，读写和委托越多，越像&quot;纸面隔离&quot;。</p>
   <details><summary>spec · <code>group-org.yaml</code></summary><pre><code># 组织架构 + 数据隔离示例：嵌套 = 外层可见内层；并列 = 互相隔离；跨域访问画授权
 layout: org
 title: 集团采购组织与数据隔离
@@ -832,12 +693,9 @@ grants:
 </code></pre></details>
 </article>
 <article class="ex" id="bid-fishbone">
-  <header class="ex-h"><span class="n">13</span><h3>鱼骨图</h3><code class="lay">layout: fishbone</code><code class="init">--init fishbone</code></header>
+  <header class="ex-h"><h3>鱼骨图</h3><code class="init">--init fishbone</code></header>
   <a class="fig" href="img/bid-fishbone.png" target="_blank" rel="noopener"><img src="img/bid-fishbone.png" alt="鱼骨图示例：一个结果背后有哪些原因，哪些已经验证。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>一个结果背后有哪些原因，哪些已经验证。</dd></div>
-    <div><dt>画法要点</dt><dd>正交梳状骨，不画斜线；没有标根因时提示&quot;这张图现在只是假设清单&quot;。</dd></div>
-  </dl>
+  <p class="example-note">正交梳状骨，不画斜线；没有标根因时提示&quot;这张图现在只是假设清单&quot;。</p>
   <details><summary>spec · <code>bid-fishbone.yaml</code></summary><pre><code># 鱼骨图示例：评标周期为什么超长
 layout: fishbone
 title: 评标周期超长原因分析
@@ -858,12 +716,9 @@ categories:
 </code></pre></details>
 </article>
 <article class="ex" id="ai-quadrant">
-  <header class="ex-h"><span class="n">14</span><h3>四象限图</h3><code class="lay">layout: quadrant</code><code class="init">--init quadrant</code></header>
+  <header class="ex-h"><h3>四象限图</h3><code class="init">--init quadrant</code></header>
   <a class="fig" href="img/ai-quadrant.png" target="_blank" rel="noopener"><img src="img/ai-quadrant.png" alt="四象限图示例：一组事项在两个维度上，该先做哪个。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>一组事项在两个维度上，该先做哪个。</dd></div>
-    <div><dt>画法要点</dt><dd>from 画出&quot;现状 → 目标&quot;迁移；60% 以上挤在一个象限时提示&quot;评分可能没拉开&quot;。</dd></div>
-  </dl>
+  <p class="example-note">from 画出&quot;现状 → 目标&quot;迁移；60% 以上挤在一个象限时提示&quot;评分可能没拉开&quot;。</p>
   <details><summary>spec · <code>ai-quadrant.yaml</code></summary><pre><code># 四象限示例：AI 场景优先级（价值 × 落地难度）
 layout: quadrant
 title: 招采 AI 场景优先级
@@ -887,12 +742,9 @@ items:
 </code></pre></details>
 </article>
 <article class="ex" id="platform-timeline">
-  <header class="ex-h"><span class="n">15</span><h3>里程碑时间线</h3><code class="lay">layout: timeline</code><code class="init">--init timeline</code></header>
+  <header class="ex-h"><h3>里程碑时间线</h3><code class="init">--init timeline</code></header>
   <a class="fig" href="img/platform-timeline.png" target="_blank" rel="noopener"><img src="img/platform-timeline.png" alt="里程碑时间线示例：关键节点什么时候到、现在走到哪、偏了多少。" loading="lazy"></a>
-  <dl class="meta">
-    <div><dt>回答的问题</dt><dd>关键节点什么时候到、现在走到哪、偏了多少。</dd></div>
-    <div><dt>画法要点</dt><dd>plan ≠ date 时画偏移箭头，并汇总&quot;延期 N 个、累计 X 天&quot;；最大延期之后的节点没写 plan 会被提醒。</dd></div>
-  </dl>
+  <p class="example-note">plan ≠ date 时画偏移箭头，并汇总&quot;延期 N 个、累计 X 天&quot;；最大延期之后的节点没写 plan 会被提醒。</p>
   <details><summary>spec · <code>platform-timeline.yaml</code></summary><pre><code># 里程碑时间线示例：某平台二期
 layout: timeline
 title: 某平台二期里程碑
@@ -918,19 +770,80 @@ milestones:
   </div>
 </section>
 
+<section aria-labelledby="how">
+  <div class="narrow" style="display:grid;gap:10px">
+    <h2 id="how">使用流程</h2>
+  </div>
+  <ol class="pipe">
+    <li><b>抽取</b><span>阶段、节点、系统、连线</span></li>
+    <li><b>补齐必要信息</b><span>缺失的业务事实、交付目标</span></li>
+    <li><b>从模板起步</b><span><code>--init</code></span></li>
+    <li><b>精简表达</b><span>保留业务事实与控制点</span></li>
+    <li class="gate"><b>--all 校验</b><span>必须通过</span></li>
+    <li><b>检查 PNG</b></li>
+    <li><b>交付</b><span>HTML / PNG / 飞书画板</span></li>
+  </ol>
+  <p class="narrow">输出语言优先按你的明确要求，否则沿用请求的语言。英文图示使用 <code>language: en</code>，中文使用 <code>language: zh-CN</code>；模板的语言不决定交付语言。<a href="https://github.com/yishan/saankits/tree/main/skills/saan-diagram/assets/en">查看英文示例</a></p>
+</section>
+
+<section aria-labelledby="grammar">
+  <div class="narrow" style="display:grid;gap:10px">
+    <h2 id="grammar">视觉规范</h2>
+    <p>业务节点一律中性灰，核心色全图 ≤3 处。</p>
+  </div>
+  <div class="grammar">
+    <div class="panel">
+      <h3>节点</h3>
+      <div class="sw">
+        <span class="chip c-hub">主线节点</span><span><code>hub</code> 主干、汇聚点</span>
+        <span class="chip c-mod">功能模块</span><span><code>module</code> 默认，中性浅灰</span>
+        <span class="chip c-int">内部系统</span><span><code>system · internal</code> VI 主色</span>
+        <span class="chip c-ext">外部服务</span><span><code>system · external</code> 主色提亮 45%</span>
+        <span class="chip c-core">核心业务</span><span><code>core: true</code> 全图 ≤3 处（F1）</span>
+        <span class="chip c-ai">重点能力</span><span><code>special</code> 一张图只突出一类，名称自定（如"AI 能力"）</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>连线</h3>
+      <div class="lines">
+        <svg viewBox="0 0 76 12" aria-hidden="true"><path d="M2 6H68" stroke="var(--ink)" stroke-width="1.6" fill="none"/><path d="M66 2L72 6L66 10" stroke="var(--ink)" stroke-width="1.6" fill="none"/></svg><span><code>flow</code> 业务主流程</span>
+        <svg viewBox="0 0 76 12" aria-hidden="true"><path d="M2 6H68" stroke="var(--muted)" stroke-width="1.4" stroke-dasharray="2 3" fill="none"/><path d="M66 2L72 6L66 10" stroke="var(--muted)" stroke-width="1.4" fill="none"/></svg><span><code>data</code> 数据、集成、推送</span>
+        <svg viewBox="0 0 76 12" aria-hidden="true"><path d="M2 6H68" stroke="var(--meta)" stroke-width="1.4" stroke-dasharray="6 4" fill="none"/><path d="M66 2L72 6L66 10" stroke="var(--meta)" stroke-width="1.4" fill="none"/></svg><span><code>meta</code> 配置依赖，必须带标签</span>
+        <svg viewBox="0 0 76 12" aria-hidden="true"><path d="M2 6H68" stroke="var(--accent)" stroke-width="2.2" fill="none"/><path d="M66 2L72 6L66 10" stroke="var(--accent)" stroke-width="2.2" fill="none"/></svg><span><code>emphasis</code> 关键路径，全图只标一条</span>
+      </div>
+      <ul class="rules">
+        <li>只用正交折线，拐角半径 8，不画斜线</li>
+        <li>相连节点自动对齐，auto 连线最多折一次</li>
+        <li>标签放在线旁、不压线，也不压节点</li>
+        <li>箭头末段 ≥ 24px，箭头前要看得到线</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>文字与网格</h3>
+      <ul class="rules">
+        <li>节点名 ≤10 字，连线标签 ≤8 字；放不下就精简措辞，<b>不缩字号</b></li>
+        <li>中文最小 12px，不用等宽字体；等宽字体只给技术值（<code>SHA-256</code>）</li>
+        <li>所有结构尺寸都落在 4px 网格上</li>
+        <li>标题栏默认无边框，不占颜色预算</li>
+        <li>图例自动生成，只列图中实际用到的类型</li>
+        <li>泳道不是必备的：只有列本身有含义时才画</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
 <section aria-labelledby="lint">
   <div class="narrow" style="display:grid;gap:10px">
-    <span class="eyebrow">校验</span>
-    <h2 id="lint">排版可以改，业务发现不许改</h2>
+    <h2 id="lint">校验规则</h2>
   </div>
   <div class="two">
     <div class="panel">
-      <h3>排版问题 · 35 条</h3>
+      <h3>排版问题</h3>
       <p class="codes"><b>建模</b> R1 R3 R5 R6 · <b>几何</b> A1 B1 G1–G4 · <b>文字</b> L1–L3 T1 S1 E3 · <b>对比度</b> CT1 CT2 · <b>预算</b> F1 F2 D1 D2 · <b>分层图</b> V1 W1 K1 · <b>组织图</b> O3 O4 · <b>鱼骨 / 时间线 / 四象限</b> FB1 TL1–TL3 Q1 Q2 · <b>IDEF0</b> ID3 ID5</p>
       <p style="font-size:13.5px">改 spec 直到通过</p>
     </div>
     <div class="panel finding">
-      <h3>业务发现 · 16 条</h3>
+      <h3>业务发现</h3>
       <p class="codes"><b>路径</b> P1 绕过控制点 · P2 走不到 · P3 死路 · P4 单出口判断 · P5 岗位未分离 · <b>流程分析</b> DF1–DF3 AU1 AU2 · <b>数据隔离</b> O1 O2 · <b>其他</b> ID1 ID2 Q3 C1</p>
       <p style="font-size:13.5px">报告给你；确认属实后写进 <code>accept</code>，图例下方如实标注</p>
     </div>
@@ -940,8 +853,7 @@ milestones:
 
 <section aria-labelledby="verify">
   <div class="narrow" style="display:grid;gap:10px">
-    <span class="eyebrow">流程路径验证</span>
-    <h2 id="verify">检查图中控制点是否存在绕过路径</h2>
+    <h2 id="verify">流程路径验证</h2>
   </div>
   <div class="two">
     <pre class="cmd" style="margin:0;background:var(--sheet)"><code>column_semantics: roles    # 本例的列明确表示岗位
@@ -967,8 +879,7 @@ FAIL: 排版 0 条 · 发现 1 条 · 退出码 2</span></pre>
 
 <section aria-labelledby="deliver">
   <div class="narrow" style="display:grid;gap:10px">
-    <span class="eyebrow">交付</span>
-    <h2 id="deliver">HTML / PNG，或写入飞书画板</h2>
+    <h2 id="deliver">导出与飞书画板</h2>
   </div>
   <div class="route">
     <div class="panel">
@@ -994,14 +905,14 @@ FAIL: 排版 0 条 · 发现 1 条 · 退出码 2</span></pre>
 </section>
 
 
-<footer>
+<footer><a href="https://github.com/yishan/saankits/blob/main/skills/saan-diagram/SKILL.md">SKILL.md</a>
   <span>Saan Diagram v1.0.0 · 作者 Yishan · MIT</span>
   <span><a href="https://github.com/yishan/saankits" target="_blank" rel="noopener">github.com/yishan/saankits</a></span>
   <span><a href="https://github.com/yishan/saankits/blob/main/docs/saan-diagram/README.md">English README</a> · <a href="https://github.com/yishan/saankits/blob/main/docs/saan-diagram/README.zh-CN.md">中文说明</a></span>
   <span>参考 cathrynlavery/diagram-design</span>
   <span>示例内容均为虚构</span>
 </footer>
-</div>
+</main>
 
 </body>
 </html>

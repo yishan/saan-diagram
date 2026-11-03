@@ -16,7 +16,7 @@
 if (location.hash.length > 1) location.replace('diagram/' + location.hash);
 </script>
 <style>
-/* Layout: 技能目录画成一棵 Saan 连线树。实线是可用，虚线是计划中，和技能本身的线型语义一致 */
+/* Compare available skills by their outputs; each row opens its skill page. */
 :root{
   --paper:#F6F7F9; --ink:#1F2329; --muted:#5B6370; --line:#4E5563; --node:#E3E5EA; --node-hover:#D0D3D9; --code:#ECEEF2;
   --f-display:"Noto Serif SC","Songti SC","STSong",serif;
@@ -33,38 +33,30 @@ body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-siz
   padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
 main{max-width:640px;margin:0 auto;padding-block:clamp(56px,14vh,128px) 64px}
 h1{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(44px,9vw,72px);line-height:1.1}
-.lead{margin:16px 0 0;font-size:18px;color:var(--muted);text-wrap:balance}
-.tree{list-style:none;margin:40px 0 0;padding:0;display:grid}
-.tree li{position:relative;padding:0 0 16px 40px;min-width:0}
-/* 主干 + 单折连线 */
-.tree li::before{content:"";position:absolute;left:12px;top:0;bottom:0;border-left:1.5px solid var(--line)}
-.tree li::after{content:"";position:absolute;left:12px;top:32px;width:28px;border-top:1.5px solid var(--line)}
-.tree li:last-child{padding-bottom:0}
-.tree li:last-child::before{bottom:auto;height:32px}
-.tree li.planned::before{border-left:1.5px dashed var(--muted)}
-.tree li.planned::after{border-top:1.5px dashed var(--muted)}
-.skill{display:grid;gap:2px;padding:12px 16px;border-radius:4px;background:var(--node);color:inherit;text-decoration:none}
-a.skill:hover{background:var(--node-hover)}
-a.skill:focus-visible,footer a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.skill b{font-weight:500;font-size:18px}
-.skill span{font-size:14.5px;color:var(--muted)}
-.planned .skill{background:none;outline:1.5px dashed var(--node-hover);outline-offset:-1.5px}
-.planned .skill b{font-size:16px;font-weight:400;color:var(--muted)}
-pre{margin:40px 0 0;padding:14px 16px;background:var(--code);border-radius:4px;overflow-x:auto;font-family:var(--f-mono);font-size:13.5px;line-height:1.6}
+.skill-list{list-style:none;margin:40px 0;padding:0;display:grid;border-top:1px solid var(--node-hover)}
+.skill-list li{border-bottom:1px solid var(--node-hover);min-width:0}
+.skill{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px 24px;padding:22px 0;color:inherit;text-decoration:none}
+a.skill:hover{background:var(--node)}
+.skill b{font-weight:500;font-size:22px}
+.skill span{font-size:14px;color:var(--muted)}
+.install{display:grid;gap:16px;margin-top:40px}
+.install h2{font-size:18px;font-weight:500;margin:0}
+pre{font-family:var(--f-mono);font-size:13px;line-height:1.7}
+@media(max-width:560px){.skill{grid-template-columns:1fr}.skill span{font-size:13px}}
 footer{margin-top:24px;font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 20px}
 footer a{color:inherit}
 </style>
+<link rel="stylesheet" href="site.css">
+<script src="site.js" defer></script>
 </head>
 <body>
 <main>
   <h1>Saan Kits</h1>
-  <p class="lead">把需求变成图示、文档和原型的 Agent 技能集。</p>
-  <ul class="tree">
-    <li><a class="skill" href="diagram/"><b>Saan Diagram</b><span>汇报和对外交付用的业务图，可写入飞书画板</span></a></li>
-    <li><a class="skill" href="mermaid/"><b>Saan Mermaid</b><span>放进文档的 Mermaid 图，并按控制点清单审查流程</span></a></li>
-    <li class="planned"><div class="skill"><b>PRD 写作、原型</b><span>计划中，还不能安装</span></div></li>
+  <ul class="skill-list">
+    <li><a class="skill" href="diagram/"><b>Saan Diagram</b><span>HTML · SVG · PNG · 飞书画板</span></a></li>
+    <li><a class="skill" href="mermaid/"><b>Saan Mermaid</b><span>Mermaid 代码 · 流程审查</span></a></li>
   </ul>
-  <pre><code>npx skills add yishan/saankits</code></pre>
+  <section class="install" aria-labelledby="install"><h2 id="install">安装</h2><div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制Saan Kits安装命令" hidden>复制</button></div></section>
   <footer><a href="https://github.com/yishan/saankits">GitHub</a><span>MIT</span><span>作者 Yishan</span></footer>
 </main>
 </body>
