@@ -1,6 +1,6 @@
 # Landing page
 
-Static HTML and images for Saan Diagram. The page is currently in Chinese; the repository README is available in English and Chinese.
+Static HTML and images for Saan Diagram. The page is currently in Chinese. The repository README introduces Saan Kits; the [English](../docs/saan-diagram/README.md) and [Chinese](../docs/saan-diagram/README.zh-CN.md) guides cover Saan Diagram.
 
 ## Local preview
 
@@ -15,7 +15,7 @@ Open http://localhost:8768. No package installation or build command is needed.
 
 ## Vercel
 
-Connect `yishan/saan-diagram` and use these project settings:
+Connect `yishan/saankits` and use these project settings:
 
 - Root Directory: `page`
 - Framework Preset: Other

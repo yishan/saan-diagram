@@ -1,0 +1,229 @@
+# Saan Diagram
+
+[Saan Kits](../../README.zh-CN.md) · 技能使用说明
+
+[English](README.md) | **简体中文**
+
+[介绍页与示例图库](https://saan-diagram.vercel.app/)
+
+把业务描述、需求文档、白板截图，转成同一套规范下的中英文业务图示。
+
+> **统一的是约束语言，不是具体方案。** 不同项目画的内容可以不同，但阶段、节点类型、线型、配色和校验规则都是同一套。
+
+Saan Diagram 是一个可用于 Claude Code、Codex 等 Agent 的 Skill。模型只写一份 YAML spec，用阶段、泳道、行来定位，不写像素也不写颜色；坐标、走线、配色、字号和图例都由 `render.py` 计算。`--lint` 不通过，就不能交付。
+
+- **15 种图示**，共用一套视觉语法，并校验形状和文字的对比度
+- **52 条校验规则**，写在脚本里，不靠模型记忆；`--selftest` 证明每条规则都能被故意改坏的样例触发
+- **业务发现不许被"修掉"**：失控点、绕过控制、数据黑洞、权限交叉等问题会原样报告，用户确认后写进图例
+- **流程路径验证**：检查流程图的可达性与控制点绕过路径，检查控制点不可绕过、岗位分离、没有死路
+- **颜色只留给"系统"和"核心"**：业务节点一律中性灰，核心色全图不超过 3 处
+- **元素对齐，线少折弯**：相连但差一点没对齐的节点自动对齐，auto 走线最多折一次；仍要折两次的连线会报 G5
+- **交付方式由你选**：直接输出 HTML / SVG / PNG，或通过内置脚本安全写入飞书画板（不用飞书的人不会加载这部分说明）
+
+![分层架构图示例](../../docs/img/biz-platform.png)
+
+## 支持的图示
+
+先分清要讲的是“有什么”还是“怎么走”。泳道只是流程图的一种分列方式。
+
+| 你要表达的是 | 图示 | 写法 | 示例 |
+|---|---|---|---|
+| 有什么：各阶段有哪些模块，接哪些系统 | 架构图 · 按阶段 | `columns` + `nodes` + `edges` | [1-arch](../../skills/saan-diagram/assets/1-arch.yaml) |
+| 有什么：平台由哪些层组成、对外接什么 | 架构图 · 按层 | `layout: layers` | [biz-platform](../../skills/saan-diagram/assets/biz-platform.yaml) |
+| 怎么走：一条主流程，含判断和回退 | 流程图 | `paths` | [2-flow](../../skills/saan-diagram/assets/2-flow.yaml) |
+| 怎么走：多个角色之间的交接 | 流程图 · 泳道 | `columns` = 角色 | [4-swim](../../skills/saan-diagram/assets/4-swim.yaml) |
+| 怎么走：跨系统的端到端总览 | 流程图 · 总览 | 上游、平台、下游三条泳道 + `kind: zone` | [5-overview](../../skills/saan-diagram/assets/5-overview.yaml) |
+| 怎么走：单据与关键控制点 | 流程图 · 审计 | `profile: audit` | [payment-audit](../../skills/saan-diagram/assets/payment-audit.yaml) |
+| 怎么走：哪些环节不增值 | 流程图 · 机会 | `profile: opportunity` | [vendor-opportunity](../../skills/saan-diagram/assets/vendor-opportunity.yaml) |
+| 几种方式各走过哪些阶段 | 路径对比视图 | `paths` 多行 | [3-paths](../../skills/saan-diagram/assets/3-paths.yaml) |
+| 每个活动受什么约束、靠谁完成 | IDEF0 功能模型 | `layout: idef0` | [proc-idef0](../../skills/saan-diagram/assets/proc-idef0.yaml) |
+| 数据从哪来、经过哪些处理、存到哪 | 数据流图 | `profile: dfd` | [bid-dfd](../../skills/saan-diagram/assets/bid-dfd.yaml) |
+| 业务对象及其关系、几对几 | 实体关系图 | `layout: er` | [procurement-er](../../skills/saan-diagram/assets/procurement-er.yaml) |
+| 谁管谁，谁能看到谁的数据 | 组织架构图 + 数据隔离 | `layout: org` | [group-org](../../skills/saan-diagram/assets/group-org.yaml) |
+| 一个结果背后有哪些原因 | 鱼骨图 | `layout: fishbone` | [bid-fishbone](../../skills/saan-diagram/assets/bid-fishbone.yaml) |
+| 两个维度上该先做哪个 | 四象限图 | `layout: quadrant` | [ai-quadrant](../../skills/saan-diagram/assets/ai-quadrant.yaml) |
+| 关键节点什么时候到、偏了多少 | 里程碑时间线 | `layout: timeline` | [platform-timeline](../../skills/saan-diagram/assets/platform-timeline.yaml) |
+
+时序交互、状态流转、物理表结构、按任务排期的甘特图不在范围内，建议用 Mermaid 或数据库建模工具。
+
+## 安装
+
+### skills CLI（Claude Code / Codex 等）
+
+```bash
+# 只列出可发现的 Skill，不安装
+npx skills add yishan/saankits --list
+
+# 安装，并交互选择目标 Agent；默认安装到当前项目
+npx skills add yishan/saankits --skill saan-diagram
+
+# 明确安装到 Claude Code 或 Codex；加 -g 可安装到用户级目录
+npx skills add yishan/saankits --skill saan-diagram -a claude-code
+npx skills add yishan/saankits --skill saan-diagram -a codex
+```
+
+依赖当前 skills CLI 所要求的 Node.js 版本。CLI 安装完整 Skill 目录，运行依赖见下文（多数桌面环境只需 uv 和本机 Chrome）。
+skills.sh 的目录与排名由 CLI 安装统计驱动；本仓库有安装命令不代表平台已收录，CLI 安装成功也不代表渲染或飞书写入已验收。参见 [CLI 文档](https://github.com/vercel-labs/skills) 与 [收录说明](https://skills.sh/docs/faq)。
+
+### Claude Code（插件市场）
+
+```bash
+/plugin marketplace add yishan/saankits
+/plugin install saan-diagram@saan-diagram
+```
+
+### Claude Code（手动）
+
+把 `skills/saan-diagram/` 整个目录复制到 `~/.claude/skills/saan-diagram/`（个人）或项目里的 `.claude/skills/saan-diagram/`。
+
+### Claude.ai
+
+把 `skills/saan-diagram/` 目录打成 zip（zip 里的顶层是 `saan-diagram/` 文件夹），在 Claude.ai 的设置里上传为自定义 Skill。
+
+## 依赖
+
+| 用途 | 需要 |
+|---|---|
+| 校验与出 HTML / SVG | Python 3.9+ 和 [uv](https://docs.astral.sh/uv/)（自动获取 `pyyaml`）；或 `pip install -r requirements.txt`；或用 `.json` spec，只需标准库 |
+| 导出 PNG | 本机 Chrome / Chromium / Edge / Brave（headless 截图；装在非默认位置时设 `SAAN_CHROME`） |
+| 写入飞书画板 | [`lark-cli`](https://github.com/larksuite) 并已登录，Node.js（用于 `@larksuite/whiteboard-cli`） |
+
+## 单独使用渲染脚本
+
+```bash
+cd skills/saan-diagram
+uv run scripts/render.py --init audit > pay.yaml     # 起步模板（15 种）
+uv run scripts/render.py --guide verify              # 某类图的详细写法
+uv run scripts/render.py pay.yaml --all              # 校验 + 路径验证 + HTML + PNG + 画板 DSL
+uv run scripts/render.py --selftest                  # 自测：示例全部通过 + 每条规则都能失败
+```
+
+退出码：0 本次请求通过 · 1 排版问题 · 2 未确认的业务发现 · 3 spec 输入错误 · 4 产物生成失败或不完整。
+
+出图自动生成 `<slug>.result.json`，记录每个产物的状态。没有 uv 时，先 `pip install -r requirements.txt`，再把命令里的 `uv run` 换成 `python3`。没有 PyYAML 时，把 spec 写成 `.json`（字段相同；`--init audit --json` 可输出 JSON 模板），再运行 `python3 scripts/render.py pay.json --all`。PNG 由系统浏览器截图；容器里没有浏览器时安装 Chromium 即可（以 root 运行会自动加 `--no-sandbox`）。PNG 失败会返回 4，保留已生成的 HTML 和画板 DSL；若只需要 HTML/SVG，请显式使用对应参数。`--result-json PATH` 可指定结果文件，配合 `--lint` 也可取得机器可读结果。
+
+## 输出语言
+
+Agent 优先遵循用户明确指定的输出语言；未指定时，沿用用户请求的语言。技能说明和模板的语言不覆盖用户的选择。
+
+```yaml
+language: en  # en 或 zh-CN
+```
+
+`--language en` 可覆盖 spec 中的语言设置。渲染器切换自动生成的图例、业务发现和验证注释，不翻译输入的名称、标签和备注；这些由 Agent 改写，同时保持 id 与引用一致。旧 spec 省略 `language` 时仍使用中文。详细指南及部分 CLI 诊断暂时保留中文。
+
+英文示例：[审批流程](../../skills/saan-diagram/assets/en/approval-flow.yaml)、[分层架构](../../skills/saan-diagram/assets/en/platform-layers.yaml)、[发布里程碑](../../skills/saan-diagram/assets/en/release-timeline.yaml)。
+
+```bash
+cd skills/saan-diagram
+uv run scripts/render.py assets/en/approval-flow.yaml --all --outdir out
+```
+
+YAML 标签中的 `"Yes"`、`"No"`、`"On"`、`"Off"` 等要加引号，避免被解析成布尔值。英文按词换行，保留技术标识符；长标签应在不丢失业务含义的前提下精简。
+
+## 流程路径验证
+
+```yaml
+verify:
+  must_pass:
+    - {before: 执行支付, through: [核对合同验收, 审核发票, 三单一致？]}   # 控制点不可绕过
+  separate:
+    - [提交付款申请, 执行支付]                                          # 岗位分离
+```
+
+失败时给出业务语言的反例，例如"可以绕过『审核发票』到达『执行支付』：提交付款申请 → 紧急付款审批 → 执行支付"。这类问题属于业务发现，不能为了通过而删线；用户确认现状如此后写进 `accept`，图例下方会如实写明。
+
+![审计流程图与路径验证](../../docs/img/payment-audit.png)
+
+## 写入飞书画板
+
+写入只能通过内置脚本，模型不直接拼 lark-cli 写入命令：
+
+```bash
+cd skills/saan-diagram
+python3 scripts/wb_publish.py pay.wb.json --token <wbcn…>                # 先导出现有画板并停下（退出码 20）
+python3 scripts/wb_publish.py pay.wb.json --token <wbcn…> --mode append  # 确认后写入，写后导出核验图
+```
+
+写入成功但核验图导出失败时，退出码为 21。只重试回读，避免再次写入：
+
+```bash
+python3 scripts/wb_publish.py pay.wb.json --token <wbcn…> --verify-only
+```
+
+发布结果写入 `<slug>.wb.publish.json`。回读成功与人工/图像工具查看通过是不同状态。`--pass` 仅允许门禁要求且用户确认过的 `--pass=--yes`，不能改变目标、来源或写入方式。
+
+## 视觉语法速览
+
+| 元素 | 样式 |
+|---|---|
+| 主线节点 `hub` / 功能模块 `module` | 中性灰，深浅两档 |
+| 内部系统 / 外部服务 `system` | VI 主色 / 主色提亮 45% |
+| 核心业务 `core: true` | 主色浅底 + 主色描边，全图 ≤3 处 |
+| 重点能力 `special` | 浅橙底，名称由 `special.label` 声明（如"AI 能力"） |
+| 业务主流程 / 数据集成 / 配置依赖 | 实线 / 点线 / 紫色虚线 |
+| 标题栏 | 默认无边框，可选 `outline`（白底线框）/ `gray` / `brand` / `dark` |
+
+英文统一入口见 [SKILL.md](../../skills/saan-diagram/SKILL.md)，中文阅读版见 [中文技能说明](../../docs/SKILL.zh-CN.md)。
+
+## 写飞书画板的规矩（写在脚本里）
+
+- 不带 `--mode` 不写：先导出现有画板预览，退出码 20，看图后再决定追加还是覆盖
+- 覆盖只在 `--mode overwrite` 时发生，必须有用户明确同意
+- 不新建文档：只往用户给的画板或文档里写
+- `lark-cli` 退出码 10 是高风险确认门禁，原样返回给用户确认，不自动追加参数
+- 幂等 token 由目标、写入方式和内容共同生成，重试自动复用
+
+## 开发与验证
+
+`guides/*.md` 与 `assets/*.yaml` 是指南和示例的唯一维护源。渲染器直接读取这些文件，不维护内嵌副本；发布和安装时必须保留完整 `skills/saan-diagram/` 目录。输入校验在 `scripts/spec_validation.py`，渲染器只保留一个 CLI 入口。
+
+在仓库根目录运行：
+
+测试会直接导入渲染器，先安装 PyYAML（`python3 -m pip install -r skills/saan-diagram/requirements.txt`），或在每条命令前加 `uv run --with pyyaml`。
+
+```bash
+uv run skills/saan-diagram/scripts/render.py --selftest
+python3 -m unittest discover -s tests -v
+python3 scripts/render_smoke.py            # 15 个原示例 + 3 个英文示例：校验、SVG、画板 DSL
+python3 scripts/render_smoke.py --png      # 另用本机 Chrome 实际导出 PNG
+```
+
+GitHub Actions 运行 Python 版本矩阵、行为回归测试和浏览器导出检查。自测的 50/50 是规则触发覆盖，不代表全部分支、视觉效果或实际业务权限都已验证。飞书发布测试使用模拟子进程，不访问用户画板。
+
+### 从 v1.2 升级
+
+- PNG 改由本机 Chrome / Chromium / Edge / Brave 的 headless 模式截图，不再需要 Playwright 和 `requirements-png.txt`；浏览器装在非默认位置时设置 `SAAN_CHROME`。
+- `render.py` 在文件头声明了 PyYAML 依赖，`uv run scripts/render.py …` 不需要虚拟环境；`pip install -r requirements.txt` 加 `python3` 的方式仍然可用。旧的虚拟环境和 Playwright 浏览器缓存可以删除。
+- 标题栏默认改为无边框（`titlebar: plain`）；想保留原来的白底线框，写 `titlebar: outline`。
+- 渲染前会把直接相连、相差不到半个泳道或半行的自由节点自动对齐；写 `align: false` 可保留 spec 里的位置。斜对角的两端在路径畅通时只折一次。
+- 新增规则 **G5**：auto 走线仍折两次会让 lint 失败。把相连节点放到同一 `lane` 或 `row`；回退线等有意绕行的连线显式写 `route`。`--selftest` 现在验证 50 条规则。
+
+### 从 v1.1 升级
+
+- 技能入口和插件发现描述改为英文，明确输出语言优先级。
+- 英文图示设置 `language: en`；已有中文 spec 保持默认行为。
+- 英文按词换行，分层图能力节点和侧栏根据拉丁文本宽度布局。
+- `--selftest` 仍验证 15 份原模板与 52 条规则；回归测试覆盖 14 类图示的语言行为，出图检查另含 3 份实际英文示例。
+
+### 从 v1.0 升级
+
+- `verify: {}` 现在实际启用检查；漏连线的业务步骤可能产生新发现。混合图可用 `verify.nodes` 明确验证范围，并解释排除原因。
+- 岗位分离需要节点 `actor`，或明确声明 `column_semantics: roles`；不能把业务阶段当岗位。
+- 时间线完成状态由 `status: done | pending | unknown` 明确声明；省略为待确认。
+- PNG 缺失不再作为完整交付返回 0；写入后回读失败返回 21。
+- 不再支持仅复制 render.py 的安装方式；请完整安装 Skill。
+
+## 介绍页
+
+静态介绍页源码放在 [`page/`](../../page/README.md)，由 Vercel 托管。项目的 Root Directory 为 `page`，生产分支为 `main`，不需要构建步骤。
+
+修改技能示例或预览图后，运行 `python3 scripts/sync_page.py`，同步页面中的 15 份 spec、图片和版本标识。
+
+## 致谢
+
+排版规则参考 [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design)（图示类型选择、正交连线、标签留白、焦点色预算、4px 网格），并适配为中英文业务图示。
+
+## 许可
+
+[MIT](../../LICENSE) © 2026 Yishan。示例内容均为虚构。

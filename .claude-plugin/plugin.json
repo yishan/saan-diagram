@@ -1,14 +1,17 @@
 {
   "name": "saan-diagram",
-  "displayName": "Saan Diagram",
+  "displayName": "Saan Kits",
   "version": "1.4.0",
-  "description": "Create business diagrams in English or Chinese with a consistent visual language, YAML specs, layout validation, and process path verification. Export HTML/SVG/PNG or publish to a Feishu/Lark whiteboard.",
+  "description": "Saan Kits: independently usable agent skills for product work. Currently includes Saan Diagram for validated business diagrams in English and Chinese.",
   "author": {
     "name": "Yishan"
   },
-  "repository": "https://github.com/yishan/saan-diagram",
+  "repository": "https://github.com/yishan/saankits",
   "license": "MIT",
   "keywords": [
+    "saankits",
+    "agent-skills",
+    "product-workflows",
     "diagram",
     "architecture",
     "flowchart",
