@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#FFFFFF"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="6.5" fill="none" stroke="#DEE0E3"/>
+  <!-- A decision branches into two outcomes: Mermaid's flowchart vocabulary. -->
+  <path d="M16 14V19M7 23V21a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2" fill="none" stroke="#1F2329" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 3L23 10L16 17L9 10Z" fill="#C3C8D0"/>
+  <rect x="3" y="23" width="10" height="6" rx="2" fill="#C3C8D0"/>
+  <rect x="20" y="23" width="10" height="6" rx="2" fill="#3370FF"/>
+</svg>

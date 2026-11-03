@@ -55,4 +55,12 @@ Confirm both the reported finding and the rendered image before publishing.
 
 ## Icons
 
-`favicon.svg` is the source icon: a gray business node connected to a brand-blue system block by a single-bend connector, drawn on a 32-unit grid so the 16 px rendering stays crisp. `favicon.ico` (16, 32, and 48 px) and `apple-touch-icon.png` (180 px, opaque white background without the border) are exported from it. Re-export both after changing the SVG.
+Each page has its own icon family, sharing a white rounded tile, neutral gray nodes, and the `#3370FF` brand accent:
+
+| Page | SVG source | Symbol |
+|---|---|---|
+| Saan Kits | `favicon.svg` | Four modules forming a toolkit |
+| Saan Diagram | `diagram/favicon.svg` | A business node connected to a system block |
+| Saan Mermaid | `mermaid/favicon.svg` | A decision node branching into two outcomes |
+
+Each directory also contains `favicon.ico` (16, 32, and 48 px) and `apple-touch-icon.png` (180 px, opaque white background without the border). Keep these exports in sync with their SVG source. Each page references its own local icons; `/favicon.ico` is the collection's default fallback.
