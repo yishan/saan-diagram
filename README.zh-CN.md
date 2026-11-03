@@ -2,9 +2,11 @@
 
 [English](README.md) | **简体中文**
 
+[浏览 Saan Kits 总览](https://kits.yishan.app/)
+
 一套逐步扩展的 Agent 技能工具集，帮助用户把需求转化为图示、文档和原型。可以按需安装单个技能，也可以选择整套工具集。
 
-**目前可用：`saan-diagram`。** Mermaid、PRD 写作和原型技能处于计划阶段，尚未包含在工具集中。
+**目前可用：`saan-diagram` 和 `saan-mermaid`。** PRD 写作和原型技能处于计划阶段，尚未包含在工具集中。
 
 GitHub 仓库已由 `yishan/saan-diagram` 更名为 [`yishan/saankits`](https://github.com/yishan/saankits)。安装命令使用新仓库地址，现有 `saan-diagram` 技能名和插件标识保持不变。
 
@@ -12,7 +14,8 @@ GitHub 仓库已由 `yishan/saan-diagram` 更名为 [`yishan/saankits`](https://
 
 | 技能 | 适用任务 | 交付物 | 使用说明 |
 |---|---|---|---|
-| [`saan-diagram`](skills/saan-diagram/SKILL.md) | 中英文业务架构、流程、角色交接、数据关系和里程碑图示 | 可编辑 YAML/JSON spec、HTML、SVG、PNG 和飞书画板 DSL | [中文指南](docs/saan-diagram/README.zh-CN.md) · [English guide](docs/saan-diagram/README.md) · [示例图库](https://saan-diagram.vercel.app/) |
+| [`saan-diagram`](skills/saan-diagram/SKILL.md) | 中英文业务架构、流程、角色交接、数据关系和里程碑图示 | 可编辑 YAML/JSON spec、HTML、SVG、PNG 和飞书画板 DSL | [中文指南](docs/saan-diagram/README.zh-CN.md) · [English guide](docs/saan-diagram/README.md) · [示例图库](https://kits.yishan.app/diagram/) |
+| [`saan-mermaid`](skills/saan-mermaid/SKILL.md) | 放在 Markdown 和设计文档里的图，时序图、状态图、甘特图，以及按控制点清单审查流程 | Mermaid 源码、可选的渲染图片和审查发现 | [中文指南](docs/saan-mermaid/README.zh-CN.md) · [English guide](docs/saan-mermaid/README.md) · [介绍页](https://kits.yishan.app/mermaid/) |
 
 每个技能有独立的 `SKILL.md`，并携带核心流程需要的资源。安装单个技能不要求安装整个工具集。
 
@@ -32,13 +35,16 @@ npx skills add yishan/saankits
 # 只安装 Saan Diagram
 npx skills add yishan/saankits --skill saan-diagram
 
+# 只安装 Saan Mermaid
+npx skills add yishan/saankits --skill saan-mermaid
+
 # 把当前全部可用技能安装到 Codex
 npx skills add yishan/saankits --skill '*' -a codex
 ```
 
-默认安装到当前项目；加 `-g` 可安装到用户级目录。目前整套安装只会选中 `saan-diagram`。以后新增的技能需要再次安装，整套安装不会自动订阅未来技能。
+默认安装到当前项目；加 `-g` 可安装到用户级目录。目前整套安装会选中 `saan-diagram` 和 `saan-mermaid`。以后新增的技能需要再次安装，整套安装不会自动订阅未来技能。
 
-运行依赖由各技能分别说明。Python、PNG 导出和可选的飞书发布依赖，见 [Saan Diagram 依赖说明](docs/saan-diagram/README.zh-CN.md#依赖)。
+运行依赖由各技能分别说明。见 [Saan Diagram 依赖说明](docs/saan-diagram/README.zh-CN.md#依赖)和 [Saan Mermaid 依赖说明](docs/saan-mermaid/README.zh-CN.md#依赖)。
 
 ### Claude Code 插件
 
@@ -57,7 +63,6 @@ npx skills add yishan/saankits --skill '*' -a codex
 
 | 计划技能 | 预期职责 |
 |---|---|
-| `saan-mermaid` | 生成适合 Markdown 和技术文档维护的 Mermaid 图表源码 |
 | `saan-prd-writing` | 整理需求、业务规则、验收标准和待确认问题，形成 PRD |
 | `saan-prototype` | 生成包含关键交互和状态的可运行界面原型 |
 
@@ -68,15 +73,17 @@ npx skills add yishan/saankits --skill '*' -a codex
 ```text
 skills/                  可独立安装的技能包
   saan-diagram/          现有图示技能及其运行资源
+  saan-mermaid/          Mermaid 画图和流程审查技能
 docs/                    用户说明和预览图片
   saan-diagram/          图示技能的中英文指南
+  saan-mermaid/          Mermaid 技能的中英文指南
 scripts/                 仓库维护和验证脚本
-tests/                   现有 Saan Diagram 回归测试
-page/                    现有 Saan Diagram 介绍页和图库
+tests/                   Saan Diagram 回归测试；saan-mermaid/ 放 Mermaid 测试
+page/                    工具集总览页，每个技能一个二级页面
 .claude-plugin/          工具集打包信息，保留原有标识
 ```
 
-Agent 执行入口位于 `skills/<skill-name>/SKILL.md`。根目录 README 提供工具集目录，技能详细使用说明放在 `docs/<skill-name>/`。现有图库继续介绍 Saan Diagram。
+Agent 执行入口位于 `skills/<skill-name>/SKILL.md`。根目录 README 提供工具集目录，技能详细使用说明放在 `docs/<skill-name>/`。站点总览在 `/`，下设 `/diagram/` 和 `/mermaid/`。
 
 ## 开发
 

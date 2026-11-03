@@ -1,6 +1,14 @@
-# Landing page
+# Site
 
-Static HTML and images for Saan Diagram. The page is currently in Chinese. The repository README introduces Saan Kits; the [English](../docs/saan-diagram/README.md) and [Chinese](../docs/saan-diagram/README.zh-CN.md) guides cover Saan Diagram.
+Static pages for the collection, currently in Chinese, published at [kits.yishan.app](https://kits.yishan.app/):
+
+| Path | Source | Content |
+|---|---|---|
+| `/` | `index.html` | Saan Kits overview |
+| `/diagram/` | `diagram/` | Saan Diagram introduction and gallery |
+| `/mermaid/` | `mermaid/` | Saan Mermaid introduction and examples |
+
+The overview page forwards old `/#anchor` links to `/diagram/#anchor`. Each new skill gets its own second-level directory and a row on the overview page.
 
 ## Local preview
 
@@ -24,20 +32,26 @@ Connect `yishan/saankits` and use these project settings:
 - Output Directory: `.`
 - Production Branch: `main`
 
-The directory name does not add `/page` to the public URL. `index.html` is served at `/`.
+Bind `kits.yishan.app` to this project. In Cloudflare, use a DNS-only CNAME for `kits` with the target recommended by Vercel. The collection uses `/`, Saan Diagram uses `/diagram/`, and Saan Mermaid uses `/mermaid/`.
 
-## Maintaining examples
+The directory name does not add `/page` to the public URL. `index.html` is served at `/`. `vercel.json` keeps trailing slashes so that relative image paths on second-level pages resolve.
+
+## Maintaining Saan Diagram examples
 
 Update the skill's `assets/*.yaml` and the corresponding `docs/img/*.png` first, then run `python3 scripts/sync_page.py` (it only copies `docs/img/*.png`; re-render those first with `uv run skills/saan-diagram/scripts/render.py <spec> --all`). It refreshes the 15 embedded specs, preview images, and displayed skill version. Review any surrounding explanatory text when behavior changes.
 
-`examples/accepted.yaml` is a separate fictional example that intentionally records a control bypass. To regenerate its image (needs uv and a local Chrome), run from the repository root:
+`diagram/examples/accepted.yaml` is a separate fictional example that intentionally records a control bypass. To regenerate its image (needs uv and a local Chrome), run from the repository root:
 
 ```bash
-uv run skills/saan-diagram/scripts/render.py page/examples/accepted.yaml --all --out out/accepted.html
-mv page/examples/accepted.png page/img/accepted.png
+uv run skills/saan-diagram/scripts/render.py page/diagram/examples/accepted.yaml --all --out out/accepted.html
+mv page/diagram/examples/accepted.png page/diagram/img/accepted.png
 ```
 
 Confirm both the reported finding and the rendered image before publishing.
+
+## Maintaining Saan Mermaid examples
+
+`mermaid/index.html` embeds each file in `skills/saan-mermaid/assets/examples/`. After changing one, update the embedded code and `mermaid/img/`. `tests/saan-mermaid` fails if the page and an example differ.
 
 ## Icons
 

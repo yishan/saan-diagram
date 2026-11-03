@@ -1,0 +1,29 @@
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: "PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif"
+    primaryColor: "#E3E5EA"
+    primaryTextColor: "#1F2329"
+    primaryBorderColor: "#E3E5EA"
+    secondaryColor: "#E9ECF1"
+    tertiaryColor: "#F5F6F8"
+    lineColor: "#4E5563"
+    textColor: "#1F2329"
+    clusterBkg: "#F5F6F8"
+    clusterBorder: "#D5D8DE"
+    edgeLabelBackground: "#FFFFFF"
+    dropShadow: "none"
+    cScale0: "#E3E5EA"
+    cScale1: "#E2EBFF"
+    cScale2: "#E9ECF1"
+    cScale3: "#F5F6F8"
+---
+stateDiagram-v2
+  direction LR
+  [*] --> 草稿
+  草稿 --> 审批中: 提交
+  审批中 --> 已生效: 通过
+  审批中 --> 草稿: 退回
+  已生效 --> 已归档: 归档
+  已归档 --> [*]

@@ -1,0 +1,40 @@
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: "PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif"
+    primaryColor: "#E3E5EA"
+    primaryTextColor: "#1F2329"
+    primaryBorderColor: "#E3E5EA"
+    secondaryColor: "#E9ECF1"
+    tertiaryColor: "#F5F6F8"
+    lineColor: "#4E5563"
+    textColor: "#1F2329"
+    clusterBkg: "#F5F6F8"
+    clusterBorder: "#D5D8DE"
+    edgeLabelBackground: "#FFFFFF"
+    dropShadow: "none"
+    cScale0: "#E3E5EA"
+    cScale1: "#E2EBFF"
+    cScale2: "#E9ECF1"
+    cScale3: "#F5F6F8"
+---
+%% saan: arch
+flowchart LR
+  classDef external fill:#8FB0FF,stroke:#8FB0FF,color:#1F2329
+  subgraph contract[合同阶段]
+    direction TB
+    c1[合同台账]
+    c2[合同变更]
+  end
+  subgraph settle[结算阶段]
+    direction TB
+    s1[产值结算]
+    s2[支付管理]
+  end
+  subgraph ext[外部系统]
+    direction TB
+    fin[财务系统]:::external
+  end
+  contract --> settle
+  s2 --> fin

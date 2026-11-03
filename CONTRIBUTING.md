@@ -22,9 +22,19 @@ Keep reusable source material maintainable, but include required runtime resourc
 
 `skills/saan-diagram/` remains the installable unit. Its scripts, guides, assets, and skill name stay together. Existing regression tests are under `tests/`; new skills can place their tests in `tests/<skill-name>/` and register the appropriate checks in CI without moving the existing suite just for symmetry.
 
-`scripts/render_smoke.py` and `scripts/sync_page.py` currently serve Saan Diagram. `page/` remains its gallery. Update these only when the diagram examples or page change.
+`scripts/render_smoke.py` and `scripts/sync_page.py` currently serve Saan Diagram. `page/diagram/` is its gallery. Update these only when the diagram examples or page change.
 
 The Claude Code plugin display name is Saan Kits. Both `.claude-plugin` manifests retain `saan-diagram` identifiers, and the plugin entry points to the repository root so its `skills/` collection can grow. Keep manifest identities consistent with the documented install command. Preserve skill-specific versions separately when future skills are added.
+
+## Site pages
+
+`page/index.html` is the collection overview. Give each available skill a second-level page at `page/<short-name>/` and a row on the overview. Do not add planned skills as links.
+
+## Versions and tags
+
+Each skill keeps its own `metadata.version`. `.claude-plugin/plugin.json` carries the collection version.
+
+Use namespaced tags from now on: `saankits/vX.Y.Z` for the collection and `saan-<name>/vX.Y.Z` for a skill. The existing `v1.0.0` tag and its GitHub release mark Saan Diagram from before the collection existed. Keep them as they are, and do not create new bare `v*` tags.
 
 ## Check a change
 

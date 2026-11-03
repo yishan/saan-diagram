@@ -1,0 +1,33 @@
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: "PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif"
+    primaryColor: "#E3E5EA"
+    primaryTextColor: "#1F2329"
+    primaryBorderColor: "#E3E5EA"
+    secondaryColor: "#E9ECF1"
+    tertiaryColor: "#F5F6F8"
+    lineColor: "#4E5563"
+    textColor: "#1F2329"
+    clusterBkg: "#F5F6F8"
+    clusterBorder: "#D5D8DE"
+    edgeLabelBackground: "#FFFFFF"
+    dropShadow: "none"
+    cScale0: "#E3E5EA"
+    cScale1: "#E2EBFF"
+    cScale2: "#E9ECF1"
+    cScale3: "#F5F6F8"
+---
+%%{init: {"quadrantChart": {"pointTextPadding": 14}}}%%
+quadrantChart
+  title 优先级（示例）
+  x-axis 低投入 --> 高投入
+  y-axis 低价值 --> 高价值
+  quadrant-1 大项目
+  quadrant-2 先做
+  quadrant-3 暂缓
+  quadrant-4 慎做
+  经营预警: [0.3, 0.8]
+  智能问答: [0.7, 0.6]
+  报表换肤: [0.25, 0.2]

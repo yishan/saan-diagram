@@ -3,7 +3,7 @@ name: "saan-diagram"
 description: "Create consistent business diagrams from descriptions, requirements, or whiteboard screenshots. Use for business architecture, process flows, role handoffs, data relationships, and milestones in English or Chinese. Render HTML/SVG/PNG; publish to a Feishu/Lark whiteboard when requested. Not for sequence diagrams, state machines, physical database schemas, or task-level Gantt charts."
 metadata:
   author: "Yishan"
-  version: "1.4.0"
+  version: "1.0.0"
 ---
 
 # Saan Diagram
@@ -47,7 +47,7 @@ Start with one question: does the diagram explain **what exists** or **how work 
 
 Choose the flow variant by purpose. An overview shows the forward path only. Approval and audit flows must keep decisions and returns, because removing them hides control risk.
 
-For sequence diagrams, state machines, physical database schemas, or task-level Gantt charts, choose a suitable tool such as Mermaid or a database modeler. For mixed needs, decide what exists versus how work runs first, then choose the axis: stages or layers, step order, roles, or systems. Do not add swimlanes, alternate paths, or highlighted capabilities when the source does not call for them.
+For sequence diagrams, state machines, physical database schemas, or task-level Gantt charts, use `saan-mermaid` if it is available, or another suitable tool such as a database modeler. For mixed needs, decide what exists versus how work runs first, then choose the axis: stages or layers, step order, roles, or systems. Do not add swimlanes, alternate paths, or highlighted capabilities when the source does not call for them.
 
 ## Establish necessary context
 

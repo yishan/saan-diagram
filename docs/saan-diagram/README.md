@@ -4,7 +4,7 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-[Introduction & example gallery (中文)](https://saan-diagram.vercel.app/)
+[Introduction & example gallery (中文)](https://kits.yishan.app/diagram/)
 
 Turn business descriptions, requirements documents, and whiteboard screenshots into business diagrams in English or Chinese with a consistent visual language.
 
@@ -46,7 +46,7 @@ First decide whether the diagram explains what exists or how work runs. Swimlane
 | Priorities across two dimensions | Quadrant chart | `layout: quadrant` | [ai-quadrant](../../skills/saan-diagram/assets/ai-quadrant.yaml) |
 | Milestone dates and schedule variance | Milestone timeline | `layout: timeline` | [platform-timeline](../../skills/saan-diagram/assets/platform-timeline.yaml) |
 
-Sequence diagrams, state machines, physical database schemas, and task-level Gantt charts are outside this skill's scope. Use tools such as Mermaid or a database modeling tool for those tasks.
+Sequence diagrams, state machines, physical database schemas, and task-level Gantt charts are outside this skill's scope. Use [Saan Mermaid](../saan-mermaid/README.md) or tools such as Mermaid or a database modeling tool for those tasks.
 
 ## Installation
 

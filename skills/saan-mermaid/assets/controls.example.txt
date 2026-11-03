@@ -1,0 +1,4 @@
+source: user
+control: 财务复核
+must_pass: 执行付款 through 审核单据
+separate: 提交付款申请 | 审核单据

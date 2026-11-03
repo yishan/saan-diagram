@@ -4,7 +4,7 @@
 
 [English](README.md) | **简体中文**
 
-[介绍页与示例图库](https://saan-diagram.vercel.app/)
+[介绍页与示例图库](https://kits.yishan.app/diagram/)
 
 把业务描述、需求文档、白板截图，转成同一套规范下的中英文业务图示。
 
@@ -44,7 +44,7 @@ Saan Diagram 是一个可用于 Claude Code、Codex 等 Agent 的 Skill。模型
 | 两个维度上该先做哪个 | 四象限图 | `layout: quadrant` | [ai-quadrant](../../skills/saan-diagram/assets/ai-quadrant.yaml) |
 | 关键节点什么时候到、偏了多少 | 里程碑时间线 | `layout: timeline` | [platform-timeline](../../skills/saan-diagram/assets/platform-timeline.yaml) |
 
-时序交互、状态流转、物理表结构、按任务排期的甘特图不在范围内，建议用 Mermaid 或数据库建模工具。
+时序交互、状态流转、物理表结构、按任务排期的甘特图不在范围内，建议用 [Saan Mermaid](../saan-mermaid/README.zh-CN.md) 或数据库建模工具。
 
 ## 安装
 

@@ -7,7 +7,7 @@ import re
 import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGE = ROOT / 'page' / 'index.html'
+PAGE = ROOT / 'page' / 'diagram' / 'index.html'
 PATTERN = re.compile(
     r'(<details><summary>spec · <code>([^<]+\.yaml)</code></summary><pre><code>)'
     r'.*?(</code></pre></details>)', re.S
@@ -26,7 +26,7 @@ def main():
     text = re.sub(r'(?<=Skill · )v[\d.]+|(?<=Saan Diagram )v[\d.]+', f'v{version}', text)
     PAGE.write_text(text, encoding='utf-8')
     for source in (ROOT / 'docs' / 'img').glob('*.png'):
-        shutil.copy2(source, ROOT / 'page' / 'img' / source.name)
+        shutil.copy2(source, ROOT / 'page' / 'diagram' / 'img' / source.name)
     print(f'Synced {count} examples and preview images for v{version}.')
 
 

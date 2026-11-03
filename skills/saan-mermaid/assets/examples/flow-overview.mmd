@@ -1,0 +1,31 @@
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: "PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif"
+    primaryColor: "#E3E5EA"
+    primaryTextColor: "#1F2329"
+    primaryBorderColor: "#E3E5EA"
+    secondaryColor: "#E9ECF1"
+    tertiaryColor: "#F5F6F8"
+    lineColor: "#4E5563"
+    textColor: "#1F2329"
+    clusterBkg: "#F5F6F8"
+    clusterBorder: "#D5D8DE"
+    edgeLabelBackground: "#FFFFFF"
+    dropShadow: "none"
+    cScale0: "#E3E5EA"
+    cScale1: "#E2EBFF"
+    cScale2: "#E9ECF1"
+    cScale3: "#F5F6F8"
+---
+%% saan: overview
+flowchart LR
+  classDef core fill:#E2EBFF,stroke:#2B5FD8,color:#1F2329
+  classDef external fill:#8FB0FF,stroke:#8FB0FF,color:#1F2329
+  subgraph hub[经营平台]
+    direction LR
+    p1[签订合同] --> p2[结算产值]:::core --> p3[归集成本]
+  end
+  bid[招采系统]:::external -->|中标结果| p1
+  p3 -->|凭证数据| fin[财务系统]:::external

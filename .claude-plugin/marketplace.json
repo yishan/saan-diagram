@@ -1,6 +1,6 @@
 {
   "name": "saan-diagram",
-  "description": "Saan Kits: independently usable agent skills for product work. Currently includes Saan Diagram.",
+  "description": "Saan Kits: independently usable agent skills for product work. Currently includes Saan Diagram and Saan Mermaid.",
   "owner": {
     "name": "Yishan"
   },
@@ -8,7 +8,7 @@
     {
       "name": "saan-diagram",
       "source": "./",
-      "description": "Saan Kits: independently usable agent skills for product work. Currently includes Saan Diagram for validated business diagrams in English and Chinese."
+      "description": "Saan Kits: independently usable agent skills for product work. Currently includes Saan Diagram for validated business diagrams in English and Chinese, and Saan Mermaid for Mermaid diagrams and process reviews."
     }
   ]
 }

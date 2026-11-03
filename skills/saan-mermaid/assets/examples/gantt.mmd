@@ -1,0 +1,33 @@
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: "PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif"
+    primaryColor: "#E3E5EA"
+    primaryTextColor: "#1F2329"
+    primaryBorderColor: "#E3E5EA"
+    secondaryColor: "#E9ECF1"
+    tertiaryColor: "#F5F6F8"
+    lineColor: "#4E5563"
+    textColor: "#1F2329"
+    clusterBkg: "#F5F6F8"
+    clusterBorder: "#D5D8DE"
+    edgeLabelBackground: "#FFFFFF"
+    dropShadow: "none"
+    cScale0: "#E3E5EA"
+    cScale1: "#E2EBFF"
+    cScale2: "#E9ECF1"
+    cScale3: "#F5F6F8"
+---
+gantt
+  title 上线计划（示例）
+  dateFormat YYYY-MM-DD
+  axisFormat %m-%d
+  todayMarker off
+  section 准备
+  需求确认 :done, a1, 2026-09-01, 15d
+  方案评审 :done, a2, after a1, 7d
+  section 实施
+  开发 :a3, after a2, 30d
+  联调测试 :a4, after a3, 14d
+  上线 :milestone, m1, after a4, 0d

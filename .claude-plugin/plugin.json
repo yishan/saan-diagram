@@ -1,8 +1,8 @@
 {
   "name": "saan-diagram",
   "displayName": "Saan Kits",
-  "version": "1.4.0",
-  "description": "Saan Kits: independently usable agent skills for product work. Currently includes Saan Diagram for validated business diagrams in English and Chinese.",
+  "version": "1.0.0",
+  "description": "Saan Kits: independently usable agent skills for product work. Currently includes Saan Diagram for validated business diagrams in English and Chinese, and Saan Mermaid for Mermaid diagrams and process reviews.",
   "author": {
     "name": "Yishan"
   },
@@ -13,6 +13,7 @@
     "agent-skills",
     "product-workflows",
     "diagram",
+    "mermaid",
     "architecture",
     "flowchart",
     "swimlane",
