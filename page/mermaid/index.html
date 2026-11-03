@@ -55,8 +55,6 @@ tr:last-child td,tr:last-child th{border-bottom:0}
 .pair.wide pre{max-height:240px}
 .codebox{background:var(--code);border-radius:6px;min-width:0;display:flex;flex-direction:column}
 .bar{display:flex;justify-content:space-between;align-items:center;padding:8px 10px 0 14px;font-size:12px;color:var(--muted)}
-.copy{font:inherit;font-size:12px;color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:2px 10px;cursor:pointer}
-.copy:hover{border-color:var(--muted)}
 pre{margin:0;padding:10px 14px 14px;overflow:auto;font-size:12.5px;line-height:1.6;max-height:420px;flex:1}
 pre code{font-size:inherit}
 .fig{display:flex;align-items:center;justify-content:center;background:var(--fig);border:1px solid var(--line);border-radius:6px;padding:12px;min-width:0;overflow:auto;cursor:default}
@@ -98,19 +96,33 @@ footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:
 <header class="hero">
   <nav class="site-nav" aria-label="技能导航"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="../mermaid/" aria-current="page">Mermaid</a></nav>
   <h1>Saan Mermaid</h1>
+  <p class="lead">用 Mermaid 画图，并拿一份独立的控制点清单审查业务流程。</p>
+  <dl class="intro"><div><dt>输入</dt><dd>流程资料、制度要求或现有流程</dd></div><div><dt>产出</dt><dd>Mermaid 代码和审查发现</dd></div><div><dt>把关</dt><dd>脚本查走不通、可绕过和缺退回，有问题就报告</dd></div><div><dt>不适合</dt><dd>汇报用的精确排版、IDEF0、数据隔离组织图</dd></div></dl>
   <nav class="section-nav" aria-label="页内导航"><a href="#install">安装</a><a href="#pick">图示类型</a><a href="#gallery">示例</a><a href="#lint">校验</a><a href="#limits">兼容性</a></nav>
 </header>
 
 <section aria-labelledby="install">
   <div class="narrow"><h2 id="install">安装</h2></div>
-  <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-mermaid</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制Saan Mermaid安装命令" hidden>复制</button></div>
-  <p>本地校验需要 Python 3；渲染本页全部示例需要 Mermaid CLI 12。</p>
+  <ol class="install-steps">
+    <li><h3>安装技能</h3><div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits <span class="nb">--skill saan-mermaid</span></code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Mermaid 安装命令" hidden></button></div><p>默认装到当前项目，并让你选择目标 Agent。加 <code>-g</code> 装到用户级目录，加 <code>-a claude-code</code> 或 <code>-a codex</code> 可直接指定。</p></li>
+    <li><h3>准备环境</h3><ul class="rules"><li>审查流程：Python 3，只用标准库</li><li>渲染图片：<code>npm install -g @mermaid-js/mermaid-cli</code>，需要 12 或更高版本</li></ul></li>
+    <li><h3>直接说要什么</h3><ul class="rules"><li>“这是付款流程和制度要求，帮我查有没有能绕过财务复核的路径。”</li><li>“画一张时序图，说明结算单怎么推送到财务系统。”</li></ul></li>
+  </ol>
+  <details class="alternatives"><summary>其他安装方式</summary><div class="tbl-wrap"><table class="inst">
+    <thead><tr><th>平台</th><th>安装方式</th></tr></thead>
+    <tbody>
+      <tr><td>Claude Code 插件</td><td><code>/plugin marketplace add yishan/saankits</code><br><code>/plugin install saan-diagram@saan-diagram</code><br>插件会一起安装工具集里的全部技能。</td></tr>
+      <tr><td>手动复制</td><td>把 <a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid"><code>skills/saan-mermaid/</code></a> 整个目录复制到 Agent 的技能目录，例如 <code>~/.claude/skills/saan-mermaid/</code>。</td></tr>
+      <tr><td>Claude.ai</td><td>把这个目录打成 zip（顶层为 <code>saan-mermaid/</code>），在设置里上传。</td></tr>
+    </tbody>
+  </table></div></details>
 </section>
 
 <section aria-labelledby="pick">
   <div class="narrow"><h2 id="pick">图示类型</h2>
+    <p>先分清要讲“有什么”还是“怎么走”，再按问题选图。一段文字能说清的，就不画。</p>
   </div>
-  <div class="type-group"><h3 class="pick-h">架构图</h3><ul class="pick"><li><a href="#arch"><span class="nm">架构图 · 按阶段</span></a></li><li><a href="#layers"><span class="nm">架构图 · 按层</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">流程图</h3><ul class="pick"><li><a href="#flow"><span class="nm">流程图</span></a></li><li><a href="#swim"><span class="nm">流程图 · 泳道</span></a></li><li><a href="#overview"><span class="nm">流程图 · 总览</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">其他图示</h3><ul class="pick"><li><a href="#seq"><span class="nm">时序图</span></a></li><li><a href="#state"><span class="nm">状态图</span></a></li><li><a href="#er"><span class="nm">实体关系图</span></a></li><li><a href="#gantt"><span class="nm">甘特图</span></a></li><li><a href="#timeline"><span class="nm">时间线</span></a></li><li><a href="#quad"><span class="nm">四象限图</span></a></li><li><a href="#fish"><span class="nm">鱼骨图</span></a></li></ul></div>
+  <div class="type-group"><h3 class="pick-h">架构图<small>讲“有什么”：节点是能力或功能</small></h3><ul class="pick"><li><a href="#arch"><span class="nm">架构图 · 按阶段</span><span class="q">每个阶段有哪些模块，接哪些系统。</span></a></li><li><a href="#layers"><span class="nm">架构图 · 按层</span><span class="q">平台由哪些层组成。</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">流程图<small>讲“怎么走”：节点是业务动作，泳道只是分列方式</small></h3><ul class="pick"><li><a href="#flow"><span class="nm">流程图</span><span class="q">一条流程怎么走，在哪里判断和退回。</span></a></li><li><a href="#swim"><span class="nm">流程图 · 泳道</span><span class="q">多个角色之间怎么交接。</span></a></li><li><a href="#overview"><span class="nm">流程图 · 总览</span><span class="q">跨系统看，业务从头到尾怎么走。</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">其他图示<small>时序、状态、对象、进度、优先级和原因</small></h3><ul class="pick"><li><a href="#seq"><span class="nm">时序图</span><span class="q">系统之间按什么顺序交互，失败时怎么走。</span></a></li><li><a href="#state"><span class="nm">状态图</span><span class="q">一张单据有哪些状态，什么动作触发流转。</span></a></li><li><a href="#er"><span class="nm">实体关系图</span><span class="q">有哪些业务对象，彼此几对几。</span></a></li><li><a href="#gantt"><span class="nm">甘特图</span><span class="q">任务排期和前后依赖。</span></a></li><li><a href="#timeline"><span class="nm">时间线</span><span class="q">关键节点什么时候到。</span></a></li><li><a href="#quad"><span class="nm">四象限图</span><span class="q">一组事项在两个维度上该先做哪个。</span></a></li><li><a href="#fish"><span class="nm">鱼骨图</span><span class="q">一个结果背后有哪些原因。</span></a></li></ul></div>
 </section>
 
 <section aria-labelledby="gallery">
@@ -478,11 +490,9 @@ python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code><
 </section>
 
 <section aria-labelledby="ask">
-  <div class="narrow"><h2 id="ask">请求示例</h2></div>
+  <div class="narrow"><h2 id="ask">更多请求示例</h2></div>
   <ul class="rules">
-    <li>“这是付款流程和制度要求，帮我查有没有能绕过财务复核的路径。”</li>
     <li>“用 Mermaid 画一下付款审批流程，放进这份设计文档。付款前必须经过财务复核。”</li>
-    <li>“画一张时序图，说明结算单怎么推送到财务系统。”</li>
     <li>“给 README 加一张合同单据的状态图。”</li>
   </ul>
 </section>

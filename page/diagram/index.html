@@ -137,20 +137,24 @@ footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:
 <header class="hero">
   <nav class="site-nav" aria-label="技能导航"><a href="../">Saan Kits</a><a href="../diagram/" aria-current="page">Diagram</a><a href="../mermaid/">Mermaid</a></nav>
   <h1>Saan Diagram</h1>
+  <p class="lead">把业务描述、需求文档和白板截图，转成同一套规范下的中英文业务图。</p>
+  <dl class="intro"><div><dt>输入</dt><dd>业务描述、需求文档、白板截图</dd></div><div><dt>产出</dt><dd>可编辑的 spec、HTML、SVG、PNG、飞书画板</dd></div><div><dt>把关</dt><dd>脚本校验排版和业务逻辑，有问题就报告</dd></div><div><dt>不适合</dt><dd>时序图、状态图、甘特图、物理表结构</dd></div></dl>
   <nav class="section-nav" aria-label="页内导航"><a href="#install">安装</a><a href="#pick">图示类型</a><a href="#gallery">示例</a><a href="#lint">校验</a><a href="#deliver">交付</a></nav>
 </header>
 
 <section aria-labelledby="install">
-  <div class="narrow" style="display:grid;gap:10px">
-    <h2 id="install">安装</h2>
-  </div>
-  <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-diagram</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制Saan Diagram安装命令" hidden>复制</button></div>
+  <div class="narrow"><h2 id="install">安装</h2></div>
+  <ol class="install-steps">
+    <li><h3>安装技能</h3><div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits <span class="nb">--skill saan-diagram</span></code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Diagram 安装命令" hidden></button></div><p>默认装到当前项目，并让你选择目标 Agent。加 <code>-g</code> 装到用户级目录，加 <code>-a claude-code</code> 或 <code>-a codex</code> 可直接指定。</p></li>
+    <li><h3>准备环境</h3><ul class="rules"><li>校验和导出 HTML、SVG：Python 3.9+ 和 <a href="https://docs.astral.sh/uv/">uv</a></li><li>导出 PNG：本机 Chrome、Chromium、Edge 或 Brave</li><li>写入飞书画板：已登录的 <code>lark-cli</code> 和 Node.js</li></ul></li>
+    <li><h3>直接说要什么</h3><ul class="rules"><li>“把这份需求画成架构图，外部系统放在右侧。”</li><li>“画一张采购流程的泳道图，写入这个飞书画板。”</li></ul></li>
+  </ol>
   <details class="alternatives"><summary>其他安装方式</summary><div class="tbl-wrap"><table class="inst">
     <thead><tr><th>平台</th><th>安装方式</th></tr></thead>
     <tbody>
-
-      <tr><td>Claude Code</td><td><code>/plugin marketplace add yishan/saankits</code><br><code>/plugin install saan-diagram@saan-diagram</code></td></tr>
-      <tr><td>Claude.ai</td><td>将仓库中的 <a href="https://github.com/yishan/saankits/tree/main/skills/saan-diagram"><code>skills/saan-diagram/</code></a> 完整目录打成 zip（顶层为 <code>saan-diagram/</code>），在设置里上传</td></tr>
+      <tr><td>Claude Code 插件</td><td><code>/plugin marketplace add yishan/saankits</code><br><code>/plugin install saan-diagram@saan-diagram</code><br>插件会一起安装工具集里的全部技能。</td></tr>
+      <tr><td>手动复制</td><td>把 <a href="https://github.com/yishan/saankits/tree/main/skills/saan-diagram"><code>skills/saan-diagram/</code></a> 整个目录复制到 Agent 的技能目录，例如 <code>~/.claude/skills/saan-diagram/</code>。</td></tr>
+      <tr><td>Claude.ai</td><td>把这个目录打成 zip（顶层为 <code>saan-diagram/</code>），在设置里上传。</td></tr>
     </tbody>
   </table></div></details>
 </section>
@@ -158,16 +162,17 @@ footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:
 <section aria-labelledby="pick">
   <div class="narrow" style="display:grid;gap:10px">
     <h2 id="pick">图示类型</h2>
+    <p>先分清要讲“有什么”还是“怎么走”，再按问题选图。一段文字能说清的，就不画。</p>
 
   </div>
-  <div class="type-group"><h3 class="pick-h">架构图</h3>
-  <ol class="pick"><li><a href="#1-arch"><span class="nm">架构视图</span></a></li><li><a href="#biz-platform"><span class="nm">分层架构图</span></a></li>
+  <div class="type-group"><h3 class="pick-h">架构图<small>讲“有什么”：节点是能力或功能</small></h3>
+  <ol class="pick"><li><a href="#1-arch"><span class="nm">架构视图</span><span class="q">业务能力全景：每个阶段有哪些模块，接哪些系统。</span></a></li><li><a href="#biz-platform"><span class="nm">分层架构图</span><span class="q">平台由哪些层组成、对外接什么、受哪些体系约束。</span></a></li>
   </ol></div>
-  <div class="type-group"><h3 class="pick-h">流程图</h3>
-  <ol class="pick"><li><a href="#2-flow"><span class="nm">主流程视图</span></a></li><li><a href="#4-swim"><span class="nm">泳道图</span></a></li><li><a href="#5-overview"><span class="nm">总览流程图</span></a></li><li><a href="#payment-audit"><span class="nm">审计流程图</span></a></li><li><a href="#vendor-opportunity"><span class="nm">机会流程图</span></a></li>
+  <div class="type-group"><h3 class="pick-h">流程图<small>讲“怎么走”：节点是业务动作，泳道只是分列方式</small></h3>
+  <ol class="pick"><li><a href="#2-flow"><span class="nm">主流程视图</span><span class="q">一条业务主流程怎么走，判断点在哪里分叉、回退到哪里。</span></a></li><li><a href="#4-swim"><span class="nm">泳道图</span><span class="q">多个角色之间谁在什么时候做什么、在哪里交接。</span></a></li><li><a href="#5-overview"><span class="nm">总览流程图</span><span class="q">从上游系统到平台再到下游系统，业务怎么走。</span></a></li><li><a href="#payment-audit"><span class="nm">审计流程图</span><span class="q">付款审批中有哪些单据、关键控制点在哪、各防什么风险。</span></a></li><li><a href="#vendor-opportunity"><span class="nm">机会流程图</span><span class="q">流程里哪些环节不增值，最该砍的是哪几步。</span></a></li>
   </ol></div>
-  <div class="type-group"><h3 class="pick-h">其他图示</h3>
-  <ol class="pick"><li><a href="#3-paths"><span class="nm">路径对比视图</span></a></li><li><a href="#proc-idef0"><span class="nm">IDEF0 功能模型</span></a></li><li><a href="#bid-dfd"><span class="nm">数据流图</span></a></li><li><a href="#procurement-er"><span class="nm">实体关系图</span></a></li><li><a href="#group-org"><span class="nm">组织架构图 + 数据隔离</span></a></li><li><a href="#bid-fishbone"><span class="nm">鱼骨图</span></a></li><li><a href="#ai-quadrant"><span class="nm">四象限图</span></a></li><li><a href="#platform-timeline"><span class="nm">里程碑时间线</span></a></li>
+  <div class="type-group"><h3 class="pick-h">其他图示<small>比较方式、数据、组织、原因、优先级和进度</small></h3>
+  <ol class="pick"><li><a href="#3-paths"><span class="nm">路径对比视图</span><span class="q">同一套阶段上，几种方式各走过哪些阶段、跳过哪些。</span></a></li><li><a href="#proc-idef0"><span class="nm">IDEF0 功能模型</span><span class="q">每个活动受什么约束、靠谁完成、产出什么。</span></a></li><li><a href="#bid-dfd"><span class="nm">数据流图</span><span class="q">数据从哪来、经过哪些处理、存到哪、流向谁。</span></a></li><li><a href="#procurement-er"><span class="nm">实体关系图</span><span class="q">有哪些业务对象、彼此什么关系、几对几。</span></a></li><li><a href="#group-org"><span class="nm">组织架构图 + 数据隔离</span><span class="q">谁管谁之外，谁能看到谁的数据。</span></a></li><li><a href="#bid-fishbone"><span class="nm">鱼骨图</span><span class="q">一个结果背后有哪些原因，哪些已经验证。</span></a></li><li><a href="#ai-quadrant"><span class="nm">四象限图</span><span class="q">一组事项在两个维度上，该先做哪个。</span></a></li><li><a href="#platform-timeline"><span class="nm">里程碑时间线</span><span class="q">关键节点什么时候到、现在走到哪、偏了多少。</span></a></li>
   </ol></div>
   <p class="nope">时序图、状态图、甘特图使用 <a href="../mermaid/">Saan Mermaid</a>。物理表结构不在本技能范围内。</p>
 </section>
