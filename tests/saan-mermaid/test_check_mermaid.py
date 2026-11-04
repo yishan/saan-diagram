@@ -29,6 +29,25 @@ class PackageTests(unittest.TestCase):
         for rel in re.findall(r"`((?:scripts|assets)/[^`]+)`", text):
             self.assertTrue((SKILL / rel).exists(), rel)
 
+    def test_every_reference_note_is_listed(self):
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        for path in (SKILL / "references").glob("*.md"):
+            self.assertIn(f"`{path.name}`", text, path.name)
+
+    def test_skill_theme_blocks_match_theme_file(self):
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        light = checker.load_theme("saan-light")
+        self.assertIn(checker.theme_block(light), text)
+        self.assertIn(checker.classdef_block(light), text)
+
+    def test_page_theme_block_matches_theme_file(self):
+        page = html.unescape((ROOT / "page" / "mermaid" / "index.html").read_text(encoding="utf-8"))
+        self.assertIn(checker.theme_block(checker.load_theme("saan-light")).rstrip("\n"), page)
+
+    def test_themes_meet_contrast(self):
+        for theme in checker.all_themes():
+            self.assertEqual(checker.theme_problems(theme), [], theme["name"])
+
 
 class CheckerTests(unittest.TestCase):
     def test_selftest_passes(self):
@@ -70,6 +89,40 @@ class CheckerTests(unittest.TestCase):
             self.assertEqual(run(bad).returncode, 1)
             self.assertIn("[R2]", run(empty).stdout)
             self.assertEqual(run(empty).returncode, 1)
+
+    def test_json_output_has_locations(self):
+        import json
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "bad.mmd"
+            path.write_text(checker.FLOW + "  a[甲] --> end\n", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(SCRIPT), "--json", str(path)], capture_output=True, text=True, encoding="utf-8")
+            data = json.loads(result.stdout)
+            self.assertFalse(data["ok"])
+            hit = [x for x in data["issues"] if x["code"] == "S2"]
+            self.assertEqual(hit[0]["file"], str(path))
+            self.assertEqual(hit[0]["line"], checker.FLOW.count("\n") + 1)
+
+    def test_target_flags_new_types(self):
+        text = (SKILL / "assets" / "examples" / "flow-swimlane.mmd").read_text(encoding="utf-8")
+        self.assertTrue(any("[V2]" in e for e in checker.review([text], "source: document\nnone: example\n", target="11.12")[0]))
+        self.assertEqual(checker.review([text], "source: document\nnone: example\n", target="12.1")[0], [])
+
+    def test_hook_blocks_only_on_syntax_errors(self):
+        import json
+        import tempfile
+        hook = SKILL / "scripts" / "hook.py"
+        with tempfile.TemporaryDirectory() as tmp:
+            broken = Path(tmp) / "broken.md"
+            styled = Path(tmp) / "plain.md"
+            broken.write_text("```mermaid\nflowchart TB\n  a --> end\n```\n", encoding="utf-8")
+            styled.write_text("```mermaid\nflowchart TB\n  a --> b\n  style a fill:#f00\n```\n", encoding="utf-8")
+            run = lambda p: subprocess.run([sys.executable, str(hook)], input=json.dumps({"tool_input": {"file_path": str(p)}}),
+                                           capture_output=True, text=True, encoding="utf-8")
+            result = run(broken)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("broken.md:3 [S2]", result.stderr)
+            self.assertEqual(run(styled).returncode, 0)
 
     def test_svg_width_is_read(self):
         self.assertEqual(checker.svg_width('<svg viewBox="4 4 1800.5 200">'), 1800.5)

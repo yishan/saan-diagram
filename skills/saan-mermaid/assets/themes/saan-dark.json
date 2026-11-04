@@ -1,0 +1,58 @@
+{
+  "name": "saan-dark",
+  "description": "Saan palette for dark pages. Same roles as saan-light.",
+  "config": {
+    "theme": "base",
+    "look": "classic",
+    "themeVariables": {
+      "darkMode": "true",
+      "background": "#17191D",
+      "fontFamily": "PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif",
+      "primaryColor": "#2E323A",
+      "primaryTextColor": "#E6E8EB",
+      "primaryBorderColor": "#2E323A",
+      "secondaryColor": "#353A43",
+      "tertiaryColor": "#22252B",
+      "lineColor": "#A3AAB6",
+      "textColor": "#E6E8EB",
+      "clusterBkg": "#22252B",
+      "clusterBorder": "#3C424C",
+      "edgeLabelBackground": "#17191D",
+      "dropShadow": "none",
+      "cScale0": "#2E323A",
+      "cScale1": "#1F2D4F",
+      "cScale2": "#353A43",
+      "cScale3": "#22252B"
+    },
+    "quadrantChart": {
+      "pointTextPadding": 14
+    }
+  },
+  "roles": {
+    "core": {
+      "fill": "#1F2D4F",
+      "stroke": "#6E97FF",
+      "color": "#E6E8EB"
+    },
+    "hub": {
+      "fill": "#454B55",
+      "stroke": "#454B55",
+      "color": "#E6E8EB"
+    },
+    "system": {
+      "fill": "#2B5FD8",
+      "stroke": "#2B5FD8",
+      "color": "#FFFFFF"
+    },
+    "external": {
+      "fill": "#8FB0FF",
+      "stroke": "#8FB0FF",
+      "color": "#1F2329"
+    },
+    "ai": {
+      "fill": "#4A3522",
+      "stroke": "#C98A4B",
+      "color": "#F3E6D8"
+    }
+  }
+}
