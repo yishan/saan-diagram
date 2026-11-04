@@ -1,0 +1,70 @@
+// Run before styles to apply saved appearance and resolve the automatic entry URL.
+(() => {
+  const root = document.documentElement;
+  const keys = { language: 'saankits.language', theme: 'saankits.theme' };
+  const read = key => { try { return localStorage.getItem(key); } catch { return null; } };
+  const save = (key, value) => { try { localStorage.setItem(key, value); } catch { /* Preferences still work for this visit. */ } };
+  const language = value => /^zh(?:-|$)/i.test(value || '') ? 'zh' : /^en(?:-|$)/i.test(value || '') ? 'en' : null;
+  const currentLanguage = language(root.lang) || 'en';
+  const url = new URL(location.href);
+  const explicitLanguage = ['en', 'zh'].includes(url.searchParams.get('lang')) ? url.searchParams.get('lang') : null;
+  const alternate = lang => document.querySelector(`link[rel="alternate"][hreflang="${lang === 'zh' ? 'zh-CN' : 'en'}"]`);
+  if (alternate('en') && alternate('zh')) {
+    const browserLanguage = (navigator.languages || [navigator.language]).map(language).find(Boolean) || 'en';
+    const desiredLanguage = explicitLanguage || (root.dataset.languageEntry === 'auto'
+      ? language(read(keys.language)) || browserLanguage : currentLanguage);
+    if (explicitLanguage) save(keys.language, explicitLanguage);
+    if (desiredLanguage !== currentLanguage) {
+      const target = new URL(alternate(desiredLanguage).href);
+      target.search = url.search;
+      target.hash = url.hash;
+      location.replace(target.href);
+    }
+  }
+
+  const media = matchMedia('(prefers-color-scheme: dark)');
+  let theme = read(keys.theme);
+  if (!['light', 'dark', 'system'].includes(theme)) theme = 'system';
+  const applyTheme = () => {
+    if (theme === 'system') delete root.dataset.theme;
+    else root.dataset.theme = theme;
+    root.style.colorScheme = theme === 'system' ? (media.matches ? 'dark' : 'light') : theme;
+    document.querySelectorAll('[data-theme-choice]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.themeChoice === theme));
+    });
+  };
+  applyTheme();
+  media.addEventListener('change', applyTheme);
+  addEventListener('storage', event => {
+    if (event.key !== keys.theme && event.key !== null) return;
+    const stored = read(keys.theme);
+    theme = ['light', 'dark', 'system'].includes(stored) ? stored : 'system';
+    applyTheme();
+  });
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-language]').forEach(link => {
+      const updateTarget = () => {
+        const target = new URL(link.href);
+        target.search = location.search;
+        target.searchParams.set('lang', link.dataset.language);
+        target.hash = location.hash;
+        link.href = target.href;
+      };
+      updateTarget();
+      addEventListener('hashchange', updateTarget);
+      link.addEventListener('click', () => {
+        updateTarget();
+        save(keys.language, link.dataset.language);
+      });
+    });
+    document.querySelectorAll('[data-theme-choice]').forEach(button => {
+      button.addEventListener('click', () => {
+        theme = button.dataset.themeChoice;
+        save(keys.theme, theme);
+        applyTheme();
+      });
+    });
+    document.querySelectorAll('[data-theme-controls]').forEach(control => { control.hidden = false; });
+    applyTheme();
+  });
+})();

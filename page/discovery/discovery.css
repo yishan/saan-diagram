@@ -1,0 +1,31 @@
+:root{
+  --paper:#F6F7F9;--sheet:#FFFFFF;--ink:#1F2329;--muted:#5B6370;--line:#DEE0E3;--soft:#EEF0F3;--accent:#2F5FD0;
+  --f-display:"Noto Serif SC","Songti SC","STSong",serif;
+  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#15171B;--sheet:#1D2026;--ink:#E8EAED;--muted:#A0A7B3;--line:#33373F;--soft:#262A31;--accent:#7FA6FF;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#15171B;--sheet:#1D2026;--ink:#E8EAED;--muted:#A0A7B3;--line:#33373F;--soft:#262A31;--accent:#7FA6FF;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75;padding-inline:max(20px,env(safe-area-inset-left,0px)) max(20px,env(safe-area-inset-right,0px))}
+.wrap{max-width:960px;margin:auto;padding-block:40px 64px}
+h1,h2,h3,p{margin:0}
+h2{font-family:var(--f-display);font-size:27px;line-height:1.4}
+h3{font-size:17px;font-weight:500}
+a{color:var(--accent)}
+code,pre{font-family:var(--f-mono);font-size:13px}
+section{display:grid;gap:20px;padding-block:36px;border-top:1px solid var(--line)}
+.stages{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin:0;padding:0}
+.stages li{display:grid;align-content:start;gap:8px}
+.stages p,.note{color:var(--muted);font-size:14px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;min-width:580px;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:12px 14px;border-bottom:1px solid var(--line)}
+th{font-weight:500}thead th{color:var(--muted);font-size:13px}th:first-child,td:first-child{padding-left:0}
+.example{border-left:3px solid var(--line);padding-left:20px;display:grid;gap:16px;max-width:760px}
+.example blockquote{margin:0;font-size:18px}
+.example ol{margin:0;padding-left:22px;display:grid;gap:8px}
+.rules{margin:0;padding-left:20px;display:grid;gap:10px;max-width:760px}
+footer{display:flex;flex-wrap:wrap;gap:8px 24px;border-top:1px solid var(--line);padding-top:24px;color:var(--muted);font-size:13px}
+footer a{color:inherit}
+@media(max-width:640px){.stages{grid-template-columns:minmax(0,1fr);gap:24px}.wrap{padding-top:24px}}

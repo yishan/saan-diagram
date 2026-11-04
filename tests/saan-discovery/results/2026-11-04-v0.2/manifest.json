@@ -1,0 +1,43 @@
+{
+  "date": "2026-11-04",
+  "version": "0.2.0",
+  "data": "fictional",
+  "method": "Three independent contexts using a copied standalone skill. Consumer and public-service each had three simulated user turns in the same context; enterprise received a direct-output request. Parent reviewed saved outputs. Runners received no rubric or intended answer.",
+  "skill_sha256": {
+    "SKILL.md": "90811036ca813ec07c895df626001fd3eb2eb1c5e028b8eb15a33c4646b1f923",
+    "agents/openai.yaml": "0bdd1a56a71f66ac2758dde6aa7e296e06fc2bd8dfa725da678afb2cf92d876f",
+    "references/deliverables.md": "3b0a0427970d451bd6785e9adc31136abe547f91a72b5c1998480ef7594ef2f2",
+    "references/process-and-approval.md": "67927fc1c460b8e74f9054f615e741eaa6ec7907920de2f57e2f4904f096030a",
+    "references/product-fit.md": "e9e90168389e7093b0ca8711b849681a926b549e495bf3b254474916d097245f",
+    "references/research-context.md": "e94f8a9ef5e4b8b71539d2e0c1a0fe0b350ba0fd6e849f7599fa5f87f57e2181",
+    "references/user-interview.md": "bf6e44205f12f559a01d93ccf86c231fc99b45326b770cfc8fc2a193e19bbaec"
+  },
+  "runs": [
+    {
+      "name": "consumer",
+      "turns": 3
+    },
+    {
+      "name": "public-service",
+      "turns": 3
+    },
+    {
+      "name": "enterprise-direct",
+      "tasks": 1
+    }
+  ],
+  "observed": [
+    "ToC narrows to saving an activity through deciding whether to leave; no acquisition or enterprise approval checklist",
+    "Secondhand reports from two users remain bounded and unknown reasons are not invented",
+    "Skip and no-more-questions requests produce interim outputs and respondent-directed follow-ups",
+    "Public-facing service retains resident and organization perspectives; reservation review is distinct from service completion",
+    "Explicit ToB direct-output request bypasses interactive setup while retaining consequential gaps"
+  ],
+  "limits": [
+    "Simulated text exchanges, not native question UI interaction",
+    "No real customer interviews or population validation",
+    "No no-skill comparison",
+    "Original v0.1.0 suite was not rerun in full",
+    "No global install, remote publication or live product verification"
+  ]
+}
