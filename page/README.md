@@ -1,18 +1,21 @@
 # Site
 
-Static pages for the collection, published at [kits.yishan.app](https://kits.yishan.app/). Discovery and PRD Writing include English and Chinese, selected from browser preferences on first visit. The collection, Diagram, and Mermaid pages are in Chinese.
+Static pages for the collection, published at [kits.yishan.app](https://kits.yishan.app/). All five pages include English and Chinese, selected from browser preferences on first visit.
 
 | Path | Source | Content |
 |---|---|---|
 | `/` | `index.html` | Saan Kits overview |
+| `/zh/` | `zh/index.html` | Explicit Chinese overview |
 | `/diagram/` | `diagram/` | Saan Diagram introduction and gallery |
+| `/diagram/zh/` | `diagram/zh/index.html` | Explicit Chinese Diagram introduction |
 | `/mermaid/` | `mermaid/` | Saan Mermaid introduction and examples |
+| `/mermaid/zh/` | `mermaid/zh/index.html` | Explicit Chinese Mermaid introduction |
 | `/discovery/` | `discovery/index.html` | Saan Discovery automatic language entry (English HTML fallback) |
 | `/discovery/zh/` | `discovery/zh/index.html` | Explicit Chinese introduction |
 | `/prd-writing/` | `prd-writing/index.html` | PRD Writing automatic language entry (English HTML fallback) |
 | `/prd-writing/zh/` | `prd-writing/zh/index.html` | Explicit Chinese introduction |
 
-The overview page forwards old `/#anchor` links to `/diagram/#anchor`. Each new skill gets its own second-level directory and a row on the overview page.
+The overview page forwards old `/#anchor` links to `/diagram/#anchor`, except its own `#collection-install` section. Each new skill gets its own second-level directory and a row on the overview page. Keep the localized skill count in sync with that list. Skill text aligns with the main heading; decorative circles and a connecting line sit in the left gutter.
 
 ## Local preview
 
@@ -31,7 +34,9 @@ Run `python3 scripts/check_site.py` before publishing. It checks local links and
 
 Copy feedback follows the rendered page's `lang` attribute. Each bilingual introduction keeps complete English and Chinese HTML documents and shares its own CSS. `site-preferences.js` runs before styles: an explicit `?lang=en|zh` choice takes precedence; otherwise the main entry uses the saved language and then the first supported browser language (Chinese or English, with English fallback). A direct `/zh/` URL remains Chinese. Language links preserve the query and section anchor and remember manual choices. Without JavaScript, both documents and ordinary language links remain usable.
 
-The top-right appearance control uses system, sun, and moon icons. Initial appearance follows `prefers-color-scheme`; a manual light/dark/system choice is saved for the site. System mode follows live OS changes. The shared script also applies that preference when navigating to existing pages. Storage denial does not block language switching or the current page's theme control. Page preferences do not change the skill's output-language rule.
+Two icon buttons at the top right open language and appearance dropdowns. The appearance icon reflects the selected system, light, or dark mode. Menus mark the current choice, close on selection, outside click, focus leaving, or Escape, and support Tab and arrow-key navigation. Escape returns focus to the trigger. Language selection uses native `details` and links, so it remains usable without JavaScript; the appearance picker stays hidden in that case.
+
+Initial appearance follows `prefers-color-scheme`; a manual light/dark/system choice is saved for the site. System mode follows live OS changes. The shared script also applies that preference when navigating to existing pages. Storage denial does not block language switching or the current page's theme control. Page preferences do not change the skill's output-language rule.
 
 ## Vercel
 
@@ -50,7 +55,7 @@ The directory name does not add `/page` to the public URL. `index.html` is serve
 
 ## Maintaining Saan Diagram examples
 
-Update the skill's `assets/*.yaml` and the corresponding `docs/img/*.png` first, then run `python3 scripts/sync_page.py` (it only copies `docs/img/*.png`; re-render those first with `uv run skills/saan-diagram/scripts/render.py <spec> --all`). It refreshes the 15 embedded specs, preview images, and displayed skill version. Review any surrounding explanatory text when behavior changes.
+Update the skill's `assets/*.yaml` and the corresponding `docs/img/*.png` first, then run `python3 scripts/sync_page.py` (it only copies `docs/img/*.png`; re-render those first with `uv run skills/saan-diagram/scripts/render.py <spec> --all`). It refreshes the 15 embedded specs in both languages, shared preview images, and the version from Diagram's `SKILL.md`. Review any surrounding explanatory text when behavior changes.
 
 `diagram/examples/accepted.yaml` is a separate fictional example that intentionally records a control bypass. To regenerate its image (needs uv and a local Chrome), run from the repository root:
 
@@ -63,7 +68,7 @@ Confirm both the reported finding and the rendered image before publishing.
 
 ## Maintaining Saan Mermaid examples
 
-`mermaid/index.html` embeds each file in `skills/saan-mermaid/assets/examples/`. After changing one, update the embedded code and `mermaid/img/`. `tests/saan-mermaid` fails if the page and an example differ.
+`mermaid/index.html` and `mermaid/zh/index.html` embed each file in `skills/saan-mermaid/assets/examples/`. After changing one, update both pages and `mermaid/img/`. `check_site.py` checks both languages against the sources; `tests/saan-mermaid` also checks the main page.
 
 ## Icons
 
