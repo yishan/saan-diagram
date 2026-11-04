@@ -142,6 +142,8 @@ mmdc -i diagram.mmd -o diagram.png -b white -s 2 -q
 python3 <skill-dir>/scripts/check_mermaid.py --controls controls.txt diagram.mmd diagram.svg
 ```
 
+When the diagrams live in a Markdown file, pass the `.md` file itself. The script checks each fenced `mermaid` block.
+
 Look at the PNG. If `mmdc` is missing, install `@mermaid-js/mermaid-cli`, version 12 or later. If it cannot be installed, tell the user the diagram is unrendered.
 
 Handle the script output this way:

@@ -11,9 +11,16 @@ ROLES = {
     "ai": ("#FDEBD8", "#F5C99B", "#1F2329"),
 }
 KINDS = {"arch", "flow", "overview", "approval", "audit"}
-SHAPE = r"\(\[.*?\]\)|\[\(.*?\)\]|\[\[.*?\]\]|\(\(.*?\)\)|\{\{.*?\}\}|\[.*?\]|\(.*?\)|\{.*?\}|>.*?\]"
-NODE = re.compile(rf"\s*([^\s\[\]\(\)\{{\}}<>|&:;\"-]+(?:-[^\s\[\]\(\)\{{\}}<>|&:;\"-]+)*)\s*({SHAPE})?(?::::(\w+))?\s*")
-LINK = re.compile(r"\s*(?:(--|-\.|==)\s+([^|]*?)\s+)?(<?-{2,}>|-\.+->|-\.+-|={2,}>|-{3,}|--[xo]|~~~)\s*(?:\|([^|]*)\|)?\s*")
+SHAPE = r'@\{(?:[^{}"]|"[^"]*")*\}|\(\[.*?\]\)|\[\(.*?\)\]|\[\[.*?\]\]|\(\(.*?\)\)|\{\{.*?\}\}|\[.*?\]|\(.*?\)|\{.*?\}|>.*?\]'
+NODE = re.compile(rf"\s*([^\s\[\]\(\)\{{\}}<>|&:;\"@-]+(?:-[^\s\[\]\(\)\{{\}}<>|&:;\"@-]+)*)\s*({SHAPE})?(?::::(\w+))?\s*")
+LINK = re.compile(r"\s*(?:([^\s@|&]+)@)?(?:(--|-\.|==)\s+([^|]*?)\s+)?(<?-{2,}>|<?-\.+->|-\.+-|<?={2,}>|-{3,}|--[xo]|~~~)\s*(?:\|([^|]*)\|)?\s*")
+DECISION_SHAPES = {"diam", "diamond", "decision", "question"}
+TYPES = {"flowchart", "graph", "swimlane-beta", "sequenceDiagram", "stateDiagram", "stateDiagram-v2", "erDiagram",
+         "gantt", "timeline", "quadrantChart", "classDiagram", "pie", "journey", "mindmap", "gitGraph", "kanban",
+         "requirementDiagram", "zenuml"}
+SEQ_OPEN = re.compile(r"(alt|opt|loop|par|par_over|critical|break|rect|box)\b")
+SEQ_MID = {"else": "alt", "and": "par", "option": "critical"}
+FENCE = re.compile(r"^[ \t]*(`{3,}|~{3,})[ \t]*mermaid[ \t]*\n(.*?)^[ \t]*\1[ \t]*$", re.M | re.S)
 REVIEW = re.compile(r"审|批|核|校验|复验|验收")
 REJECT = re.compile(r"退回|驳回|拒绝|不通过|不合格|否|修改")
 
@@ -49,6 +56,7 @@ class D:
         self.subs, self.lane, self.sublabel = {}, {}, {}
         self.classdefs, self.errors = {}, []
         self.custom_style = False
+        self.edge_ids, self.seq_blocks = set(), []
         self.parse(text)
 
     def node(self, m, stack):
@@ -56,7 +64,14 @@ class D:
         if nid in self.subs:
             return nid
         n = self.nodes.setdefault(nid, {"label": nid, "decision": False})
-        if shape:
+        if shape and shape.startswith("@{"):
+            kind = re.search(r'shape:\s*"?([\w-]+)', shape)
+            label = re.search(r'label:\s*(?:"([^"]*)"|([^,}]+))', shape)
+            if label:
+                n["label"] = (label.group(1) if label.group(1) is not None else label.group(2)).strip()
+            if kind:
+                n["decision"] = kind.group(1) in DECISION_SHAPES
+        elif shape:
             n["label"] = re.sub(r'^[\[\(\{>]+"?|"?[\]\)\}]+$', "", shape)
             n["decision"] = shape.startswith("{") and not shape.startswith("{{")
         if cls:
@@ -93,10 +108,25 @@ class D:
             if not self.type:
                 self.type = line.split()[0]
                 continue
-            if self.type.startswith("state"):
+            if self.type == "sequenceDiagram":
+                self.seq_line(line)
+            elif self.type.startswith("state"):
                 self.state_line(line)
             elif self.type in ("flowchart", "graph", "swimlane-beta"):
                 self.flow_line(line, stack)
+
+    def seq_line(self, line):
+        word = line.split()[0]
+        if SEQ_OPEN.match(word) and SEQ_OPEN.match(word).end() == len(word):
+            self.seq_blocks.append(word)
+        elif word in SEQ_MID and line.split()[0] == word:
+            if not self.seq_blocks or self.seq_blocks[-1] != SEQ_MID[word]:
+                self.errors.append(f"[S3] 时序图的 {word} 不在 {SEQ_MID[word]} 块里")
+        elif line == "end":
+            if self.seq_blocks:
+                self.seq_blocks.pop()
+            else:
+                self.errors.append("[S3] 时序图多了一个 end")
 
     def state_line(self, line):
         m = re.match(r"(\[\*\]|[^\s:]+)\s*-->\s*(\[\*\]|[^\s:]+)", line)
@@ -136,6 +166,9 @@ class D:
         if line.startswith(("style ", "linkStyle ")):
             self.custom_style = True
             return
+        m = re.match(r"([^\s@]+)@\{", line)
+        if m and m.group(1) in self.edge_ids:
+            return
         pos, left = 0, None
         while pos < len(line):
             group = []
@@ -154,14 +187,19 @@ class D:
                 for a in left[0]:
                     for b in group:
                         if left[1] != "~~~":
-                            self.edges.append((a, b, left[1], left[2]))
+                            op = left[1].lstrip("<")
+                            self.edges.append((a, b, op, left[2]))
+                            if left[1].startswith("<"):
+                                self.edges.append((b, a, op, left[2]))
             if pos >= len(line):
                 break
             m = LINK.match(line, pos)
             if not m:
                 self.errors.append(f"[S1] 无法解析这一行：{line}")
                 return
-            left = (group, m.group(3), (m.group(4) or m.group(2) or "").strip())
+            if m.group(1):
+                self.edge_ids.add(m.group(1))
+            left = (group, m.group(4), (m.group(5) or m.group(3) or "").strip())
             pos = m.end()
 
     def endpoints(self, g):
@@ -195,6 +233,12 @@ def check(text):
     errs, finds, warns = list(d.errors), [], []
     L = lambda n: d.nodes.get(n, {}).get("label", n)
     flowlike = d.type in ("flowchart", "graph", "swimlane-beta")
+    if not d.type:
+        errs.append("[S0] 没有找到图类型行")
+    elif d.type not in TYPES and not d.type.endswith("-beta") and not d.type.startswith("C4"):
+        errs.append(f"[S0] 『{d.type}』不是 Mermaid 图类型。Markdown 文件请直接传 .md，脚本会提取 mermaid 代码块")
+    for b in d.seq_blocks:
+        errs.append(f"[S3] 时序图的 {b} 块没有 end")
     if "theme: base" not in d.fm and d.type in ("flowchart", "graph", "swimlane-beta", "sequenceDiagram", "stateDiagram-v2", "erDiagram"):
         errs.append("[CL3] 缺少 Saan 主题 frontmatter")
     m1 = re.search(r'primaryColor:\s*"(#\w{6})"', d.fm)
@@ -270,6 +314,12 @@ def check(text):
     kept = [(c, m) for c, m in finds if c not in d.accept]
     accepted = [(c, d.accept[c], m) for c, m in finds if c in d.accept]
     return errs, kept, warns, accepted
+
+
+def blocks(path, body):
+    if path.endswith((".md", ".markdown")):
+        return [m.group(2) for m in FENCE.finditer(body)]
+    return [body]
 
 
 def svg_width(text):
@@ -421,6 +471,11 @@ TESTS = [
     ("CP2", GOOD, "control: 审核单据\n"),
     ("CP2", GOOD, "source: user\n"),
     ("V1", GOOD, CTL + "must_pass: 缺少写法\n"),
+    ("S0", "# 标题\n\n```mermaid\nflowchart LR\n  a --> b\n```\n", None),
+    ("S3", FM + "sequenceDiagram\n  A->>B: 请求\n  alt 成功\n  B->>A: 返回\n", None),
+    ("S3", FM + "sequenceDiagram\n  A->>B: 请求\n  else 失败\n", None),
+    ("RT1", FM + "%% saan: approval\nflowchart LR\n  a[申请] --> b@{ shape: diamond, label: \"审核\" }\n  b --> c[付款]\n  b --> d[归档]\n", "source: document\nnone: 示例\n"),
+    ("P1", GOOD + "  apply e9@--> pay\n  e9@{ animate: true }\n", CTL),
 ]
 
 
@@ -449,6 +504,22 @@ def selftest():
     if review([br])[2]:
         bad += 1
         print("<br/> 不应计入文字长度")
+    shaped = GOOD.replace("audit{审核单据}", 'audit@{ shape: decision, label: "审核单据" }').replace("  fix -.-> apply\n", "  fix e1@-.-> apply\n  e1@{ animate: true }\n")
+    if review([shaped], CTL) != review([GOOD], CTL) or "e1" in D(shaped).nodes:
+        bad += 1
+        print("@{ } 节点或边 ID 解析有误", review([shaped], CTL))
+    md = "# 文档\n\n```mermaid\n" + GOOD + "```\n\n正文\n\n~~~mermaid\n" + FLOW + "  a[甲] --> b[乙]\n~~~\n"
+    if len(blocks("doc.md", md)) != 2 or review(blocks("doc.md", md), CTL)[:3] != ([], [], []):
+        bad += 1
+        print("Markdown 代码块提取有误")
+    two = FLOW + "  a[甲] <--> b[乙]\n"
+    if ("b", "a", "-->", "") not in D(two).edges:
+        bad += 1
+        print("双向箭头没有生成反向边")
+    seq = FM + "sequenceDiagram\n  A->>B: 请求\n  alt 成功\n    B->>A: 返回\n  else 失败\n    loop 重试\n      A->>B: 请求\n    end\n  end\n  rect rgb(240,240,240)\n    A->>B: 结束\n  end\n"
+    if review([seq])[0]:
+        bad += 1
+        print("正确的时序块不应报错", review([seq])[0])
     if svg_width('<svg viewBox="4 4 1800.5 200">') != 1800.5:
         bad += 1
         print("SVG 宽度读取有误")
@@ -482,9 +553,12 @@ def main():
             elif svg_width(body) > 1200:
                 width_notes.append(f"[W1] {p} 宽 {svg_width(body):.0f}，放进文档文字会变小。改成纵向或拆图")
         else:
-            texts.append(body)
+            found = blocks(p, body)
+            if not found:
+                width_notes.append(f"[R2] {p} 里没有 mermaid 代码块")
+            texts += found
     e, f, w, a = review(texts, controls)
-    e += [x for x in width_notes if x.startswith("[R1]")]
+    e += [x for x in width_notes if x.startswith(("[R1]", "[R2]"))]
     w += [x for x in width_notes if x.startswith("[W1]")]
     if controls is not None:
         src = parse_controls(controls)["source"]
