@@ -55,6 +55,22 @@ class CheckerTests(unittest.TestCase):
             body = re.sub(r"\A---\n.*?\n---\n", "", path.read_text(encoding="utf-8"), flags=re.S)
             self.assertIn(body, page, path.name)
 
+    def test_markdown_file_is_checked_block_by_block(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            good = Path(tmp) / "good.md"
+            bad = Path(tmp) / "bad.md"
+            empty = Path(tmp) / "empty.md"
+            good.write_text("# 文档\n\n```mermaid\n" + checker.FLOW + "  a[甲] --> b[乙]\n```\n", encoding="utf-8")
+            bad.write_text("# 文档\n\n```mermaid\n" + checker.FLOW + "  a[甲] --> end\n```\n", encoding="utf-8")
+            empty.write_text("# 只有文字\n", encoding="utf-8")
+            run = lambda path: subprocess.run([sys.executable, str(SCRIPT), str(path)], capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(run(good).returncode, 0, run(good).stdout)
+            self.assertIn("[S2]", run(bad).stdout)
+            self.assertEqual(run(bad).returncode, 1)
+            self.assertIn("[R2]", run(empty).stdout)
+            self.assertEqual(run(empty).returncode, 1)
+
     def test_svg_width_is_read(self):
         self.assertEqual(checker.svg_width('<svg viewBox="4 4 1800.5 200">'), 1800.5)
 
