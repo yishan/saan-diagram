@@ -150,6 +150,13 @@ PROCESS_KINDS = {"module", "hub", "decision", "optional", "ai"}   # DFD: things 
 EDGE_KINDS = {"flow", "data", "return", "bidir", "meta"}
 
 
+def _core_limit(spec):
+    limit = spec.get("core_limit", MAX_CORE)
+    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1:
+        raise SpecError("core_limit 需要 ≥1 的整数")
+    return limit
+
+
 def esc(s):
     return html.escape(str(s), quote=True)
 
@@ -235,6 +242,7 @@ def special_info(spec):
 class Diagram:
     def __init__(self, spec, theme=None, brand=None, titlebar=None, orient=None):
         self.spec = spec
+        self.core_limit = _core_limit(spec)
         preset = PRESETS.get(theme or spec.get("theme") or "gray", DEFAULT_BRAND)
         self.t = make_theme(brand or spec.get("brand") or preset,
                             titlebar or spec.get("titlebar") or "plain")
@@ -768,7 +776,7 @@ class Diagram:
         A('</defs>')
         A(f'<rect width="{W}" height="{H}" fill="{t["paper"]}"/>')
         edge = f' stroke="{t["titleedge"]}"' if t["titleedge"] != t["titlebar"] else ""
-        A(f'<rect x="{BODY_PAD+0.5}" y="0.5" width="{W-2*BODY_PAD-1}" height="{TOP_TITLE-1}" fill="{t["titlebar"]}"{edge}/>')
+        A(f'<rect x="{BODY_PAD+0.5}" y="0.5" width="{W-2*BODY_PAD-1}" height="{TOP_TITLE-1}" fill="{t["titlebar"]}" data-ct="titlebar"{edge}/>')
         A(f'<text x="{W/2}" y="{TOP_TITLE/2+5}" text-anchor="middle" fill="{t["titletext"]}" font-size="16" font-weight="600">{esc(title)}</text>')
         stages, rule, divider = self.chrome(legend_y)
         for (fx, fy, fw, fh), (hx, hy, hw, hh), label in stages:
@@ -905,9 +913,13 @@ class Diagram:
         else:
             A(f'<rect x="{n.x:.1f}" y="{n.y:.1f}" width="{n.w:.1f}" height="{n.h:.1f}" rx="4" fill="{fill}"{sa}/>')
         ty = n.cy + 4 - (6 if n.sub else 0)
-        A(f'<text x="{n.cx:.1f}" y="{ty:.1f}" text-anchor="middle" fill="{t["node_text"]}" font-size="{FS}" font-weight="{weight}">{esc(n.label)}</text>')
+        # The rectangle backdrop tracker cannot infer polygon/path interiors.
+        # Associate only the node's own labels with its actual fill; treating its
+        # bounding box as painted would hide unreadable text in a diamond's corners.
+        backdrop = f' data-ct-bg="{fill}"' if n.kind in ("decision", "doc") else ""
+        A(f'<text x="{n.cx:.1f}" y="{ty:.1f}" text-anchor="middle" fill="{t["node_text"]}" font-size="{FS}" font-weight="{weight}"{backdrop}>{esc(n.label)}</text>')
         if n.sub:
-            A(f'<text x="{n.cx:.1f}" y="{ty+13:.1f}" text-anchor="middle" fill="{t["soft"]}" font-size="9" font-family="{MONO}">{esc(n.sub)}</text>')
+            A(f'<text x="{n.cx:.1f}" y="{ty+13:.1f}" text-anchor="middle" fill="{t["soft"]}" font-size="9" font-family="{MONO}"{backdrop}>{esc(n.sub)}</text>')
         self._badge(A, n)
 
     def _badge(self, A, n):
@@ -1364,8 +1376,8 @@ def lint(d):
                 out.append(("R1", f"[R1] 主流程 {e['a'].label}→{e['b'].label} 挂在分组 '{cid}' 的非主线节点 '{n.label}' 上"))
     # F1 accent budget: core tint is a signal only while it is rare
     core = [n.label for n in nodes if n.core] + [c.id for c in d.containers.values() if c.core]
-    if len(core) > MAX_CORE:
-        out.append(("F1", f"[F1] 核心业务底色用了 {len(core)} 处（{'、'.join(core)}），上限 {MAX_CORE}：只留真正的核心"))
+    if len(core) > d.core_limit:
+        out.append(("F1", f"[F1] 核心业务底色用了 {len(core)} 处（{'、'.join(core)}），上限 {d.core_limit}：只留真正的核心"))
     # R5 重点能力命名：声明了 special.prefix（旧写法 kind: ai 默认为 "AI"）时，标签必须以它开头
     sl, pre = d.t["special_label"], d.t["special_prefix"]
     if pre:
@@ -1736,6 +1748,7 @@ class LayersDiagram:
 
     def __init__(self, spec, theme=None, brand=None, titlebar=None, orient=None):
         self.spec = spec
+        self.core_limit = _core_limit(spec)
         self.t = _theme_from(spec, theme, brand, titlebar)
         self.S = Scene()
         self.findings = []
@@ -1900,8 +1913,8 @@ class LayersDiagram:
             extra = _legend_row(S, t, legend, BODY_PAD + 8, ly, W)
             H = ly + 40 + extra * 32
         self.W, self.H = W, H
-        if len(self.cores) > MAX_CORE:
-            self._f("F1", f"核心底色用了 {len(self.cores)} 处（{'、'.join(map(str, self.cores))}），上限 {MAX_CORE}")
+        if len(self.cores) > self.core_limit:
+            self._f("F1", f"核心底色用了 {len(self.cores)} 处（{'、'.join(map(str, self.cores))}），上限 {self.core_limit}")
 
     def _layer(self, L, x, y, w):
         """Lay one band; returns its height. Blocks share the width by weight `w`."""
@@ -2135,6 +2148,7 @@ class ERDiagram:
 
     def __init__(self, spec, theme=None, brand=None, titlebar=None, orient=None):
         self.spec = spec
+        self.core_limit = _core_limit(spec)
         self.t = _theme_from(spec, theme, brand, titlebar)
         self.S = Scene()
         self.findings = []
@@ -2350,6 +2364,7 @@ class OrgDiagram:
 
     def __init__(self, spec, theme=None, brand=None, titlebar=None, orient=None):
         self.spec = spec
+        self.core_limit = _core_limit(spec)
         self.t = _theme_from(spec, theme, brand, titlebar)
         self.S = Scene()
         self.findings = []
@@ -2566,8 +2581,8 @@ class OrgDiagram:
                 S.text(v["x"], v["y"] + 26, v["w"], 14, v["sub"], 9, 400, t["soft"], mono=True, z=3)
                 if any(is_wide(c) for c in str(v["sub"])):
                     self._f("S1", f"副标签 '{v['sub']}' 含中文：只写编码类拉丁字符（如租户号 T01）")
-        if len(cores) > MAX_CORE:
-            self._f("F1", f"核心底色用了 {len(cores)} 处，上限 {MAX_CORE}")
+        if len(cores) > self.core_limit:
+            self._f("F1", f"核心底色用了 {len(cores)} 处，上限 {self.core_limit}")
 
         # cross-scope grants
         self.notes = []
@@ -2735,6 +2750,7 @@ class _SceneDiagram:
 
     def __init__(self, spec, theme=None, brand=None, titlebar=None, orient=None):
         self.spec = spec
+        self.core_limit = _core_limit(spec)
         self.t = _theme_from(spec, theme, brand, titlebar)
         self.S = Scene()
         self.findings = []
@@ -2855,8 +2871,8 @@ class FishboneDiagram(_SceneDiagram):
         S.conn([(x0, spine_y), (hx - 2, spine_y)], t["ink"], 2, end=True, z=1)
         S.rect(hx, spine_y - 28, hw, 56, fill=t["accent_tint"], stroke=t["accent"], rx=8, text=effect, fs=14, weight=600,
                color=t["accent"], z=2)
-        if len(roots) > MAX_CORE:
-            self._f("F1", f"标了 {len(roots)} 个根因，上限 {MAX_CORE}：根因多于 3 个，说明还没找到真正的根因")
+        if len(roots) > self.core_limit:
+            self._f("F1", f"标了 {len(roots)} 个根因，上限 {self.core_limit}：根因多于 3 个，说明还没找到真正的根因")
         if roots:
             self.notes.append(tr(self.t, '已验证根因 {0} 个：{1}', len(roots), '；'.join(roots)))
             per = {}
@@ -3050,8 +3066,8 @@ class TimelineDiagram(_SceneDiagram):
                 S.text((px + x) / 2 - (text_w(sl) + 8) / 2, sy - 22, text_w(sl) + 8, 16, sl, FS, 600, t["ink"], mask=t["paper"], z=5)
                 if abs(x - px) < MIN_END:
                     self._f("A1", f"里程碑 '{lab}' 的偏移只有 {abs(days)} 天，箭头画不出来：拉长时间轴或去掉 plan")
-        if len(cores) > MAX_CORE:
-            self._f("F1", f"焦点（core）用了 {len(cores)} 处，上限 {MAX_CORE}")
+        if len(cores) > self.core_limit:
+            self._f("F1", f"焦点（core）用了 {len(cores)} 处，上限 {self.core_limit}")
         if today:
             if start <= today <= end:
                 tx = X(today)
@@ -3211,8 +3227,8 @@ class QuadrantDiagram(_SceneDiagram):
             labels.append(spot)
             S.text(spot[0], spot[1], lw, lh, lab, FS, 600 if core else 400, t["accent"] if core else t["ink"], "left",
                    mask=None, z=4)
-        if len(cores) > MAX_CORE:
-            self._f("F1", f"焦点事项 {len(cores)} 个，上限 {MAX_CORE}")
+        if len(cores) > self.core_limit:
+            self._f("F1", f"焦点事项 {len(cores)} 个，上限 {self.core_limit}")
         named = {q: ((qs.get(q) or {}) if isinstance(qs.get(q), dict) else {"label": qs.get(q)}).get("label") or q.upper()
                  for q in geo}
         if items:
@@ -3277,8 +3293,8 @@ class IDEF0Diagram(_SceneDiagram):
             if wide_len(a["label"]) > 10:
                 self._f("T1", f"活动名 '{a['label']}' 过长：动词 + 宾语，≤10 字")
         cores = [a["label"] for a in acts if a["core"]]
-        if len(cores) > MAX_CORE:
-            self._f("F1", f"核心活动 {len(cores)} 个，上限 {MAX_CORE}")
+        if len(cores) > self.core_limit:
+            self._f("F1", f"核心活动 {len(cores)} 个，上限 {self.core_limit}")
 
         # ---- arrows (each records the ports it uses)
         arrows = []
@@ -3712,11 +3728,6 @@ INIT_ALIAS = {"arch": "1-arch", "flow": "2-flow", "paths": "3-paths", "swim": "4
 
 
 def build_spec(spec, theme=None, brand=None, titlebar=None, orient=None, slug="biz"):
-    global MAX_CORE
-    limit = spec.get("core_limit", 3)
-    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1:
-        raise SpecError("core_limit 需要 ≥1 的整数")
-    MAX_CORE = limit
     validate_spec(spec)
     spec = _copy.deepcopy(spec)
     spec.pop("_special", None)
@@ -3885,13 +3896,14 @@ def contrast_findings(svg):
             except ValueError:
                 continue
             items.append(("rect", x, y, w, h, _ct_color(_ct_attr(tag, "fill")), "#000000" if 'data-ct="stroked"' in tag else _ct_color(_ct_attr(tag, "stroke")),
-                          _ct_attr(tag, "fill"), _ct_attr(tag, "opacity")))
+                          _ct_attr(tag, "data-ct"), _ct_attr(tag, "opacity")))
         else:
             try:
                 x, y = float(_ct_attr(tag, "x") or 0), float(_ct_attr(tag, "y") or 0)
             except ValueError:
                 continue
-            items.append(("text", x, y, _ct_color(_ct_attr(tag, "fill")), float(_ct_attr(tag, "font-size") or 12), body or ""))
+            items.append(("text", x, y, _ct_color(_ct_attr(tag, "fill")), float(_ct_attr(tag, "font-size") or 12), body or "",
+                          _ct_color(_ct_attr(tag, "data-ct-bg"))))
     rects = [i for i in items if i[0] == "rect"]
     has_child = set()
     for i, a in enumerate(rects):
@@ -3910,12 +3922,12 @@ def contrast_findings(svg):
     for it in items:
         if it[0] == "rect":
             ri += 1
-            _, x, y, w, h, fill, stroke, raw, op = it
+            _, x, y, w, h, fill, stroke, role, op = it
             if not fill or w <= 2 or h <= 2 or (op and float(op) == 0):
                 continue
             bg = under(x, y, w, h)
             # 和底色完全相同又没描边的：标签遮罩、画布、无边框标题栏，都是有意不可见
-            mask = fill.upper() == bg.upper() and not stroke and (h <= 20 or w >= 400 or h > 60)
+            mask = fill.upper() == bg.upper() and not stroke and (role == "titlebar" or h <= 20 or w >= 400 or h > 60)
             if not mask:
                 ok = contrast(fill, bg) >= (CT_CONTAINER if ri in has_child else CT_ELEMENT)
                 if stroke and contrast(stroke, bg) >= CT_STROKE:
@@ -3925,10 +3937,10 @@ def contrast_findings(svg):
                     out.append(("CT1", f"[CT1] 形状 {fill} 和背景 {bg} 对比度只有 {contrast(fill, bg):.2f}，看不出边界：换深一档或加描边"))
             painted.append(it)
         else:
-            _, x, y, fill, size, body = it
+            _, x, y, fill, size, body, backdrop = it
             if not fill or not _re.search(r"[0-9A-Za-z\u4e00-\u9fff]", body):
                 continue
-            bg = under(x, y - size / 2)
+            bg = backdrop or under(x, y - size / 2)
             need = 3 if size >= 18 else CT_TEXT
             if contrast(fill, bg) < need and (fill, bg, "t") not in seen:
                 seen.add((fill, bg, "t"))
