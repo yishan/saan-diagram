@@ -94,7 +94,7 @@ page/                    工具集总览页，每个技能一个二级页面
 .claude-plugin/          工具集打包信息，保留原有标识
 ```
 
-Agent 执行入口位于 `skills/<skill-name>/SKILL.md`。根目录 README 提供工具集目录，技能详细使用说明放在 `docs/<skill-name>/`。站点总览在 `/`，下设 `/diagram/`、`/mermaid/`、`/discovery/` 和 `/prd-writing/`。Discovery 与 PRD Writing 的介绍首次按浏览器语言选择中英文；右上角可切换语言及明暗主题。
+Agent 执行入口位于 `skills/<skill-name>/SKILL.md`。根目录 README 提供工具集目录，技能详细使用说明放在 `docs/<skill-name>/`。站点总览在 `/`，下设 `/diagram/`、`/mermaid/`、`/discovery/` 和 `/prd-writing/`。五个页面均提供中英文版本，右上角统一切换语言和主题。默认跟随浏览器语言与系统主题，手动选择在全站记忆。Diagram 与 Mermaid 的示例保留源文件语言。
 
 ## 开发
 
