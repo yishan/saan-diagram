@@ -43,6 +43,14 @@
     document.querySelectorAll('[data-theme-choice]').forEach(button => {
       button.setAttribute('aria-pressed', String(button.dataset.themeChoice === theme));
     });
+    document.querySelectorAll('[data-theme-icon]').forEach(icon => { icon.toggleAttribute('hidden', icon.dataset.themeIcon !== theme); });
+    const trigger = document.querySelector('[data-theme-controls] summary');
+    const selected = document.querySelector(`[data-theme-choice="${theme}"]`);
+    if (trigger && selected) {
+      const label = trigger.dataset.preferenceLabel + (currentLanguage === 'zh' ? '：' : ': ') + selected.textContent.trim();
+      trigger.setAttribute('aria-label', label);
+      trigger.title = label;
+    }
   };
   applyTheme();
   media.addEventListener('change', applyTheme);
@@ -53,6 +61,43 @@
     applyTheme();
   });
   document.addEventListener('DOMContentLoaded', () => {
+    const pickers = [...document.querySelectorAll('[data-preference]')];
+    const closePicker = (picker, restoreFocus = false) => {
+      if (!picker) return;
+      picker.open = false;
+      if (restoreFocus) picker.querySelector('summary').focus();
+    };
+    pickers.forEach(picker => {
+      const trigger = picker.querySelector('summary');
+      picker.addEventListener('toggle', () => {
+        if (picker.open) pickers.filter(other => other !== picker).forEach(other => closePicker(other));
+      });
+      picker.addEventListener('focusout', event => {
+        if (!picker.contains(event.relatedTarget)) closePicker(picker);
+      });
+      picker.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && picker.open) {
+          event.preventDefault();
+          closePicker(picker, true);
+          return;
+        }
+        const items = [...picker.querySelectorAll('.preference-menu a, .preference-menu button')];
+        if (event.target === trigger && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
+          event.preventDefault();
+          picker.open = true;
+          items[event.key === 'ArrowDown' ? 0 : items.length - 1].focus();
+        } else if (items.includes(event.target) && ['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+          event.preventDefault();
+          const index = items.indexOf(event.target);
+          const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1
+            : (index + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+          items[next].focus();
+        }
+      });
+    });
+    document.addEventListener('pointerdown', event => {
+      pickers.filter(picker => !picker.contains(event.target)).forEach(picker => closePicker(picker));
+    });
     document.querySelectorAll('[data-language]').forEach(link => {
       const updateTarget = () => {
         const target = new URL(link.href);
@@ -66,6 +111,7 @@
       link.addEventListener('click', () => {
         updateTarget();
         save(keys.language, link.dataset.language);
+        closePicker(link.closest('[data-preference]'));
       });
     });
     document.querySelectorAll('[data-theme-choice]').forEach(button => {
@@ -73,6 +119,7 @@
         theme = button.dataset.themeChoice;
         save(keys.theme, theme);
         applyTheme();
+        closePicker(button.closest('[data-preference]'), true);
       });
     });
     document.querySelectorAll('[data-theme-controls]').forEach(control => { control.hidden = false; });
