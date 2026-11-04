@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-04",
+  "timezone": "Asia/Shanghai",
+  "data": "fictional",
+  "method": "Independent fresh contexts; synthesis follow-up continued the same context. Runners did not receive the reviewer rubric.",
+  "changes_after_initial_runs": [
+    "deliverables.md: combine overlapping sections and repeated limitations for short interim briefs",
+    "user-interview.md: do not presuppose closure or payment when an outcome is unknown",
+    "agents/openai.yaml: shorten UI description to the supported length"
+  ],
+  "final_skill_sha256": {
+    "SKILL.md": "96aa3ea3abd6dab72997e40444e22b988968a08bd1b2fd620ed675150bc15d4c",
+    "agents/openai.yaml": "96afbed4d20544f9e6f991cb761e8a6477ad03d7eef719adb519756f149ba598",
+    "references/deliverables.md": "af492fe76b77480103e779e49b42b067b5a3b89102c5dd1c04028a6fe5969766",
+    "references/process-and-approval.md": "67927fc1c460b8e74f9054f615e741eaa6ec7907920de2f57e2f4904f096030a",
+    "references/product-fit.md": "ed2feb30c1e8871c047ac04c33a0e5ca58adf8ff43ac54b5475410bbde99d882",
+    "references/user-interview.md": "acd3f49dfb5db2a54e00eb2760956cd1467cdd51445cafa48ddf5de6405062c4"
+  },
+  "runs": [
+    "prepare",
+    "synthesis",
+    "no-product",
+    "no-product-retest",
+    "question-check"
+  ],
+  "no_product_words": {
+    "initial": 2628,
+    "compact_retest": 1290
+  },
+  "limits": [
+    "No real customer interviews",
+    "No no-skill comparison",
+    "No production product verification",
+    "No remote publication or global install"
+  ]
+}

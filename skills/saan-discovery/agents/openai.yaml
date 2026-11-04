@@ -1,0 +1,4 @@
+interface:
+  display_name: "Saan Discovery"
+  short_description: "Guide consumer and organizational discovery step by step"
+  default_prompt: "Use $saan-discovery to agree the research type and scope from the available context, then develop the discovery one topic at a time."

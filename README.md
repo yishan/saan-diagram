@@ -6,7 +6,7 @@
 
 An expanding collection of agent skills for turning requirements into diagrams, documents, and prototypes. Install the skills you need, or select the whole collection.
 
-**Available today: `saan-diagram` and `saan-mermaid`.** PRD writing and prototyping skills are planned and are not yet included.
+**Available today: `saan-diagram`, `saan-mermaid`, and `saan-discovery`.** PRD writing and prototyping skills are planned and are not yet included.
 
 The GitHub repository is [`yishan/saankits`](https://github.com/yishan/saankits), renamed from `yishan/saan-diagram`. Use the new source in installation commands. The existing `saan-diagram` skill and plugin identifiers are unchanged.
 
@@ -16,6 +16,7 @@ The GitHub repository is [`yishan/saankits`](https://github.com/yishan/saankits)
 |---|---|---|---|
 | [`saan-diagram`](skills/saan-diagram/SKILL.md) | Business architecture, process flows, role handoffs, data relationships, and milestones in English or Chinese | Editable YAML/JSON specs, HTML, SVG, PNG, and Feishu/Lark whiteboard DSL | [Guide](docs/saan-diagram/README.md) · [中文指南](docs/saan-diagram/README.zh-CN.md) · [Gallery](https://kits.yishan.app/diagram/) |
 | [`saan-mermaid`](skills/saan-mermaid/SKILL.md) | Diagrams kept in Markdown and design documents, sequence, state, and Gantt charts, and process reviews against a control list | Mermaid source, an optional rendered image, and review findings | [Guide](docs/saan-mermaid/README.md) · [中文指南](docs/saan-mermaid/README.zh-CN.md) · [Introduction](https://kits.yishan.app/mermaid/) |
+| [`saan-discovery`](skills/saan-discovery/SKILL.md) | Interactive consumer, enterprise, public-sector, and mixed discovery, interview preparation, and product-fit assessment | Topic-based research briefs, interview guides, gap queues, and fit assessments | [Guide](docs/saan-discovery/README.md) · [中文指南](docs/saan-discovery/README.zh-CN.md) · [Introduction](https://kits.yishan.app/discovery/) · [中文介绍](https://kits.yishan.app/discovery/zh/) |
 
 Each skill has its own `SKILL.md` and carries the resources needed for its core workflow. Installing one skill does not require installing the whole collection.
 
@@ -38,13 +39,16 @@ npx skills add yishan/saankits --skill saan-diagram
 # Install just Saan Mermaid
 npx skills add yishan/saankits --skill saan-mermaid
 
+# Install just Saan Discovery
+npx skills add yishan/saankits --skill saan-discovery
+
 # Install all currently available skills to Codex
 npx skills add yishan/saankits --skill '*' -a codex
 ```
 
-Installation is project-level by default; add `-g` for user-level installation. The whole-collection command currently selects `saan-diagram` and `saan-mermaid`. Skills added later require a subsequent installation; this is not a subscription to future skills.
+Installation is project-level by default; add `-g` for user-level installation. The whole-collection command currently selects `saan-diagram`, `saan-mermaid`, and `saan-discovery`. Skills added later require a subsequent installation; this is not a subscription to future skills.
 
-Runtime dependencies belong to each skill. See [Saan Diagram dependencies](docs/saan-diagram/README.md#dependencies) and [Saan Mermaid dependencies](docs/saan-mermaid/README.md#dependencies).
+Saan Discovery is text-only and needs no external runtime or service for its core workflow. Accessing source files may require additional tools. Runtime dependencies belong to each skill. See [Saan Diagram dependencies](docs/saan-diagram/README.md#dependencies) and [Saan Mermaid dependencies](docs/saan-mermaid/README.md#dependencies).
 
 ### Claude Code plugin
 
@@ -74,16 +78,18 @@ A shared workflow skill can be added when a repeatable workflow across these ski
 skills/                  Installable skill packages
   saan-diagram/          Existing diagram skill and runtime resources
   saan-mermaid/          Mermaid drawing and process review skill
+  saan-discovery/        Business discovery and internal interview methods
 docs/                    User documentation and preview images
   saan-diagram/          English and Chinese diagram guides
   saan-mermaid/          English and Chinese Mermaid guides
+  saan-discovery/        English and Chinese Discovery guides and validation records
 scripts/                 Repository maintenance and validation helpers
 tests/                   Saan Diagram regression tests; saan-mermaid/ holds Mermaid tests
 page/                    Collection overview, with one second-level page per skill
 .claude-plugin/          Collection packaging; legacy identifiers retained
 ```
 
-Agent instructions live in `skills/<skill-name>/SKILL.md`. Root READMEs provide the collection catalog; detailed user guides live in `docs/<skill-name>/`. The site overview is at `/`, with `/diagram/` and `/mermaid/` below it.
+Agent instructions live in `skills/<skill-name>/SKILL.md`. Root READMEs provide the collection catalog; detailed user guides live in `docs/<skill-name>/`. The site overview is at `/`, with `/diagram/`, `/mermaid/`, and `/discovery/` below it. The Discovery introduction defaults to English, with a Chinese version at `/discovery/zh/`.
 
 ## Development
 

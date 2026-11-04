@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Saan Discovery：确认 ToC、ToB/G 或混合调研范围，结合已有产品逐项追问、整理证据和判断适配。">
+<title>Saan Discovery · 业务调研</title>
+<link rel="canonical" href="https://kits.yishan.app/discovery/zh/">
+<link rel="alternate" hreflang="en" href="https://kits.yishan.app/discovery/">
+<link rel="alternate" hreflang="zh-CN" href="https://kits.yishan.app/discovery/zh/">
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../discovery.css">
+<link rel="stylesheet" href="../../site.css">
+<script src="../../site.js" defer></script>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-top">
+    <nav class="site-nav" aria-label="技能导航"><a href="../../">Saan Kits</a><a href="../../diagram/">Diagram</a><a href="../../mermaid/">Mermaid</a><a href="./" aria-current="page">Discovery</a></nav>
+    <nav class="language-nav" aria-label="语言"><a href="../" lang="en" hreflang="en">English</a><a href="./" lang="zh-CN" hreflang="zh-CN" aria-current="page">简体中文</a></nav>
+    </div>
+    <h1>Saan Discovery</h1>
+    <p class="lead">先确定调研对象与范围，再逐项了解真实行为、业务流程和产品适配条件。</p>
+    <dl class="intro">
+      <div><dt>适用</dt><dd>ToC、ToB/G 与混合场景调研</dd></div>
+      <div><dt>交付</dt><dd>访谈提纲、专题纪要、补问与适配判断</dd></div>
+      <div><dt>依赖</dt><dd>文本技能，无需外部服务</dd></div>
+    </dl>
+  </header>
+
+  <section aria-labelledby="research-type">
+    <h2 id="research-type">不同对象，不同调研重点</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>对象</th><th>重点了解</th><th>怎样组织产出</th></tr></thead>
+      <tbody>
+        <tr><td>消费者 · ToC</td><td>场景、动机、真实经历、替代选择与放弃原因</td><td>用户旅程、行为差异、摩擦与待验证机会</td></tr>
+        <tr><td>企业与公共部门 · ToB/G</td><td>岗位职责、业务流转、审批规则、数据系统与实施约束</td><td>业务专题、企业差异、适配条件与待决议事项</td></tr>
+        <tr><td>混合场景</td><td>消费者或居民的体验，以及组织如何提供服务</td><td>分别保留用户旅程和组织流程，并说明衔接</td></tr>
+      </tbody>
+    </table></div>
+    <p>企业与公共部门的职责和判断依据分别保留；公共服务按需关注服务对象、政策来源和问责关系。国企不会仅因所有制被自动归为 ToG。</p>
+    <p>默认先确认尚未明确的范围，一次推进一个专题、一个主要问题。你可以随时纠正、跳过或索取阶段小结；明确要求直接整理时，也可一次交付。</p>
+  </section>
+
+  <section aria-labelledby="workflow">
+    <h2 id="workflow">贯穿一轮调研</h2>
+    <ol class="stages">
+      <li><h3>访谈前准备</h3><p>读取产品材料，按本次参加的岗位和时间，准备必问问题与条件追问。</p></li>
+      <li><h3>访谈后整理</h3><p>按用户旅程或业务专题记录现状、摩擦和期待，保留原始证据与不同说法。</p></li>
+      <li><h3>查漏与补访</h3><p>把未知信息交给合适的岗位补充。新答案更新原有底稿，已解决的问题不重复问。</p></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="example">
+    <h2 id="example">从一句抱怨进入实际业务</h2>
+    <div class="example">
+      <blockquote>“付款审批很慢，希望能灵活一点。”</blockquote>
+      <ol>
+        <li>先确认本轮聚焦付款流程，还是审批人员与规则。</li>
+        <li>选择流程后，先问：最近一笔付款申请是怎样到达当前状态的？</li>
+        <li>得到回答后，再决定是否追问等待环节及原因。</li>
+      </ol>
+      <p>回答将决定下一问：补材料、排队等待、职责不清和系统操作成本，需要核实的内容不同。</p>
+      <p class="note">虚拟示例。访谈方法已包含在技能内部，无需单独安装 user-interview。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="fit">
+    <h2 id="fit">已有产品决定哪些信息必须核实</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>产品逻辑</th><th>客户侧要了解什么</th><th>影响什么判断</th></tr></thead>
+      <tbody>
+        <tr><td>按金额和组织分配审批</td><td>金额口径、边界值、组织含义和例外授权</td><td>配置能否表达实际规则</td></tr>
+        <tr><td>固定的业务状态流</td><td>何时生效，退回、变更后怎样继续</td><td>状态与动作能否对应</td></tr>
+        <tr><td>从其他系统取得数据</td><td>谁维护、何时更新、失败由谁处理</td><td>集成范围与数据责任</td></tr>
+      </tbody>
+    </table></div>
+    <p>客户独有的任务和线下处理同样保留。产品资料缺失时，可以继续调研，适配判断保持待核实。</p>
+  </section>
+
+  <section aria-labelledby="evidence">
+    <h2 id="evidence">每个结论保留依据</h2>
+    <ul class="rules">
+      <li>当前做法、制度要求和目标期待分别记录。</li>
+      <li>审批通过、业务执行和核对完成分别记录。</li>
+      <li>不同岗位说法有冲突时，保留双方来源和核实动作。</li>
+      <li>产品手册、环境配置和实际运行的证据范围分别说明。</li>
+      <li>不知道的答案转成补问任务，适配差异不自动变成开发承诺。</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="install">
+    <h2 id="install">开始使用</h2>
+    <p>从 Saan Kits 单独安装 Discovery：</p>
+    <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-discovery</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Discovery 安装命令" hidden></button></div>
+    <p>安装后，将产品材料和客户背景交给 Agent：</p>
+    <div class="copy-row"><pre id="code-request"><code>用 saan-discovery 带我做这次调研。先确认 ToC、ToB/G 或混合场景及本轮范围，再逐项展开，一次问一个主要问题，不清楚的内容先记为待核实。</code></pre><button type="button" class="copy" data-copy="request" aria-label="复制业务调研请求示例" hidden></button></div>
+    <p>交互与产出优先使用你指定的语言，否则沿用请求语言。中文提问默认得到中文产出。</p>
+    <p class="note">模拟验证覆盖访谈准备、记录整理、追加材料和产品资料缺失。真实客户访谈效果仍需在实际使用中检验。</p>
+  </section>
+
+  <footer><span>Saan Discovery v0.2.0 · Yishan · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-discovery">技能源码</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-discovery/README.zh-CN.md">使用指南</a><a href="../../">Saan Kits</a></footer>
+</main>
+</body>
+</html>

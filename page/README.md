@@ -1,12 +1,14 @@
 # Site
 
-Static pages for the collection, currently in Chinese, published at [kits.yishan.app](https://kits.yishan.app/):
+Static pages for the collection, published at [kits.yishan.app](https://kits.yishan.app/). Discovery defaults to English with an explicit Chinese option. The collection, Diagram, and Mermaid pages are in Chinese.
 
 | Path | Source | Content |
 |---|---|---|
 | `/` | `index.html` | Saan Kits overview |
 | `/diagram/` | `diagram/` | Saan Diagram introduction and gallery |
 | `/mermaid/` | `mermaid/` | Saan Mermaid introduction and examples |
+| `/discovery/` | `discovery/index.html` | Saan Discovery introduction in English (default) |
+| `/discovery/zh/` | `discovery/zh/index.html` | Chinese introduction, selected through the language links |
 
 The overview page forwards old `/#anchor` links to `/diagram/#anchor`. Each new skill gets its own second-level directory and a row on the overview page.
 
@@ -25,6 +27,8 @@ Run `python3 scripts/check_site.py` before publishing. It checks local links and
 
 `site.css` shares navigation, headings, and copy controls. `site.js` copies each `data-copy` source and its optional `data-copy-prefix` (the Mermaid theme). If clipboard access fails, it selects the same complete text in a read-only field. Without JavaScript, commands, examples, and links remain available; copy buttons stay hidden.
 
+Copy feedback follows the page's `lang` attribute. The Discovery introductions share `discovery/discovery.css` and use ordinary links to switch language, without JavaScript or browser-language detection. The skill's actual interaction and output language follows the user's request.
+
 ## Vercel
 
 Connect `yishan/saankits` and use these project settings:
@@ -36,7 +40,7 @@ Connect `yishan/saankits` and use these project settings:
 - Output Directory: `.`
 - Production Branch: `main`
 
-Bind `kits.yishan.app` to this project. In Cloudflare, use a DNS-only CNAME for `kits` with the target recommended by Vercel. The collection uses `/`, Saan Diagram uses `/diagram/`, and Saan Mermaid uses `/mermaid/`.
+Bind `kits.yishan.app` to this project. In Cloudflare, use a DNS-only CNAME for `kits` with the target recommended by Vercel. The collection uses `/`, Saan Diagram uses `/diagram/`, Saan Mermaid uses `/mermaid/`, and Saan Discovery uses `/discovery/` with Chinese at `/discovery/zh/`.
 
 The directory name does not add `/page` to the public URL. `index.html` is served at `/`. `vercel.json` keeps trailing slashes so that relative image paths on second-level pages resolve.
 
