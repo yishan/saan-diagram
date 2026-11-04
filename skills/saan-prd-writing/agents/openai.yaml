@@ -1,0 +1,4 @@
+interface:
+  display_name: "Saan PRD Writing"
+  short_description: "Write source-grounded PRDs and change specifications"
+  default_prompt: "Use $saan-prd-writing to turn these requirements into a reviewable specification with concrete rules, fields, acceptance scenarios, and open decisions."

@@ -6,7 +6,7 @@ Develop consumer (ToC), enterprise (ToB), public-sector (ToG), or mixed discover
 
 The user normally conducts the customer interview. This skill prepares questions, synthesizes notes, and routes follow-ups. User-interview methods are bundled internally; there is no separate interview-skill dependency.
 
-The skill instructions and public introduction default to English. A [Chinese introduction](https://kits.yishan.app/discovery/zh/) and this guide's Chinese version are available through explicit language links. Questions, briefs, and other deliverables follow the user's requested language, or the language of the request when none is specified. English instructions do not require English answers.
+`SKILL.md` is the canonical English instruction entry point. The [introduction](https://kits.yishan.app/discovery/) includes English and Chinese and initially follows the browser language. Top-right controls switch language and choose system, light, or dark appearance. Manual choices are remembered in the current browser. Actual interaction and deliverables follow the requested language, falling back to the request language.
 
 ## Agree the context, then expand by topic
 
@@ -78,7 +78,7 @@ Fictional inputs and review criteria are in [tests/saan-discovery](../../tests/s
 
 Simulation checks workflow behavior on the supplied cases. It does not establish real interview effectiveness or an advantage over a model without the skill.
 
-See the [release preparation checks](validation-release.zh-CN.md) for the English-first introduction and packaging validation.
+See the [release preparation checks](validation-release.zh-CN.md) for the bilingual introduction and packaging validation.
 
 ## Method acknowledgments
 
@@ -91,3 +91,5 @@ Independently written with method-level inspiration from these sources; none is 
 - [discover-interview-synthesis](https://github.com/product-on-purpose/pm-skills/blob/main/skills/discover-interview-synthesis/SKILL.md): attributed synthesis and explicit limits.
 
 [Skill entry point](../../skills/saan-discovery/SKILL.md) · [Design research, Chinese](../plans/2026-11-04-business-discovery-skill-plan.zh-CN.md)
+
+[Language and appearance validation](../site-preferences-validation.zh-CN.md)

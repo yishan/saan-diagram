@@ -29,8 +29,3 @@ th{font-weight:500}thead th{color:var(--muted);font-size:13px}th:first-child,td:
 footer{display:flex;flex-wrap:wrap;gap:8px 24px;border-top:1px solid var(--line);padding-top:24px;color:var(--muted);font-size:13px}
 footer a{color:inherit}
 @media(max-width:640px){.stages{grid-template-columns:minmax(0,1fr);gap:24px}.wrap{padding-top:24px}}
-.hero-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px}
-.language-nav{display:flex;gap:12px;font-size:13px;white-space:nowrap}
-.language-nav a{color:var(--muted);text-decoration:none;padding-block:8px}
-.language-nav [aria-current="page"]{color:var(--ink);text-decoration:underline;text-underline-offset:5px}
-.language-nav a:hover{text-decoration:underline;text-underline-offset:5px}

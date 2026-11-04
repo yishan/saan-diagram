@@ -6,7 +6,7 @@
 
 用户通常负责实际访谈。技能负责准备提纲、组织证据和生成补问；`user-interview` 的方法已包含在内部参考文件中，无需另外安装访谈技能。
 
-技能指令和公开介绍默认使用英文；[中文介绍页](https://kits.yishan.app/discovery/zh/)与本中文指南可通过语言链接选择。交互问题、调研底稿及其他交付物优先使用用户指定的语言，否则沿用请求语言。中文提问默认得到中文产出，也可明确指定英文。
+`SKILL.md` 使用英文作为统一指令入口。[介绍页](https://kits.yishan.app/discovery/)预置中英文，首次按浏览器语言显示；右上角可切换语言，使用系统、太阳和月亮图标选择外观。主题首次跟随系统，手动选择会保存在当前浏览器。实际交互和交付物优先使用用户指定的语言，否则沿用请求语言。
 
 ## 先确定对象，再逐项展开
 
@@ -90,7 +90,7 @@ npx skills add yishan/saankits --skill saan-discovery
 
 这些验证检查技能在给定材料下怎样工作，不证明真实访谈效果，也不代表与无技能模型的对比提升。
 
-英文默认介绍和打包检查见 [发布准备验证](validation-release.zh-CN.md)。
+双语介绍和打包检查见 [发布准备验证](validation-release.zh-CN.md)。
 
 ## 方法来源
 
@@ -103,3 +103,5 @@ npx skills add yishan/saankits --skill saan-discovery
 - [discover-interview-synthesis](https://github.com/product-on-purpose/pm-skills/blob/main/skills/discover-interview-synthesis/SKILL.md)：带来源的访谈归纳和研究局限。
 
 [技能入口](../../skills/saan-discovery/SKILL.md) · [设计研究](../plans/2026-11-04-business-discovery-skill-plan.zh-CN.md)
+
+[介绍页语言与外观验证](../site-preferences-validation.zh-CN.md)
