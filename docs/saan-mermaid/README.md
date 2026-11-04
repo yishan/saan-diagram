@@ -29,7 +29,7 @@ For manual installation, copy the complete `skills/saan-mermaid/` directory into
 ## Dependencies
 
 - Python 3 for `scripts/check_mermaid.py`, standard library only.
-- [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) 12 or later for rendering. `swimlane-beta` needs Mermaid 12.
+- [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) 12 or later for rendering. `swimlane-beta` needs Mermaid 11.16 or later.
 
 ## How a review works
 
@@ -57,6 +57,32 @@ For manual installation, copy the complete `skills/saan-mermaid/` directory into
 | 建议 | Long labels, wide diagrams, too many dotted lines | Follow unless there is a clear reason |
 | 已确认 | A finding accepted with `%% accept P1: reason` | Keep the reason, written only after the user confirms |
 
+Each line names the file and line, such as `doc.md:42 [P1]`. A Markdown file is checked block by block.
+
+| Option | Use |
+|---|---|
+| `--target 11.12` | Flag diagram types and syntax the host's Mermaid version cannot render. Find the version by rendering a block that contains only `info` |
+| `--theme saan-dark` | Require a theme. By default the theme is recognized from the frontmatter |
+| `--theme-block saan-dark` | Print the frontmatter and role colors for a theme |
+| `--json` | Machine-readable output |
+
+Theme files live in `skills/saan-mermaid/assets/themes/`. `saan-light` is the default and `saan-dark` is for dark-only pages. A custom theme is a copy of one of these files; the checker rejects text and role colors below 4.5:1 contrast.
+
+To catch syntax errors as soon as Claude Code writes a file, add `scripts/hook.py` as a `PostToolUse` hook in your settings. It blocks only on problems that stop a diagram from rendering:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [{ "type": "command", "command": "python3 <skill-dir>/scripts/hook.py" }]
+      }
+    ]
+  }
+}
+```
+
 ## Rules
 
 | Trigger | Checks |
@@ -68,12 +94,19 @@ For manual installation, copy the complete `skills/saan-mermaid/` directory into
 | `control` | CP1 control not on any diagram |
 | `must_pass` | P1 control can be bypassed |
 | `separate` | P5 incompatible steps in the same lane |
+| `alias: name = label` | Lets a control name match a differently worded node label |
+| `sequenceDiagram` | S3 unclosed block, SQ1 unused participant, SQ2 activation imbalance, SQ3 `;` in message text |
+| `gantt` | GT1 unknown `after` ID, GT2 dependency loop, GT3 missing `todayMarker off` |
+| `erDiagram` | ER1 entity with no relationship |
+| Frontmatter | CL3 theme does not match a theme file, CF1 deprecated `%%{init}%%` |
+| SVG input | G1 overlapping nodes, G2 edge label on a node, W1 too wide, R1 render failed |
 
 ## Limits
 
 - It checks structure and the list. It does not know whether the business is right, and it finds nothing outside the list.
 - A list extracted by the same agent that draws the diagram is weak evidence, so results mark it as not independent.
-- Logic checks cover flowchart, swimlane, and state diagrams only.
+- Path logic covers flowchart, swimlane, and state diagrams. Sequence, Gantt, and ER diagrams get structural checks only.
+- The SVG overlap check reads node and label boxes from Mermaid's output. It does not see crossing lines.
 - Each Markdown host ships its own Mermaid version. The examples were rendered with Mermaid CLI 12.2 and have not been tested on GitHub, Feishu, or other hosts.
 - `swimlane-beta`, `block-beta`, and `ishikawa-beta` are beta syntax and may not render on older hosts.
 

@@ -312,8 +312,7 @@ flowchart LR
 <article class="ex" id="quad">
   <header class="ex-h"><h3>四象限图</h3></header>
   <div class="pair">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="quad" data-copy-prefix="theme" aria-label="复制四象限图代码（含主题配置）" hidden>复制</button></div><pre id="code-quad"><code>%%{init: {&quot;quadrantChart&quot;: {&quot;pointTextPadding&quot;: 14}}}%%
-quadrantChart
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="quad" data-copy-prefix="theme" aria-label="复制四象限图代码（含主题配置）" hidden>复制</button></div><pre id="code-quad"><code>quadrantChart
   title 优先级（示例）
   x-axis 低投入 --&gt; 高投入
   y-axis 低价值 --&gt; 高价值
@@ -444,6 +443,7 @@ swimlane-beta LR
   <div class="block"><div class="bar"><span>frontmatter</span><button type="button" class="copy" data-copy="theme" aria-label="复制主题配置" hidden>复制</button></div><pre id="code-theme"><code>---
 config:
   theme: base
+  look: classic
   themeVariables:
     fontFamily: &quot;PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif&quot;
     primaryColor: &quot;#E3E5EA&quot;
@@ -461,6 +461,8 @@ config:
     cScale1: &quot;#E2EBFF&quot;
     cScale2: &quot;#E9ECF1&quot;
     cScale3: &quot;#F5F6F8&quot;
+  quadrantChart:
+    pointTextPadding: 14
 ---</code></pre></div>
 </section>
 
@@ -497,7 +499,7 @@ python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code><
   </ul>
 </section>
 
-<footer><a href="https://github.com/yishan/saankits/blob/main/skills/saan-mermaid/SKILL.md">SKILL.md</a><span>Saan Mermaid v1.0.0，作者 Yishan，MIT</span><a href="../">Saan Kits</a><a href="../diagram/">Saan Diagram</a><a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid">源码</a></footer>
+<footer><a href="https://github.com/yishan/saankits/blob/main/skills/saan-mermaid/SKILL.md">SKILL.md</a><span>Saan Mermaid v1.1.0，作者 Yishan，MIT</span><a href="../">Saan Kits</a><a href="../diagram/">Saan Diagram</a><a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid">源码</a></footer>
 </main>
 
 

@@ -3,7 +3,7 @@ name: "saan-mermaid"
 description: "Draw diagrams as Mermaid code for Markdown, READMEs, and design docs, and review business processes against an independent control list. Use for Mermaid requests, process reviews, and sequence, state, or Gantt diagrams (流程审查、时序图、状态图、甘特图、用 Mermaid 画)."
 metadata:
   author: "Yishan"
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Saan Mermaid
@@ -42,7 +42,7 @@ separate: 提交付款申请 | 审核单据
 - `must_pass` checks that the target cannot be reached without the control.
 - `separate` checks that two steps sit in different `swimlane-beta` lanes.
 - If a step exists in the source but is skipped or removed by a rule, still list it as a control. Draw it, and show the skip as a path.
-- Names match node labels by text, so use the source's words. If the source has no controls, write `none: reason`.
+- Names must equal a node label (spaces and `<br/>` ignored), so use the source's words. If the diagram words a step differently, add `alias: 财务复核 = 复核付款单` instead of renaming either side. If the source has no controls, write `none: reason`.
 - Do not change the list to make a check pass. Change it only if it misread the source, and tell the user.
 
 ## Decide what the diagram explains
@@ -54,7 +54,7 @@ Ask first whether the diagram explains what exists or how work runs. Architectur
 | What exists, by stage | `flowchart LR` + `subgraph` | `arch` | Connect stages and external systems only |
 | What exists, by layer | `block-beta` | | Beta; no side panels |
 | How work runs | `flowchart TB` | `flow` | Nodes are verbs plus objects |
-| How work runs, across roles | `swimlane-beta TB` | `flow` or `approval` | Needs Mermaid 12; lanes align, routing is automatic |
+| How work runs, across roles | `swimlane-beta TB` | `flow` or `approval` | Mermaid 11.16+; lanes align, routing is automatic |
 | How work runs, across systems | `flowchart TB` + `subgraph` | `overview` | Forward path only |
 | Approval or control | `flowchart TB` or `swimlane-beta TB` | `approval` or `audit` | Keep decisions and returns |
 | Interactions over time | `sequenceDiagram` | | Use `alt` for failure paths |
@@ -63,9 +63,9 @@ Ask first whether the diagram explains what exists or how work runs. Architectur
 | Schedule with dependencies | `gantt` | | Use `after`; add `todayMarker off` |
 | Milestones | `timeline` | | No variance display |
 | Priorities across two dimensions | `quadrantChart` | | Keep labels short |
-| Causes behind an outcome | `ishikawa-beta` | | Beta; recent versions only |
+| Causes behind an outcome | `ishikawa-beta` | | Beta; Mermaid 11.13+ |
 
-`assets/examples/` holds tested files for these types, with the theme included. Read the matching file before writing unfamiliar syntax. Use vertical layouts by default. Use `LR` only for a chain of about five nodes. If a paragraph explains it clearly, do not draw it. If the target host runs an older Mermaid, replace `swimlane-beta` with `flowchart` + `subgraph` and say that lanes will not align.
+`assets/examples/` holds tested files for these types, with the theme included. `references/` has one note per type (`flowchart.md`, `swimlane.md`, `sequence.md`, `state.md`, `er.md`, `gantt.md`, `timeline.md`, `quadrant.md`, `block.md`, `ishikawa.md`) with the version it needs and its pitfalls. Read the matching example and note before writing unfamiliar syntax. Use vertical layouts by default. Use `LR` only for a chain of about five nodes. If a paragraph explains it clearly, do not draw it. If the target host runs an older Mermaid, replace `swimlane-beta` with `flowchart` + `subgraph` and say that lanes will not align.
 
 ## Declare the diagram
 
@@ -85,12 +85,13 @@ Put `%% saan: arch|flow|overview|approval|audit` directly above the type line of
 
 ## Colors mean roles
 
-Do not choose a theme. Put this frontmatter at the top of every diagram, including charts that ignore some of the values:
+Use the `saan-light` theme. Put this frontmatter at the top of every diagram, including charts that ignore some of the values:
 
 ```text
 ---
 config:
   theme: base
+  look: classic
   themeVariables:
     fontFamily: "PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif"
     primaryColor: "#E3E5EA"
@@ -108,8 +109,12 @@ config:
     cScale1: "#E2EBFF"
     cScale2: "#E9ECF1"
     cScale3: "#F5F6F8"
+  quadrantChart:
+    pointTextPadding: 14
 ---
 ```
+
+The theme files are `assets/themes/saan-light.json` and `assets/themes/saan-dark.json`. Print a ready block with `python3 <skill-dir>/scripts/check_mermaid.py --theme-block saan-dark`. Use `saan-dark` only when the page is dark and has no light mode. Use another theme only when the user asks for one: copy `saan-light.json`, change the values, and pass it with `--theme`. The checker rejects text and role colors below 4.5:1 contrast.
 
 Business nodes use the default gray. Decisions are shown by shape. For anything else, define only the roles the diagram uses:
 
@@ -121,7 +126,7 @@ classDef external fill:#8FB0FF,stroke:#8FB0FF,color:#1F2329
 classDef ai fill:#FDEBD8,stroke:#F5C99B,color:#1F2329
 ```
 
-Use `core` on at most three nodes. Do not use other class names, other colors, `style`, or `linkStyle`. The colors match `saan-diagram`. If the page has a dark mode, check the result there.
+Use `core` on at most three nodes. Do not use other class names, other colors, `style`, or `linkStyle`. The colors match `saan-diagram`, and the dark theme has its own role colors (`--theme-block saan-dark`). Do not add `%%{init}%%` directives; put settings in the frontmatter.
 
 ## Syntax that commonly breaks
 
@@ -131,6 +136,14 @@ Use `core` on at most three nodes. Do not use other class names, other colors, `
 - Set `direction TB` inside a `subgraph` when its nodes should stack.
 - Use `<br/>` for a line break in flowchart labels.
 - Avoid `:` and `;` in sequence message text.
+
+## When the layout tangles
+
+- Reorder the node declarations first; Mermaid places nodes in the order it first sees them.
+- Use `a ~~~ b` to keep two nodes next to each other without drawing a line.
+- Add spacing in the frontmatter only for this diagram: `flowchart:` with `nodeSpacing: 50` and `rankSpacing: 60` under `config:`.
+- If the host registers the ELK layout, `layout: elk` under `config:` routes dense graphs better. Most Markdown hosts do not; check before relying on it.
+- Stop after two rounds that do not reduce crossings or overlaps. Split the diagram, or recommend `saan-diagram` if the user needs exact placement.
 
 ## Check before delivering
 
@@ -142,7 +155,9 @@ mmdc -i diagram.mmd -o diagram.png -b white -s 2 -q
 python3 <skill-dir>/scripts/check_mermaid.py --controls controls.txt diagram.mmd diagram.svg
 ```
 
-When the diagrams live in a Markdown file, pass the `.md` file itself. The script checks each fenced `mermaid` block.
+When the diagrams live in a Markdown file, pass the `.md` file itself. The script checks each fenced `mermaid` block. Each line of output names the file and line, such as `doc.md:42 [P1]`. Add `--json` when another tool reads the result.
+
+When you know where the diagram will be shown, pass that host's Mermaid version with `--target 11.12`. The script then flags diagram types and syntax the host cannot render. To find a host's version, render a block that contains only `info`. Without `--target`, say which version you tested with.
 
 Look at the PNG. If `mmdc` is missing, install `@mermaid-js/mermaid-cli`, version 12 or later. If it cannot be installed, tell the user the diagram is unrendered.
 
@@ -153,7 +168,9 @@ Handle the script output this way:
 - **`%% accept P1: reason`:** Add this only after the user confirms the finding is real and must stay. Do not write it on your own.
 - **建议:** Follow these unless there is a clear reason not to.
 
-The script checks structure and the control list. It does not know whether the business itself is right, and it checks only the logic of flowchart, swimlane, and state diagrams. A clean result means no listed problem was found, not that the process is correct.
+The script checks structure and the control list. It checks path logic for flowchart, swimlane, and state diagrams, block and activation balance for sequence diagrams, dependencies for Gantt charts, and orphan entities for ER diagrams. With an SVG it also flags overlapping nodes and edge labels that sit on nodes. It does not know whether the business itself is right. A clean result means no listed problem was found, not that the process is correct.
+
+To catch syntax errors as soon as a file is written, the user can add `scripts/hook.py` as a Claude Code `PostToolUse` hook for `Write|Edit|MultiEdit`. It reports only problems that stop a diagram from rendering. Suggest it, but do not edit the user's settings yourself.
 
 Then check the image:
 
@@ -161,7 +178,7 @@ Then check the image:
 2. The main path reads in one direction, without crossing lines that can be avoided.
 3. Every node and connection comes from the source or a stated assumption.
 
-If the layout stays tangled after one or two changes to node order or direction, split the diagram. If the user needs exact placement, recommend `saan-diagram`.
+If the image fails 1 or 2, follow "When the layout tangles".
 
 Each Markdown host ships its own Mermaid version, so beta types may not render on GitHub, in a wiki, or in another host. For portable documents, prefer stable types, and say which version you tested with. Do not claim a diagram renders on a host you have not tested.
 
