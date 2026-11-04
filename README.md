@@ -94,7 +94,7 @@ page/                    Collection overview, with one second-level page per ski
 .claude-plugin/          Collection packaging; legacy identifiers retained
 ```
 
-Agent instructions live in `skills/<skill-name>/SKILL.md`. Root READMEs provide the collection catalog; detailed user guides live in `docs/<skill-name>/`. The site overview is at `/`, with `/diagram/`, `/mermaid/`, `/discovery/`, and `/prd-writing/` below it. Discovery and PRD Writing introductions initially follow the browser language; language and appearance controls are at the top right.
+Agent instructions live in `skills/<skill-name>/SKILL.md`. Root READMEs provide the collection catalog; detailed user guides live in `docs/<skill-name>/`. The site overview is at `/`, with `/diagram/`, `/mermaid/`, `/discovery/`, and `/prd-writing/` below it. All five pages have English and Chinese versions. Top-right controls initially follow the browser language and system theme; manual choices are remembered across the site. Diagram and Mermaid examples retain their source language.
 
 ## Development
 

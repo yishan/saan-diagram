@@ -8,6 +8,17 @@
   const currentLanguage = language(root.lang) || 'en';
   const url = new URL(location.href);
   const explicitLanguage = ['en', 'zh'].includes(url.searchParams.get('lang')) ? url.searchParams.get('lang') : null;
+  // The collection homepage used to host Diagram. Keep its old section links.
+  if (root.dataset.legacyDiagram && url.hash.length > 1 && url.hash !== '#collection-install') {
+    const target = new URL(root.dataset.legacyDiagram, url);
+    target.search = url.search;
+    target.hash = url.hash;
+    if (!explicitLanguage && root.dataset.languageEntry === 'explicit') {
+      target.searchParams.set('lang', currentLanguage);
+    }
+    location.replace(target.href);
+    return;
+  }
   const alternate = lang => document.querySelector(`link[rel="alternate"][hreflang="${lang === 'zh' ? 'zh-CN' : 'en'}"]`);
   if (alternate('en') && alternate('zh')) {
     const browserLanguage = (navigator.languages || [navigator.language]).map(language).find(Boolean) || 'en';
