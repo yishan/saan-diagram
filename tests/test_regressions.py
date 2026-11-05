@@ -476,5 +476,33 @@ class ChromeSnapshotTests(unittest.TestCase):
                     r.snapshot(page, Path(td) / "d.png")
 
 
+
+def swim(label, kind="module"):
+    return {"column_semantics": "roles",
+            "columns": [{"id": "a", "label": "员工", "lanes": 1}, {"id": "b", "label": "系统", "lanes": 1}],
+            "nodes": [{"id": "x", "label": label, "kind": kind, "col": "a", "row": 0.4},
+                      {"id": "y", "label": "处理", "col": "b", "row": 2.0}],
+            "edges": [{"from": "x", "to": "y", "kind": "flow", "route": "hv"},
+                      {"from": "y", "to": "x", "kind": "return", "route": "ll", "offset": 16, "label": "否"}]}
+
+
+class SwimlaneBoundsTests(unittest.TestCase):
+    def test_long_label_stays_in_one_lane_column(self):
+        d = r.Diagram(swim("选时段填主题并提交"))
+        col, n = d.cols["a"], d.nodes["x"]
+        self.assertGreaterEqual(n.x, col["s"])
+        self.assertLessEqual(n.r, col["s"] + col["size"])
+        self.assertNotIn("G7", [c for c, _ in r.lint(d)])
+
+    def test_wide_decision_is_reported(self):
+        d = r.Diagram(swim("时段主题会议室合规？", "decision"))
+        self.assertIn("G7", [c for c, _ in r.lint(d)])
+
+    def test_return_lines_have_their_own_legend_item(self):
+        labels = [x[3] for x in r.Diagram(swim("提交")).legend_items()]
+        self.assertIn("退回", labels)
+        self.assertNotIn("数据 / 集成 / 推送", labels)
+
+
 if __name__ == "__main__":
     unittest.main()

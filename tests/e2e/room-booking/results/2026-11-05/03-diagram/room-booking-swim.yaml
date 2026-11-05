@@ -1,0 +1,76 @@
+# 会议室预约：员工新建、改期、取消与管理员取消的角色交接泳道图
+# 依据：会议室预约与改期需求规格说明书 V0.1（草稿）第 4 章已确认规则。
+# 未画入（待确认，见说明书附录 B）：提前量与可预约天数（Q-02—Q-04、Q-16）、
+# 开始时刻边界（Q-07）、通知（Q-10）、重试与重复提交（Q-11）、
+# 管理员取消入口位置（Q-24）、管理员本人预约的取消路径（Q-26）、并发取消优先级（Q-18）。
+# 系统校验节点的先后顺序仅为表达"全部通过才生效"，说明书未规定校验顺序。
+title: 会议室预约·改期·取消角色交接
+desc: 员工新建、改期、取消预约，以及会议室管理员取消所管会议室预约时，员工、预约系统与管理员之间的交接、判断和失败返回。所有校验在提交处理时执行，失败不修改任何数据。
+language: zh-CN
+column_semantics: roles
+columns:
+  - {id: emp,   label: 员工（预约人）, lanes: 2}
+  - {id: sys,   label: 预约系统, lanes: 2}
+  - {id: admin, label: 会议室管理员, lanes: 2}
+nodes:
+  # 新建预约（4.2.1）
+  - {id: a1, label: 选时段填主题并提交, col: emp, lane: 0.5, row: 0.4}
+  - {id: a_chk, label: 时段主题会议室合规？, kind: decision, col: sys, lane: 0.5, row: 2.0}
+  - {id: a_conf, label: 与有效预约冲突？, kind: decision, col: sys, lane: 0.5, row: 3.6}
+  - {id: a_ok, label: 创建有效预约, kind: hub, col: sys, lane: 0.5, row: 5.2}
+  # 改期（4.2.3）
+  - {id: b1, label: 在我的预约提交改期, col: emp, lane: 0.5, row: 7.2}
+  - {id: b_own, label: 本人有效且未开始？, kind: decision, col: sys, lane: 0.5, row: 8.8}
+  - {id: b_chk, label: 目标时段会议室合规？, kind: decision, col: sys, lane: 0.5, row: 10.4}
+  - {id: b_conf, label: 与其他预约冲突？, kind: decision, col: sys, lane: 0.5, row: 12.0}
+  - {id: b_ok, label: 释放原占用更新时段, kind: hub, col: sys, lane: 0.5, row: 13.6}
+  # 预约人取消（4.2.4）
+  - {id: c1, label: 在我的预约提交取消, col: emp, lane: 0.5, row: 15.6}
+  - {id: c_chk, label: 本人有效且未开始？, kind: decision, col: sys, lane: 0.5, row: 17.2}
+  - {id: c_ok, label: 置已取消并释放占用, kind: hub, col: sys, lane: 0.5, row: 18.8}
+  - {id: c_rec, label: 保存操作人与时间, col: sys, lane: 0.5, row: 20.4}
+  # 管理员取消（4.3.1）
+  - {id: d1, label: 在占用记录选择预约, col: admin, lane: 0, row: 22.4}
+  - {id: d2, label: 填写原因并确认取消, col: admin, lane: 0, row: 24.0}
+  - {id: d_chk, label: 所管有效且未开始？, kind: decision, col: sys, lane: 0.5, row: 25.6}
+  - {id: d_reason, label: 取消原因已填写？, kind: decision, col: sys, lane: 0.5, row: 27.2}
+  - {id: d_ok, label: 置已取消并释放占用, kind: hub, col: sys, lane: 0.5, row: 28.8}
+  - {id: d_rec, label: 保存操作人时间原因, col: sys, lane: 0.5, row: 30.4}
+  - {id: d_emp, label: 我的预约显示已取消, col: emp, lane: 0.5, row: 32.0}
+edges:
+  - {from: a1, to: a_chk, kind: flow, route: hv}
+  - {from: a_chk, to: a_conf, kind: flow, label: 是}
+  - {from: a_conf, to: a_ok, kind: flow, label: 否}
+  - {from: a_chk, to: a1, kind: return, route: ll, offset: 32, label: 否·不创建}
+  - {from: a_conf, to: a1, kind: return, route: ll, offset: 48, label: 是·冲突反馈}
+
+  - {from: b1, to: b_own, kind: flow, route: hv}
+  - {from: b_own, to: b_chk, kind: flow, label: 是}
+  - {from: b_chk, to: b_conf, kind: flow, label: 是}
+  - {from: b_conf, to: b_ok, kind: flow, label: 否}
+  - {from: b_own, to: b1, kind: return, route: ll, offset: 32, label: 否·原预约不变}
+  - {from: b_chk, to: b1, kind: return, route: ll, offset: 48, label: 否·原预约不变}
+  - {from: b_conf, to: b1, kind: return, route: ll, offset: 64, label: 是·原预约不变}
+
+  - {from: c1, to: c_chk, kind: flow, route: hv}
+  - {from: c_chk, to: c_ok, kind: flow, label: 是}
+  - {from: c_ok, to: c_rec, kind: flow}
+  - {from: c_chk, to: c1, kind: return, route: ll, offset: 32, label: 否·预约不变}
+
+  - {from: d1, to: d2, kind: flow}
+  - {from: d2, to: d_chk, kind: flow, route: hv}
+  - {from: d_chk, to: d_reason, kind: flow, label: 是}
+  - {from: d_reason, to: d_ok, kind: flow, label: 是}
+  - {from: d_ok, to: d_rec, kind: flow}
+  - {from: d_rec, to: d_emp, kind: flow, route: hv}
+  - {from: d_chk, to: d2, kind: return, route: rr, offset: 32, label: 否·预约不变}
+  - {from: d_reason, to: d2, kind: return, route: rr, offset: 48, label: 否·预约不变}
+
+verify:
+  start: [a1, b1, c1, d1]
+  end: [a_ok, b_ok, c_rec, d_emp]
+  must_pass:
+    - {before: a_ok, through: [a_chk, a_conf]}
+    - {before: b_ok, through: [b_own, b_chk, b_conf]}
+    - {before: c_ok, through: [c_chk]}
+    - {before: d_ok, through: [d_chk, d_reason]}

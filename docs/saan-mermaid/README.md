@@ -95,6 +95,7 @@ To catch syntax errors as soon as Claude Code writes a file, add `scripts/hook.p
 | `must_pass` | P1 control can be bypassed |
 | `separate` | P5 incompatible steps in the same lane |
 | `alias: name = label` | Lets a control name match a differently worded node label |
+| Same-label nodes | CP4 warns that several nodes share a label and are checked as one step; write node IDs in the list to check them separately |
 | `sequenceDiagram` | S3 unclosed block, SQ1 unused participant, SQ2 activation imbalance, SQ3 `;` in message text |
 | `gantt` | GT1 unknown `after` ID, GT2 dependency loop, GT3 missing `todayMarker off` |
 | `erDiagram` | ER1 entity with no relationship |

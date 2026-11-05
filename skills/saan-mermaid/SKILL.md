@@ -42,7 +42,7 @@ separate: 提交付款申请 | 审核单据
 - `must_pass` checks that the target cannot be reached without the control.
 - `separate` checks that two steps sit in different `swimlane-beta` lanes.
 - If a step exists in the source but is skipped or removed by a rule, still list it as a control. Draw it, and show the skip as a path.
-- Names must equal a node label (spaces and `<br/>` ignored), so use the source's words. If the diagram words a step differently, add `alias: 财务复核 = 复核付款单` instead of renaming either side. If the source has no controls, write `none: reason`.
+- Names must equal a node label (spaces and `<br/>` ignored), so use the source's words. If the diagram words a step differently, add `alias: 财务复核 = 复核付款单` instead of renaming either side. If several nodes share a label, the checks treat them as one step and warn with CP4; write the node ID instead (`must_pass: c_ok through c_chk`) to check one of them. If the source has no controls, write `none: reason`.
 - Do not change the list to make a check pass. Change it only if it misread the source, and tell the user.
 
 ## Decide what the diagram explains

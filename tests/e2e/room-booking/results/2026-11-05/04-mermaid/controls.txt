@@ -1,0 +1,37 @@
+source: document
+# 从 input/prd.md（V0.1 草稿，未评审）第 4 章、5.3 提取，不是用户独立提供的控制要求。
+# 名称取泳道图节点原文。「本人有效且未开始？」「置已取消并释放占用」在图上各出现两次（改期/取消、预约人/管理员），
+# 因此取消路径的 must_pass 以各自唯一的记录节点为目标。
+
+# 新建预约（4.2.1；FR-B02、FR-B03、FR-C02、FR-C04、FR-C05、FR-C07）
+control: 创建人取当前登录员工
+control: 时段主题会议室合规？
+control: 与有效预约冲突？
+must_pass: 创建有效预约 through 时段主题会议室合规？
+must_pass: 创建有效预约 through 与有效预约冲突？
+
+# 改期（4.2.3；FR-R02、FR-R03、FR-R04、FR-R05、FR-R06、FR-X05）
+control: 本人有效且未开始？
+control: 目标时段会议室合规？
+control: 与其他预约冲突？
+must_pass: 释放原占用更新时段 through 本人有效且未开始？
+must_pass: 释放原占用更新时段 through 目标时段会议室合规？
+must_pass: 释放原占用更新时段 through 与其他预约冲突？
+
+# 预约人取消（4.2.4；FR-X01、FR-X02、FR-X03、FR-X05）
+control: 保存操作人与时间
+must_pass: 保存操作人与时间 through 本人有效且未开始？
+
+# 管理员取消（4.3.1；FR-M01—FR-M04；5.3 ④）
+control: 所管有效且未开始？
+control: 取消原因已填写？
+control: 保存操作人时间原因
+must_pass: 保存操作人时间原因 through 所管有效且未开始？
+must_pass: 保存操作人时间原因 through 取消原因已填写？
+
+# 提交处理时由系统校验，不以前端（提交人一侧）代替（FR-C06）
+separate: 选时段填主题并提交 | 时段主题会议室合规？
+separate: 在我的预约提交改期 | 本人有效且未开始？
+separate: 在我的预约提交取消 | 本人有效且未开始？
+separate: 填写原因并确认取消 | 所管有效且未开始？
+separate: 填写原因并确认取消 | 取消原因已填写？

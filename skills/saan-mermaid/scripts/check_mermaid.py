@@ -531,7 +531,12 @@ def check(d, theme=None, target=None):
                 W("S2", f"节点 ID 建议用英文：{nid}", n["line"])
             if nid == "end":
                 E("S2", "不要用 end 作节点 ID", n["line"])
-        dotted = [e for e in d.edges if e[2].startswith("-.")]
+        # A dotted edge that loops back (its source is reachable from its target) is a return,
+        # which is exactly what dotted lines are for; only the other dotted edges count.
+        g_all, _ = d.graph()
+        members = lambda x: set(d.subs.get(x, ())) or {x}
+        is_return = lambda e: bool(members(e[0]) & reach(g_all, sorted(members(e[1]))))
+        dotted = [e for e in d.edges if e[2].startswith("-.") and not is_return(e)]
         if len(dotted) > 2 and len(dotted) / max(len(d.edges), 1) > 0.3:
             W("DS1", f"虚线 {len(dotted)}/{len(d.edges)} 条，太多。虚线只留给退回或可选路径", d.type_line)
 
@@ -615,8 +620,10 @@ def parse_controls(text):
 
 
 def find(d, name, aliases=()):
+    """Nodes whose label matches name or an alias; a node ID also works, to pick one of several same-label nodes."""
     want = {norm(name)} | {norm(a) for a in aliases}
-    return [n for n, a in d.nodes.items() if norm(a["label"]) in want]
+    hits = [n for n, a in d.nodes.items() if norm(a["label"]) in want]
+    return hits or [n for n in d.nodes if n in want]
 
 
 def near(d, name):
@@ -658,6 +665,10 @@ def review_issues(items, controls=None, controls_name="", theme=None, target=Non
             close = sorted({x for d in docs for x in near(d, name)})
             hint = f"图上有相近的『{'』『'.join(close[:3])}』，如果是同一步，在清单里写 alias: {name} = {close[0]}" if close else "补上节点，或告诉用户它为什么不用画"
             C("error", "CP1", f"控制点清单里的『{name}』不在图上。{hint}", c["line"].get(name, 0))
+        for d in docs:
+            hits = find(d, name, al(name))
+            if len(hits) > 1:
+                C("warning", "CP4", f"『{name}』在图上有 {len(hits)} 个同名节点（{'、'.join(hits)}），检查把它们当作同一步。要分开查，在清单里改写节点 ID", c["line"].get(name, 0))
     found = []
     for target_name, ctl in c["must_pass"]:
         ft = lambda d: find(d, target_name, al(target_name))
@@ -685,11 +696,14 @@ def review_issues(items, controls=None, controls_name="", theme=None, target=Non
             xs, ys = find(d, x, al(x)), find(d, y, al(y))
             if not xs or not ys:
                 continue
-            la, lb = d.lane.get(xs[0]), d.lane.get(ys[0])
-            if d.type != "swimlane-beta" or not la or not lb:
+            pairs = [(a, b) for a in xs for b in ys]
+            if d.type != "swimlane-beta" or not all(d.lane.get(a) and d.lane.get(b) for a, b in pairs):
                 found.append(issue("finding", "P5", f"『{x}』与『{y}』的执行角色待确认：只有 swimlane-beta 的泳道才算角色", d.name, d.line_of(xs[0])))
-            elif la == lb:
-                found.append(issue("finding", "P5", f"『{x}』与『{y}』都由『{d.sublabel.get(la, la)}』执行，违反岗位分离", d.name, d.line_of(xs[0])))
+                continue
+            same = next(((a, b) for a, b in pairs if d.lane[a] == d.lane[b]), None)
+            if same:
+                la = d.lane[same[0]]
+                found.append(issue("finding", "P5", f"『{x}』与『{y}』都由『{d.sublabel.get(la, la)}』执行，违反岗位分离", d.name, d.line_of(same[0])))
     return out + accept(found, acc)
 
 
@@ -875,6 +889,7 @@ TESTS = [
     ("N1", FLOW + "".join(f"  n{i}[步骤] --> n{i + 1}[步骤]\n" for i in range(16)), None),
     ("L1", FLOW + "  a[这是一个非常非常非常非常非常非常长的节点文字] --> b[结束]\n", None),
     ("DS1", FLOW + "  a[甲] -.-> b[乙]\n  b -.-> c[丙]\n  c -.-> d[丁]\n", None),
+    ("CP4", GOOD.replace("    pay[执行付款]\n", "    pay[执行付款]\n    audit2{审核单据}\n") + "  fix --> audit2\n  audit2 -->|通过| pay\n  audit2 -->|退回| fix\n", CTL),
     ("CP1", GOOD, CTL + "control: 财务复核\n"),
     ("CP1", GOOD, CTL.replace("control: 审核单据", "control: 审核")),
     ("CP2", GOOD, None),
@@ -933,6 +948,13 @@ def selftest():
     shaped = GOOD.replace("audit{审核单据}", 'audit@{ shape: decision, label: "审核单据" }').replace("  fix -.-> apply\n", "  fix e1@-.-> apply\n  e1@{ animate: true }\n")
     if review([shaped], CTL) != review([GOOD], CTL) or "e1" in D(shaped).nodes:
         bad.append(f"@{{ }} 节点或边 ID 解析有误 {review([shaped], CTL)}")
+    returns = FLOW + "  a[甲] --> b{判断一}\n  b -->|是| c{判断二}\n  c -->|是| d[完成]\n  b -.->|否| a\n  c -.->|否| a\n  c -.->|退回| b\n"
+    if any(x.startswith("[DS1]") for x in review([returns])[2]):
+        bad.append("退回用的虚线不应计入 DS1")
+    if review([GOOD], "source: user\nmust_pass: pay through audit\n")[0]:
+        bad.append(f"控制点清单应能用节点 ID 指代节点 {review([GOOD], 'source: user' + chr(10) + 'must_pass: pay through audit' + chr(10))[0]}")
+    if any(x.startswith("[CP4]") for x in review([GOOD], CTL)[2]):
+        bad.append("没有同名节点时不应报 CP4")
     md = "# 文档\n\n```mermaid\n" + GOOD + "```\n\n正文\n\n~~~mermaid\n" + FLOW + "  a[甲] --> b[乙]\n~~~\n"
     if len(blocks("doc.md", md)) != 2 or review(blocks("doc.md", md), CTL)[:3] != ([], [], []):
         bad.append("Markdown 代码块提取有误")

@@ -1,0 +1,162 @@
+{
+  "date": "2026-11-05",
+  "case": "room-booking end-to-end",
+  "mode": "independent agent per step, fresh context, isolated temporary workspace containing only that skill copy, raw inputs and upstream outputs",
+  "chain": [
+    "saan-discovery",
+    "saan-prd-writing",
+    "saan-diagram",
+    "saan-mermaid"
+  ],
+  "criteria_withheld": true,
+  "outputs_unedited": true,
+  "baseline_comparison": "tests/saan-prd-writing/results/2026-11-04/room-booking/prd.md (PRD without discovery input)",
+  "repo_snapshot_note": "saan-diagram and saan-mermaid matched commit f90194e; saan-discovery and saan-prd-writing were untracked working-tree files. skill_hashes identify the exact copies used.",
+  "steps": {
+    "01-discovery": {
+      "skill": "saan-discovery",
+      "skill_version": "0.2.0",
+      "skill_hashes": {
+        "SKILL.md": "455bd08fa0ae09b47d52dbd6bcccf29c70d50a6974ea5e64039e52290a5a6d4a",
+        "agents/openai.yaml": "483d3d9d9448b9454ded8b6515c7f3f1cb21cf19d8a61e21fb6db77808dd4acb",
+        "references/deliverables.md": "3b0a0427970d451bd6785e9adc31136abe547f91a72b5c1998480ef7594ef2f2",
+        "references/process-and-approval.md": "67927fc1c460b8e74f9054f615e741eaa6ec7907920de2f57e2f4904f096030a",
+        "references/product-fit.md": "e9e90168389e7093b0ca8711b849681a926b549e495bf3b254474916d097245f",
+        "references/research-context.md": "e94f8a9ef5e4b8b71539d2e0c1a0fe0b350ba0fd6e849f7599fa5f87f57e2181",
+        "references/user-interview.md": "bf6e44205f12f559a01d93ccf86c231fc99b45326b770cfc8fc2a193e19bbaec"
+      },
+      "input_hashes": {
+        "brief.md": "d6cbbce01afa9633c223904fd4d36e3257415aa3c58656f2781d22724c99e3bd",
+        "request.md": "dbc3e7bbbb05806e1310039bdee0e43235d65cf765a5cb54211e1e2053fa4a38",
+        "review-notes.md": "d90d2ce254a80fbd8bd64e613fb87b0b64ed248705592610c067974fe5a4360c"
+      },
+      "output_hashes": {
+        "discovery-room-booking.md": "7ebbbced36bc8c9fc78669b5f22aab3e0799bb596b9d1f4fe0ac845479cb1075"
+      }
+    },
+    "02-prd": {
+      "skill": "saan-prd-writing",
+      "skill_version": "1.0.0",
+      "skill_hashes": {
+        "SKILL.md": "67d2d58d5a05e304ae232535277278dfbd57fb19892fb341a1451918b43b0707",
+        "agents/openai.yaml": "46d10a2da2e7f58a6b8a4a53ab28922bc1544e92434d91906793689f04516b0f",
+        "examples/bulk-archive/input.zh-CN.md": "5d311c44eebca6807f1cc512c47c8196451ca596397622f3c5306fa8e00ae51b",
+        "examples/bulk-archive/prd.zh-CN.md": "a684115674a81cca395d9c8790d3451d2f98115d47330f557bccbb78447cc72c",
+        "references/source-handling.md": "043e1eea7099df2937eb923b5667876ebcbc6ca121923d951ab82d0b7c0d9574",
+        "templates/change.en.md": "ec373cd2e536aadbadc8d8f77fb9c194ea50c6e2a4482915b799cc7e16099adf",
+        "templates/change.zh-CN.md": "910375876321952bdb45257f4e16a55cfcded598c3822ec28bdda69e96dbf64b",
+        "templates/specification.en.md": "f9383a5222e5cd2384fbc01f8ec26c9f76ebe3c2dc0b89eb8cf94fed57931a04",
+        "templates/specification.zh-CN.md": "566fabc1c70f5c5703171fd6b4a412d67435ca09809b27f026756b3eadf46237"
+      },
+      "input_hashes": {
+        "brief.md": "d6cbbce01afa9633c223904fd4d36e3257415aa3c58656f2781d22724c99e3bd",
+        "discovery-room-booking.md": "7ebbbced36bc8c9fc78669b5f22aab3e0799bb596b9d1f4fe0ac845479cb1075",
+        "request.md": "28153e1b41fe6b076bc9f91a6f210853837d7842463ca1a7c178422e030c9702",
+        "review-notes.md": "d90d2ce254a80fbd8bd64e613fb87b0b64ed248705592610c067974fe5a4360c"
+      },
+      "output_hashes": {
+        "prd.md": "3b0409b335af831e64e9c45f76b01a16487152fb511cd39ea16db9de5a3263ea"
+      }
+    },
+    "03-diagram": {
+      "skill": "saan-diagram",
+      "skill_version": "1.0.0",
+      "skill_hashes": {
+        "SKILL.md": "1d6f35bfdb8da872df5869b0ac8d02016822e726bac2f2a8928f17c650c28a45",
+        "assets/1-arch.yaml": "79210e84f9dd425654fee83ff01b9b602077f13096793ffa238a1e4f96dd91e9",
+        "assets/2-flow.yaml": "bd235975deaeee9e1329592c506d7445941cb2b7b870a732fb1a12a5a01900c0",
+        "assets/3-paths.yaml": "5b188b79004369d5fdee591c05c3dfbe364b008466473f2577e10850b6b75976",
+        "assets/4-swim.yaml": "f2783dadcde22d3c8d55b050d8d8267816ef27dd6078a8c792777d95b394ee62",
+        "assets/5-overview.yaml": "eb76888ccd36ab46d6d30159cc9ce99ab36e7fea5ef76907761594ef3cd5983b",
+        "assets/ai-quadrant.yaml": "61936c0ec22fa004c9f40bd75658e5929a72d91be70afdf0862dce13daa37f67",
+        "assets/bid-dfd.yaml": "e2271a176b9a878d6334f2a56e93fa5375514a797a960ee7d694f5cffbf4884a",
+        "assets/bid-fishbone.yaml": "fc24c59dac6a3672dc97dd8afbdbb5577d5aec29b4caeef6c7ef964ac3269fb4",
+        "assets/biz-platform.yaml": "ca52616fca4e170e347421c10e6360ab5c662dace989d7f93112f0453c50188d",
+        "assets/en/approval-flow.yaml": "9c1b7ddc1787833de3bf6861a06041715e1be10f1548d1c4ab122ea69d97b3ff",
+        "assets/en/platform-layers.yaml": "f34c5dd9681d7262ec2388b9201da98ced8d199799bd65649c14d547330a1693",
+        "assets/en/release-timeline.yaml": "aa43217e52d49dcd49f349ec13d870cd2fa2f9a8a71e71c4ff7660a581c313fd",
+        "assets/group-org.yaml": "0717d8a5fb204801b8a054778ec560193250eed4b105aba72e8d77dbff055507",
+        "assets/payment-audit.yaml": "526531ad10a509564a4b35add97ef84fc061c3aaf2dda6b2d943a466cadd2ec5",
+        "assets/platform-timeline.yaml": "1a1610629151faf13b020b791f9843c23929c3743bbb401ff2a84f6131df1d04",
+        "assets/proc-idef0.yaml": "0206e6ae32f5052cf6d59334238fad5795b4ba188373021d6e61dc863a418952",
+        "assets/procurement-er.yaml": "106c745e3deebcd3947c79e043575cef09e8bd0796034fb48e991ac2eea66b0c",
+        "assets/vendor-opportunity.yaml": "1d35b2b7da67ab0a747703186283acd9bb7933a41a25234f643f370a74f096d5",
+        "guides/er.md": "e6fb696da82254a3883c6b725d9750d9ed8d1ce8688dd82c5e7f26b980af6582",
+        "guides/feishu.md": "8aa8e4102d3dc20255ea06a6f3cf7b47bda7b71480057eddbd22d0bf1423fddc",
+        "guides/fishbone.md": "bd1a79e06bc16f2c153500aac3fff12092013befb1330f6ba3b41ea260d2fd2f",
+        "guides/idef0.md": "6bf739e864d48a3c6332c1fb7c05e1347514756dd7be31a8b69afae174fc6464",
+        "guides/layers.md": "81d9b25db2fa77d6202d6a90c4db480f55f609287725e5eb0ea415df369af21a",
+        "guides/lint.md": "2dac0fd8bc4c7ca174642e9f47913b259586cbcada72283b81f5713ba31d3296",
+        "guides/org.md": "567c87a39e4bad40cef1f38d21dabd521b60187eb3dc693afd502f6a85db5ea0",
+        "guides/profile.md": "c8e1ce404f2452de05626d016192825b229b037c27264016af0e3c23b44580c1",
+        "guides/quadrant.md": "be4640415fd12eedc816625417d90c97a41e4e4c7e8ec86b4f2d6b2f576085ae",
+        "guides/stages.md": "ab1bfce28cacbea0fc51fc61710c0dedac996b623bd045bcf7563cf8e545f8ec",
+        "guides/style.md": "a5004a6dd671101df43d0a22ca847a452569f0ff8ce92f1a08408b800a29555a",
+        "guides/timeline.md": "9f5063f524a70801ef2ef33d5ee41558d6496e11d071c922dd2883b2f1ae2860",
+        "guides/verify.md": "e7bd9b7686f417924403ba3feb41b9a509f8bd53144beb8281d876b8867f949b",
+        "requirements.txt": "0969da99a0bc2a1b71ed50584560f4588a37567ac63af3ddbaf3c4617ca5621a",
+        "scripts/i18n.py": "69986373aa73ba4f44d22a236ed28462f6e8e4f1960cb1e9d5b65179e4a99ba5",
+        "scripts/render.py": "32106cf8fbc3c76d1cb39e90f7def99463dc18d1924b11054fa106a21d44f795",
+        "scripts/spec_validation.py": "344203260de7dd9c34fbe7ceeea1be37202b30a87be3d71767e493f2f14b07df",
+        "scripts/wb_publish.py": "6942d594b17dbd76429dd8282f765139cc2f9e409a6704916e48d654d2566724"
+      },
+      "input_hashes": {
+        "prd.md": "3b0409b335af831e64e9c45f76b01a16487152fb511cd39ea16db9de5a3263ea",
+        "request.md": "176efeed3de6dbd049d9ec92298aecb4644f7a6463da93d3b5df6da896f45a9c"
+      },
+      "output_hashes": {
+        "room-booking-swim.html": "1391b1e8ae3d7952146e119d8fbd6b142672d47334a1f8d7c819f7d7d1025cc9",
+        "room-booking-swim.png": "454829218a4d1120cf1a32f4524b0c48cf78cdb0c4f77dd7147fa550d317ffce",
+        "room-booking-swim.result.json": "1dca09ed9513ef1de0e42ecc43bfda64fa600a4c0418d392db03953df5f94570",
+        "room-booking-swim.svg": "44b262a0254ea5fcc9c5386c9d8a93b60e99dc195f11b44f8edf14733f8ee8d8",
+        "room-booking-swim.wb.json": "65be9a6c64c43c2f8049344c0ff476ae3de03c308af4e36a54916d364020cd36",
+        "room-booking-swim.yaml": "42b137a47ed06f6393f29304ac077c2528d5d58938900c6a6f6015874b38320b"
+      }
+    },
+    "04-mermaid": {
+      "skill": "saan-mermaid",
+      "skill_version": "1.1.0",
+      "skill_hashes": {
+        "SKILL.md": "1812ea9b3af16454e3f31274336a983952e4bcbcf6735a851925b3dd8e78a50e",
+        "assets/controls.example.txt": "1f7631d69db0d512950aabd970518a94473e8345294a9b93f8c65437bb105a1d",
+        "assets/examples/arch-by-layer.mmd": "275ab016ec03c74ae6efce3c6afd756ec7344a351be09ad2300d410368633130",
+        "assets/examples/arch-by-stage.mmd": "859313ba08976dfb8716ff27e26806eb39391ee33949d05b1c422860a5054034",
+        "assets/examples/er.mmd": "d49855762b95f23d0db8a51391e42f1b3cb94d211bba8f9bf5ec5f1531b6476f",
+        "assets/examples/fishbone.mmd": "f3c2f866269d76db076ab325f972c5e68f9b9a0c3527c25a65a62b0f9c7d9962",
+        "assets/examples/flow-approval.mmd": "b0a735e215649950cb1f34cb69ee068dd498e38490fa7e6bad54103815a7ca84",
+        "assets/examples/flow-overview.mmd": "ddeb805ecd22b0ab1b3ed7cd0f883fcf962d54098c607cfabc5d728ae782263d",
+        "assets/examples/flow-swimlane.mmd": "e93179f94ca3892ebc244c95efff3b63901217828a3287b4210c9fbc7b81dc26",
+        "assets/examples/gantt.mmd": "b9715281c4ba564d8dfd97020b1241eeff35ac8c72f8942cea7b1f2bba63dd76",
+        "assets/examples/quadrant.mmd": "dca333ca5cfb6767cee6898a30023112015b31439c4b503c662614f6fde3e5c5",
+        "assets/examples/sequence.mmd": "364461cea2f53f537e5d4fd928e595fdb1ea44739fb43850c8658a333c345925",
+        "assets/examples/state.mmd": "9bf82fbb76f886debbd98b5eaa4c5959d21ddc10a59e9f42a149506fb5b29bb4",
+        "assets/examples/timeline.mmd": "5ce0717c66bded06567053d2ac0a1b78ff44a077afc9a86d1639186d86e1b51f",
+        "assets/themes/saan-dark.json": "cd4b850e843405cf29d1d9951503bdb10fcc6faa67c04ae1e475fa103c9699f1",
+        "assets/themes/saan-light.json": "2954ede0630f359ee7e34e218985a38a0065f4b3a72f5de2a3d998901d04dddc",
+        "references/block.md": "aeb9004ea8faf5c6649ac0a2a92d73c3b49aeb918a41948c0b21492d6b943e9a",
+        "references/er.md": "f2f15ff1a3eefdd21dad4fc1602fafea4ce30321d84557584e58ac93d4897d43",
+        "references/flowchart.md": "bb17c49569be7802c44162f269e47494d675f24e92bf7581de271a928481b7eb",
+        "references/gantt.md": "1ee0395b28543578fb04927d3d1e4c7ea3981919e74be38a4fe9db8a79b9474c",
+        "references/ishikawa.md": "4edf2f4d63e5584070b5c54f4709143b314b861a2e1c552fdcfe11a8fe7e0120",
+        "references/quadrant.md": "f2dcb6119a547d92cf050c5057cf61d8235227e1738ba6ad50a03d85f35b4771",
+        "references/sequence.md": "9e1150dc7c6c8b7dee4dae2316372f50046a148e7207f553b05cd738ba755e11",
+        "references/state.md": "bb22e1310f6cdf3741bba23537f02dbcd3c32dc32cb0d14c0770e352ff484df9",
+        "references/swimlane.md": "216998c48f3620d4c4c4c5d61f01b5193f1fea4c7b3a2e73280523a851a68f1f",
+        "references/timeline.md": "bde617f66fc76a9f87d836e04562576db9baf4bf37ec93a7d823c1e502d35a8c",
+        "scripts/check_mermaid.py": "3b2f864c7e6335f811032a754c47613a372e7f4ca17367093f64671d18f50c05",
+        "scripts/hook.py": "557a7563971395d338b4dd99943ad482e71131ec3de6e31061978ea3751c2cca"
+      },
+      "input_hashes": {
+        "prd.md": "3b0409b335af831e64e9c45f76b01a16487152fb511cd39ea16db9de5a3263ea",
+        "request.md": "35792bb6289f4449caa8e9891d232ffee5935837fa1d8df0cf5e6398e56adefc",
+        "room-booking-swim.yaml": "42b137a47ed06f6393f29304ac077c2528d5d58938900c6a6f6015874b38320b"
+      },
+      "output_hashes": {
+        "booking-state.mmd": "3213e8b6540e77e197f6cd0bd7c7318e7239def670888bb031379e3c3f7fe5d2",
+        "controls.txt": "c9362c291cb1524703eef9509ecdbb6ad7c90671b1566075f407e97bf1b414bd",
+        "review.md": "b8a55e9dc059d6743dbb5c0fec7bbfc940659b7c175d1d7c84e0ad392f9ea7b1",
+        "room-booking-swim.mmd": "03a1b003bfcb97fedca53cd8ea9ae9d823748df9d623cd89dca2b4bb8b706235"
+      }
+    }
+  }
+}

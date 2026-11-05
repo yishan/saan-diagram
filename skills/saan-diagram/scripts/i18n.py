@@ -31,6 +31,7 @@ EN = {
     "外部系统": "External system",
     "业务主流程": "Process flow",
     "数据 / 集成 / 推送": "Data / integration",
+    "退回": "Return",
     "配置 / 委托关系": "Configuration / delegation",
     "关键路径": "Critical path",
     "范围标注": "Scope",
