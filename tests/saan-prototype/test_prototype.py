@@ -125,5 +125,22 @@ class CheckTests(unittest.TestCase):
         self.assertEqual(mod("check").report([("finding", "C1", "m", "x"), ("error", "T1", "m", "y")]), 1)
 
 
+class PackageTests(unittest.TestCase):
+    def test_frontmatter_name_matches_directory(self):
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        self.assertRegex(text, r'\A---\nname: "saan-prototype"\ndescription: ".+"')
+
+    def test_referenced_files_exist(self):
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        refs = re.findall(r"\]\(([^)#]+)\)", text) + re.findall(r"`((?:scripts|assets|patterns|themes|references)/[^`]*)`", text)
+        for rel in refs:
+            self.assertTrue((SKILL / rel).exists(), rel)
+
+    def test_package_has_no_paths_outside_itself(self):
+        for f in SKILL.rglob("*"):
+            if f.is_file() and f.suffix in {".md", ".py", ".js", ".json", ".html", ".yaml"}:
+                self.assertNotIn("../../", f.read_text(encoding="utf-8"), f)
+
+
 if __name__ == "__main__":
     unittest.main()
