@@ -44,5 +44,21 @@ class SourceIndexTests(unittest.TestCase):
         self.assertEqual(mod("source_index").index("OPEN-3 和 Q-01", p)["open"], {"OPEN-3": "OPEN-3 和 Q-01"})
 
 
+class ThemeTests(unittest.TestCase):
+    THEMES = {f.stem: json.loads(f.read_text(encoding="utf-8")) for f in sorted((SKILL / "themes").glob("*.json"))}
+
+    def test_bundled_themes_pass(self):
+        self.assertEqual(sorted(self.THEMES), ["blue", "dark", "neutral"])
+        for name, t in self.THEMES.items():
+            self.assertEqual(mod("contrast").problems(t), [], name)
+
+    def test_low_contrast_is_reported(self):
+        t = dict(self.THEMES["neutral"], text="#C0C4CA")
+        self.assertTrue(any(m.startswith("text 在 bg") for m in mod("contrast").problems(t)))
+
+    def test_known_ratio(self):
+        self.assertAlmostEqual(mod("contrast").ratio("#000000", "#FFFFFF"), 21.0, places=1)
+
+
 if __name__ == "__main__":
     unittest.main()
