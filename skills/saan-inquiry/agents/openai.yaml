@@ -1,0 +1,4 @@
+interface:
+  display_name: "Saan Inquiry"
+  short_description: "Clarify problems, examine blind spots, and choose next steps"
+  default_prompt: "Use $saan-inquiry to help me clarify this problem, examine what I may be missing, and decide a useful next step."

@@ -1,6 +1,6 @@
 # Site
 
-Static pages for the collection, published at [kits.yishan.app](https://kits.yishan.app/). All five pages include English and Chinese, selected from browser preferences on first visit.
+Static pages for the collection, published at [kits.yishan.app](https://kits.yishan.app/). All six pages include English and Chinese, selected from browser preferences on first visit.
 
 | Path | Source | Content |
 |---|---|---|
@@ -14,6 +14,8 @@ Static pages for the collection, published at [kits.yishan.app](https://kits.yis
 | `/discovery/zh/` | `discovery/zh/index.html` | Explicit Chinese introduction |
 | `/prd-writing/` | `prd-writing/index.html` | PRD Writing automatic language entry (English HTML fallback) |
 | `/prd-writing/zh/` | `prd-writing/zh/index.html` | Explicit Chinese introduction |
+| `/inquiry/` | `inquiry/index.html` | Inquiry introduction (local addition) |
+| `/inquiry/zh/` | `inquiry/zh/index.html` | Explicit Chinese Inquiry introduction |
 
 The overview page forwards old `/#anchor` links to `/diagram/#anchor`, except its own `#collection-install` section. Each new skill gets its own second-level directory and a row on the overview page. Keep the localized skill count in sync with that list. Skill text aligns with the main heading; decorative circles and a connecting line sit in the left gutter.
 
