@@ -1,0 +1,14 @@
+[
+  {"id": "ac1", "label": "甲登记明天的空闲车位", "acceptance": ["AC-1", "AC-3"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "page": "spots",
+   "data": {"spots": [{"id": "A-01", "name": "A-01"}, {"id": "A-02", "name": "A-02"}, {"id": "A-03", "name": "A-03"}],
+            "regs": []}},
+  {"id": "ac2", "label": "A-01 明天已被乙登记", "acceptance": ["AC-2", "AC-6"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "page": "spots",
+   "data": {"spots": [{"id": "A-01", "name": "A-01"}, {"id": "A-02", "name": "A-02"}, {"id": "A-03", "name": "A-03"}],
+            "regs": [{"id": "r1", "spot": "A-01", "date": "2026-11-11", "owner": "yi", "createdAt": "2026-11-10T08:30:00+08:00", "status": "已登记"}]}},
+  {"id": "ac4", "label": "甲登错了，当天取消", "acceptance": ["AC-4"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "page": "mine",
+   "data": {"spots": [{"id": "A-01", "name": "A-01"}, {"id": "A-02", "name": "A-02"}, {"id": "A-03", "name": "A-03"}],
+            "regs": [{"id": "r1", "spot": "A-02", "date": "2026-11-11", "owner": "jia", "createdAt": "2026-11-10T08:40:00+08:00", "status": "已登记"}]}},
+  {"id": "ac5", "label": "甲想取消昨天的登记", "acceptance": ["AC-5"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "page": "mine",
+   "data": {"spots": [{"id": "A-01", "name": "A-01"}, {"id": "A-02", "name": "A-02"}, {"id": "A-03", "name": "A-03"}],
+            "regs": [{"id": "r1", "spot": "A-02", "date": "2026-11-10", "owner": "jia", "createdAt": "2026-11-09T18:00:00+08:00", "status": "已登记"}]}}
+]
