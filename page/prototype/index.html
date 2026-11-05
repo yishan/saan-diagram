@@ -54,6 +54,41 @@
     </div>
   </section>
 
+  <section aria-labelledby="structure">
+    <h2 id="structure">From specification to review file</h2>
+    <div class="structure">
+      <div><h3>What it reads</h3><ol>
+        <li>Functions and pages: what each screen offers and where it is reached from</li>
+        <li>Roles: who can see and do what</li>
+        <li>Functional constraints: conditions, state changes, and failure feedback</li>
+        <li>Acceptance scenarios: the cases reviewers should be able to try</li>
+        <li>Open questions and proposed wording, kept as they are</li>
+      </ol></div>
+      <div><h3>What it writes</h3><ol>
+        <li><code>prototype.html</code>: one file with the runtime, theme, and pages inlined</li>
+        <li><code>rules.js</code>: one small function per confirmed rule</li>
+        <li><code>scenarios.json</code>: each scenario's acceptance IDs, role, current time, and data</li>
+        <li><code>pages/*.js</code>: the pages, built from list, detail, form, dialog, state, and timeline patterns</li>
+        <li><code>trace.md</code>: pages and scenarios mapped to source IDs, and which open questions are left out and why</li>
+      </ol><p class="note">The scope comes first, for example “4 pages, 2 roles, 9 scenarios”, so you can cut it down before anything is built.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rule-example">
+    <h2 id="rule-example">Turn a rule into something reviewers can click</h2>
+    <div class="example">
+      <p class="label">From the validation run · Room-booking conflicts</p>
+      <blockquote>“A booking occupies [start, end). Two active bookings for the same room conflict if their intervals overlap. Back-to-back bookings, such as 09:00–10:00 and 10:00–11:00, do not conflict.”</blockquote>
+      <ol>
+        <li>Rule: FR-C04 becomes one function. The booking dialog calls it and shows its result.</li>
+        <li>Scenario: “B books around A's weekly meeting and in another room” covers AC-02, AC-03, and AC-04, with A's 09:00–10:00 meeting already in place.</li>
+        <li>Try it: 10:00–11:00 in the same room succeeds, 09:30–10:30 is rejected and A's booking stays unchanged, and 09:00–10:00 in another room succeeds.</li>
+        <li>Open: the conflict message is not final (Q-12), so the wording carries a proposal badge and the question opens from it.</li>
+      </ol>
+      <p class="note">Concurrent submissions (FR-C05) cannot be shown by clicking. The trace table says the prototype shows only the visible half.</p>
+    </div>
+  </section>
+
   <section aria-labelledby="review">
     <h2 id="review">What reviewers can do</h2>
     <ul class="rules">
@@ -74,6 +109,25 @@
     </ul>
     <p>Two cases were each run twice in fresh contexts against criteria written before generation: the room-booking PRD (24 acceptance scenarios) and a one-paragraph description with three rules and no PRD. All four runs met the criteria. Review found runtime and documentation gaps, which were fixed between rounds.</p>
     <p class="note">The checker matches IDs and text. It does not judge interaction quality, and the prototype has not been tested with real users.</p>
+  </section>
+
+  <section aria-labelledby="resources">
+    <h2 id="resources">Patterns, themes, and a checker</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Resource</th><th>When it is used</th><th>Contents</th></tr></thead>
+      <tbody>
+        <tr><td>Six page patterns</td><td>Building each page</td><td>List, detail, form, dialog, states, and timeline: when to use each and how to build it</td></tr>
+        <tr><td>Three themes</td><td>Matching the review audience</td><td>Neutral, blue, and dark, each checked for contrast</td></tr>
+        <tr><td><code>build.py</code> and <code>check.py</code></td><td>After every change</td><td>Inline everything into one file, then trace IDs, states, wording, and external requests</td></tr>
+        <tr><td>Device-borrowing example · Chinese</td><td>A reference for the file layout</td><td>The specification, rules, scenarios, pages, and trace table behind the example above</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section aria-labelledby="scope">
+    <h2 id="scope">When to use this skill or another one</h2>
+    <p>Use it before a review, when people need to click through pages, roles, and states rather than read about them. To write the requirements themselves, see <a href="../prd-writing/">Saan PRD Writing</a>; its output is the preferred input here, but it is not a dependency. To explain a business structure or process, see <a href="../diagram/">Saan Diagram</a> or <a href="../mermaid/">Saan Mermaid</a>.</p>
+    <p>The prototype aligns interactions, states, and rules. It is not production front-end code, a visual design, or a mobile device mockup.</p>
   </section>
 
   <section aria-labelledby="install">
