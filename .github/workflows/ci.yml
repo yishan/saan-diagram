@@ -25,6 +25,9 @@ jobs:
       - run: python scripts/check_site.py
       - run: python skills/saan-mermaid/scripts/check_mermaid.py --selftest
       - run: python -m unittest discover -s tests/saan-mermaid -v
+      - run: python skills/saan-prototype/scripts/check.py --selftest
+      - run: python -m unittest discover -s tests/saan-prototype -v
+      - run: node --check skills/saan-prototype/runtime/runtime.js
   png-export:
     runs-on: ubuntu-latest
     steps:
