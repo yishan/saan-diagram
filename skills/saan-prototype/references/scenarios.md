@@ -19,5 +19,7 @@ A scenario is the starting point for one review conversation. Switching scenario
 
 1. Start from the acceptance scenarios. Make one scenario per case that can be shown in the interface.
 2. Cases that need concurrency, back-end bypass, or time passing cannot be fully shown. Show the visible half (for example the conflict message for the second submitter) and say in `trace.md` what is not demonstrated.
-3. Keep the data small: enough records to show the rule, no more.
-4. Use the source's own example names when it gives them (甲、乙、会议室 A); otherwise use neutral placeholders.
+3. A rule the interface enforces by not offering the choice (for example, only tomorrow can be picked) has no rejection to show. Demonstrate it by its absence and say so in `trace.md`.
+4. Some acceptance checks say "submit directly, bypassing the interface" (the server re-checks). Show them with a review-only panel: `<div class="p-card p-review-only" data-rule="FR-…">` holding buttons such as 「直接提交：取消」 that call the same action with the forbidden input. The panel hides when annotations are off; label it as a review aid, not interface design.
+5. Keep the data small: enough records to show the rule, no more.
+6. Use the source's own example names when it gives them (甲、乙、会议室 A); otherwise use neutral placeholders.

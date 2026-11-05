@@ -27,7 +27,7 @@ Propose a short list: pages, roles, and scenarios, for example "4 pages, 2 roles
 
 ## Build
 
-Copy `assets/example/` as the starting structure into the user's working directory as `prototype/`. Read it once; it is a complete, minimal prototype. Replace its `source.md` with a copy of the user's specification, so the folder still builds after it is moved; keep the original file unchanged. Then write, in this order:
+Copy `assets/example/` as the starting structure into the user's working directory as `prototype/`. Read it once; it is a complete, minimal prototype. Replace its `source.md` with a copy of the user's specification, so the folder still builds after it is moved; keep the original file unchanged. Without a specification file, write the restatement described in [source handling](references/source-handling.md#without-ids) instead. Then write, in this order:
 
 1. `manifest.json`: title, `source` (the copied specification, relative to the manifest), roles, states, `confirmed_text`, pages, theme. States and roles come from the source. `confirmed_text` lists only wording the source confirms; it is empty when nothing is confirmed.
 2. `rules.js`: confirmed rules only, as pure functions on `Proto.rules`, each commented with its rule ID. An open question never becomes logic.
@@ -45,7 +45,7 @@ python3 scripts/build.py prototype/manifest.json -o prototype.html
 python3 scripts/check.py prototype/manifest.json
 ```
 
-`check.py` exits 0 when clean, 1 for problems you must fix (必须修改), and 2 for business findings (业务发现). Fix 必须修改 items. Report 业务发现 to the user; do not change the source, the manifest, or the pages just to make them pass. 提示 lists uncovered acceptance scenarios: explain in `trace.md` why they cannot be shown in the interface. The checker matches IDs and text; it cannot judge whether the interaction is good.
+`check.py` exits 0 when clean, 1 for problems you must fix (必须修改), and 2 for business findings (业务发现). Fix 必须修改 items. Report 业务发现 to the user; do not change the source, the manifest, or the pages just to make them pass. 提示 lists uncovered acceptance scenarios: explain in `trace.md` why they cannot be shown in the interface. The checker matches IDs and text; it cannot judge whether the interaction is good, whether an action really goes through the rule functions, or whether an annotated element is reachable in any scenario.
 
 Open `prototype.html` in a browser and click through every scenario once when a browser is available. Say so if you could not.
 

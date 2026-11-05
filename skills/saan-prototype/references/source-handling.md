@@ -17,6 +17,8 @@ When the source is a description, a screenshot, or notes without IDs:
 1. Write a short `source.md` next to the manifest that restates the material and assigns IDs: rules you were told (`FR-1`…), your assumptions as open questions (`Q-1`…), and the scenarios you will show (`AC-1`…). Mark it as your restatement, not the user's document.
 2. Point `manifest.source` at it and tell the user the IDs are yours.
 3. Treat every label as a proposal unless the user confirmed it.
+4. When a phrase can be read in more than one way (for example "当天取消"), implement the plainest reading as the rule, and also list it as an open question that names the reading you used. Mark the controls it affects with that question's ID.
+5. Your restatement is checked against itself, so the checker cannot catch an invented rule or state there. Keep the restatement to what the user said and what follows from it directly.
 
 ## Conflicts and gaps
 

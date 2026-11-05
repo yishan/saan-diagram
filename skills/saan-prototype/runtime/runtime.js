@@ -20,7 +20,7 @@
   function ctx() {
     return {
       data: S.data, role: role(), now: S.now, rules: Proto.rules, scenario: S.scenario, esc: esc,
-      go: function (id) { S.page = id; S.flash = null; },
+      go: function (id) { S.page = id; },  // keeps a message set in the same action; run() clears old ones
       flash: function (text, opt) { S.flash = Object.assign({ text: text, kind: "ok" }, opt || {}); },
       dialog: function (html) { S.dialog = html; },
       close: function () { S.dialog = null; }
@@ -84,9 +84,9 @@
       return '<button data-go="' + esc(p.id) + '"' + (p.id === S.page ? ' aria-current="page"' : "") + attrs(p) + ">" + esc(p.label) + "</button>";
     }).join("");
     var page = vis.filter(function (p) { return p.id === S.page; })[0];
-    var html = S.flash ? '<div class="p-flash ' + esc(S.flash.kind) + '"' + attrs(S.flash) + ">" + esc(S.flash.text) + "</div>" : "";
-    html += page ? page.render(ctx()) : '<div class="p-empty">当前角色没有可见页面</div>';
-    if (S.dialog) html += '<div class="p-dialog"><div>' + S.dialog + "</div></div>";
+    var flash = S.flash ? '<div class="p-flash ' + esc(S.flash.kind) + '"' + attrs(S.flash) + ">" + esc(S.flash.text) + "</div>" : "";
+    var html = (S.dialog ? "" : flash) + (page ? page.render(ctx()) : '<div class="p-empty">当前角色没有可见页面</div>');
+    if (S.dialog) html += '<div class="p-dialog"><div>' + flash + S.dialog + "</div></div>";  // keep the message visible above the overlay
     var main = document.getElementById("p-main");
     main.innerHTML = html;
     decorate(document.getElementById("p-nav"));
