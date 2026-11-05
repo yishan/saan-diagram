@@ -60,5 +60,47 @@ class ThemeTests(unittest.TestCase):
         self.assertAlmostEqual(mod("contrast").ratio("#000000", "#FFFFFF"), 21.0, places=1)
 
 
+class BuildTests(unittest.TestCase):
+    def setUp(self):
+        self.td = tempfile.TemporaryDirectory()
+        self.out = Path(self.td.name) / "p.html"
+
+    def tearDown(self):
+        self.td.cleanup()
+
+    def test_example_builds_into_one_offline_file(self):
+        html = mod("build").build(EXAMPLE, self.out).read_text(encoding="utf-8")
+        self.assertNotRegex(html, r"""(?:src|href)=["']https?://""")
+        self.assertEqual(html.count("<script"), 5)
+        self.assertNotIn("/*@", html)
+        data = json.loads(re.search(r'<script type="application/json" id="p-data">(.*?)</script>', html, re.S).group(1))
+        self.assertEqual(data["defs"]["Q-01"], "Q-01 | 借用期限多长，超期怎么处理？ | 借用表单、提醒")
+        self.assertEqual(sorted(data["themes"]), ["blue", "dark", "neutral"])
+
+    def test_closing_script_tag_in_source_is_escaped(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "proto"
+            src.mkdir()
+            for f in ("manifest.json", "source.md", "rules.js", "scenarios.json", "trace.md"):
+                (src / f).write_text((EXAMPLE.parent / f).read_text(encoding="utf-8"), encoding="utf-8")
+            (src / "pages").mkdir()
+            page = (EXAMPLE.parent / "pages" / "devices.js").read_text(encoding="utf-8")
+            (src / "pages" / "devices.js").write_text(page + '\nvar s = "</script>";\n', encoding="utf-8")
+            html = mod("build").build(src / "manifest.json", self.out).read_text(encoding="utf-8")
+            self.assertIn('"<\\/script>"', html)
+
+    def test_unknown_theme_fails(self):
+        with self.assertRaises(mod("build").BuildError):
+            mod("build").build(EXAMPLE, self.out, theme="pink")
+
+    def test_cli_reports_missing_file(self):
+        with tempfile.TemporaryDirectory() as td:
+            m = Path(td) / "manifest.json"
+            m.write_text(json.dumps({"title": "x", "source": "nope.md", "roles": [{"id": "a"}], "scenarios": "s.json", "pages": ["p.js"]}), encoding="utf-8")
+            r = subprocess.run([sys.executable, str(SKILL / "scripts" / "build.py"), str(m)], capture_output=True, text=True)
+            self.assertEqual(r.returncode, 1)
+            self.assertIn("找不到", r.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
