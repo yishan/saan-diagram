@@ -1,0 +1,14 @@
+[
+  {"id": "s1", "label": "甲登记明天空闲的车位", "acceptance": ["AC-1"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "page": "register",
+   "data": {"spots": [{"id": "a01", "name": "A-01"}, {"id": "a02", "name": "A-02"}, {"id": "b01", "name": "B-01"}],
+            "registrations": []}},
+  {"id": "s2", "label": "A-01 明天已被乙登记", "acceptance": ["AC-2"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "page": "register",
+   "data": {"spots": [{"id": "a01", "name": "A-01"}, {"id": "a02", "name": "A-02"}, {"id": "b01", "name": "B-01"}],
+            "registrations": [{"id": "r1", "spot": "a01", "date": "2026-11-11", "by": "yi", "createdOn": "2026-11-10", "status": "已登记"}]}},
+  {"id": "s3", "label": "甲当天取消自己的登记", "acceptance": ["AC-3"], "role": "jia", "now": "2026-11-10T16:00:00+08:00", "page": "mine",
+   "data": {"spots": [{"id": "a01", "name": "A-01"}, {"id": "a02", "name": "A-02"}, {"id": "b01", "name": "B-01"}],
+            "registrations": [{"id": "r1", "spot": "a01", "date": "2026-11-11", "by": "jia", "createdOn": "2026-11-10", "status": "已登记"}]}},
+  {"id": "s4", "label": "甲隔天不能取消昨天的登记", "acceptance": ["AC-4"], "role": "jia", "now": "2026-11-10T08:30:00+08:00", "page": "mine",
+   "data": {"spots": [{"id": "a01", "name": "A-01"}, {"id": "a02", "name": "A-02"}, {"id": "b01", "name": "B-01"}],
+            "registrations": [{"id": "r1", "spot": "a01", "date": "2026-11-10", "by": "jia", "createdOn": "2026-11-09", "status": "已登记"}]}}
+]
