@@ -102,5 +102,28 @@ class BuildTests(unittest.TestCase):
             self.assertIn("找不到", r.stderr)
 
 
+class CheckTests(unittest.TestCase):
+    def codes(self, mutate):
+        p = mod("build").load(EXAMPLE)
+        mutate(p)
+        return {c for _, c, _, _ in mod("check").check_parts(p)}
+
+    def test_example_is_clean(self):
+        self.assertEqual(mod("check").check(EXAMPLE), [])
+
+    def test_selftest_passes(self):
+        r = subprocess.run([sys.executable, str(SKILL / "scripts" / "check.py"), "--selftest"], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout)
+
+    def test_open_question_excused_in_trace(self):
+        self.assertNotIn("T2", self.codes(lambda p: None))
+        self.assertIn("T2", self.codes(lambda p: p.update(trace=p["trace"].replace("不涉及：", ""))))
+
+    def test_exit_codes(self):
+        self.assertEqual(mod("check").report([]), 0)
+        self.assertEqual(mod("check").report([("finding", "C1", "m", "x")]), 2)
+        self.assertEqual(mod("check").report([("finding", "C1", "m", "x"), ("error", "T1", "m", "y")]), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
