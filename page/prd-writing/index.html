@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en" data-language-entry="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Saan PRD Writing: turn requirements and prototypes into full specifications or scoped changes, with concrete rules, fields, state effects, acceptance scenarios, and open decisions.">
+<title>Saan PRD Writing</title>
+<link rel="canonical" href="https://kits.yishan.app/prd-writing/">
+<link rel="alternate" hreflang="en" href="./">
+<link rel="alternate" hreflang="zh-CN" href="zh/">
+<script src="../site-preferences.js"></script>
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="prd-writing.css?v=e813618a5c">
+<link rel="stylesheet" href="../site.css?v=85e8aacbdc">
+<script src="../site.js" defer></script>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-top">
+      <nav class="site-nav" aria-label="Skill navigation"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="../mermaid/">Mermaid</a><a href="../discovery/">Discovery</a><a href="./" aria-current="page">PRD Writing</a><a href="../inquiry/">Inquiry</a></nav>
+      <div class="site-controls">
+      <details class="preference-picker" data-preference="language" name="site-preferences">
+        <summary class="preference-trigger" aria-label="Language" title="Language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
+        <nav class="preference-menu" aria-label="Language"><a href="zh/?lang=zh" data-language="zh" lang="zh-CN" hreflang="zh-CN">中文</a><a href="./?lang=en" data-language="en" lang="en" hreflang="en" aria-current="page">English</a></nav>
+      </details>
+      <details class="preference-picker" data-preference="theme" data-theme-controls name="site-preferences" hidden>
+        <summary class="preference-trigger" data-preference-label="Appearance" aria-label="Appearance" title="Appearance"><svg data-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><svg data-theme-icon="light" hidden viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="dark" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></summary>
+        <div class="preference-menu" role="group" aria-label="Appearance"><button type="button" data-theme-choice="system" aria-label="System" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>System</span></button><button type="button" data-theme-choice="light" aria-label="Light" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><span>Light</span></button><button type="button" data-theme-choice="dark" aria-label="Dark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg><span>Dark</span></button></div>
+      </details>
+    </div>
+    </div>
+    <div class="skill-heading"><h1>Saan PRD Writing</h1><span class="skill-version">v1.0.0</span></div>
+    <p class="lead">Bring scattered requirements and prototypes into a document your team can discuss, build from, and check against.</p>
+    <p>Start with a brief, review comments, an existing document, or a prototype the assistant can read. Describe each function: who uses it, what must be true first, what changes, and what happens on failure. For a single feature change, write only the affected parts.</p>
+    <dl class="intro">
+      <div><dt>Use for</dt><dd>Full PRDs, scoped changes, and document revisions</dd></div>
+      <div><dt>Outputs</dt><dd>Functional rules, business fields, acceptance scenarios, and open decisions</dd></div>
+      <div><dt>To get started</dt><dd>Bring your requirements; templates and examples are included</dd></div>
+    </dl>
+  </header>
+
+  <section aria-labelledby="structure">
+    <h2 id="structure">From context to functional detail</h2>
+    <div class="structure">
+      <div><h3>Complete requirements specification</h3><ol>
+        <li>Introduction: scope, readers, terms, and sources</li>
+        <li>Project overview: background, problem, and objectives</li>
+        <li>System overview: boundaries, flows, and function inventory</li>
+        <li>Functional requirements: modules and individual functions</li>
+        <li>Nonfunctional requirements: quality targets and verification</li>
+        <li>Design constraints: confirmed external limits</li>
+      </ol></div>
+      <div><h3>A consistent structure for each function</h3><ol>
+        <li>Business description: roles, context, and outcomes</li>
+        <li>Interface design: entry points, regions, and interactions</li>
+        <li>Business fields: type, format, whether each is required, and its purpose</li>
+        <li>Functional constraints: conditions, processing, states, and feedback</li>
+      </ol><p class="note">For a feature change, keep the relevant sections and name the existing requirements version you are working from. Add an “Other” section only if there is more to explain.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="example">
+    <h2 id="example">Turn a requirement into observable behavior</h2>
+    <div class="example">
+      <p class="label">Fictional example · Bulk archiving purchase requests</p>
+      <blockquote>“Purchasing specialists can bulk archive completed requests they created. If any selected record is ineligible, reject the entire batch.”</blockquote>
+      <ol>
+        <li>Trigger: a purchasing specialist selects requests and starts bulk archiving.</li>
+        <li>Validation: every selected request was created by the current user and is completed.</li>
+        <li>Result: if any request is ineligible, reject the entire batch and leave all records unchanged.</li>
+        <li>Acceptance: include a request created by another user and verify that no selected record changes.</li>
+      </ol>
+      <p class="note">If a system error occurs halfway through, whether to restore already processed records still needs a decision. The requirement above only covers records that are ineligible for archiving.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="evidence">
+    <h2 id="evidence">Keep requirements, proposals, and unknowns distinct</h2>
+    <ul class="rules">
+      <li>Define each rule once. Reference its identifier in interface descriptions, fields, and acceptance scenarios.</li>
+      <li>Distinguish business states, list groups, display labels, and permitted actions.</li>
+      <li>When sources conflict, retain both references and identify the decision needed.</li>
+      <li>Templates do not supply default performance values, security levels, architectures, or service commitments.</li>
+      <li>Label proposed wording and unresolved rules. Derive acceptance scenarios from confirmed requirements.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="resources">
+    <h2 id="resources">Two templates and a worked example</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Resource</th><th>When to use it</th><th>Contents</th></tr></thead>
+      <tbody>
+        <tr><td>Full specification · English and Chinese</td><td>New projects or a full review</td><td>Six chapters, version and revision records, acceptance scenarios, and open decisions</td></tr>
+        <tr><td>Scoped change · English and Chinese</td><td>One requirement within an existing project</td><td>What changes, functional details, effects on existing requirements, and acceptance scenarios</td></tr>
+        <tr><td>Bulk archive example · Chinese</td><td>A reference for writing detail</td><td>Fictional input, rules, state changes, and explicit unknowns</td></tr>
+      </tbody>
+    </table></div>
+    <p>An independent writing trial used a new room-booking requirement. It checked adjacent time slots, concurrent conflicts, preservation of the original booking after a failed reschedule, and unresolved rules. The evaluation materials are kept in the repository.</p>
+    <p class="note">Provide a prototype the available tools can read, such as exported pages or files. The skill does not include a general reader for Axure .rp files. Word or PDF formatting needs a suitable document tool.</p>
+  </section>
+
+  <section aria-labelledby="install">
+    <h2 id="install">Get started</h2>
+    <p>Install just Saan PRD Writing from Saan Kits:</p>
+    <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-prd-writing</code></pre><button type="button" class="copy" data-copy="install" aria-label="Copy the Saan PRD Writing install command" hidden></button></div>
+    <p>Give your agent the brief, review notes, or an accessible prototype:</p>
+    <div class="copy-row"><pre id="code-request"><code>Use saan-prd-writing to turn these materials into a requirements specification. Deliver a draft with concrete functions, fields, state changes, and acceptance scenarios. Collect unresolved decisions in one place.</code></pre><button type="button" class="copy" data-copy="request" aria-label="Copy the PRD writing request example" hidden></button></div>
+    <p class="note">Document checks and simulated writing trials do not establish business acceptance.</p>
+  </section>
+
+  <footer class="site-footer"><span>Saan PRD Writing · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-prd-writing">Skill source</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-prd-writing/README.md">User guide</a><a href="../">Saan Kits</a></footer>
+</main>
+</body>
+</html>

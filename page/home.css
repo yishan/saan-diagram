@@ -1,0 +1,47 @@
+/* Compare available skills by their outputs; each row opens its skill page. */
+:root{
+  --paper:#F6F7F9; --ink:#1F2329; --muted:#5B6370; --line:#4E5563; --node:#E3E5EA; --node-hover:#D0D3D9; --code:#ECEEF2;
+  --f-display:"Noto Serif SC","Songti SC","STSong",serif;
+  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#15171B; --ink:#E8EAED; --muted:#A0A7B3; --line:#A0A7B3; --node:#262A31; --node-hover:#33373F; --code:#1D2026; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#15171B; --ink:#E8EAED; --muted:#A0A7B3; --line:#A0A7B3; --node:#262A31; --node-hover:#33373F; --code:#1D2026; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7;
+  padding-left:max(40px,env(safe-area-inset-left,0px));padding-right:max(40px,env(safe-area-inset-right,0px))}
+main{max-width:640px;margin:0 auto;padding-block:40px 64px}
+h1{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(44px,9vw,72px);line-height:1.1}
+.lead{margin:16px 0 0;font-size:18px;color:var(--muted);text-wrap:balance}
+.skill-count{margin:40px 0 20px;font-size:13.5px;color:var(--muted)}
+.skill-list{--marker-offset:32px;list-style:none;margin:0;padding:0;display:grid}
+.skill{position:relative;display:grid;gap:8px;padding:0 0 36px;min-width:0}
+/* Connect title centers; the last circle ends the list. */
+.skill::before{content:"";position:absolute;box-sizing:border-box;left:calc(0px - var(--marker-offset));top:8px;width:14px;height:14px;border:2px solid var(--node-hover);border-radius:50%;background:var(--paper);z-index:1;pointer-events:none}
+.skill:not(:last-child)::after{content:"";position:absolute;left:calc(6.5px - var(--marker-offset));top:15px;width:1px;height:100%;background:var(--node-hover);pointer-events:none}
+.skill:last-child{padding-bottom:0}
+.skill h2{margin:0;font-size:22px;font-weight:500;line-height:1.4}
+.skill h2 a{color:inherit;text-decoration:none}
+.skill h2 a:hover,.more:hover{text-decoration:underline;text-underline-offset:4px}
+.skill p{margin:0}
+.fit{font-size:14.5px;color:var(--muted)}
+.skill .copy-row{margin-top:8px}
+.more{justify-self:start;margin-top:4px;font-size:14.5px;color:var(--muted);text-decoration:none}
+.planned{margin:24px 0 0;font-size:14.5px;color:var(--muted)}
+.install{display:grid;gap:12px;margin-top:48px}
+.install h2{font-size:18px;font-weight:500;margin:0}
+.install p{margin:0;font-size:14.5px;color:var(--muted)}
+.install summary{cursor:pointer;font-size:14.5px;color:var(--muted)}
+.install details .copy-row{margin-top:12px}
+pre{font-family:var(--f-mono);font-size:13px;line-height:1.7}
+.hero-top{margin-bottom:32px}
+@media(max-width:560px){
+ body{padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+ main{padding-top:24px}
+ .skill-list{--marker-offset:24px}
+}
+
+.site-footer{margin-top:24px}

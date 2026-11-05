@@ -1,92 +1,89 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en" data-language-entry="auto" data-legacy-diagram="diagram/">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Saan Kits：把需求变成图示、文档和原型的 Agent 技能集。">
+<meta name="description" content="Saan Kits: skills for thinking through problems, preparing research, writing requirements, and drawing business diagrams.">
 <title>Saan Kits</title>
+<link rel="canonical" href="https://kits.yishan.app/">
+<link rel="alternate" hreflang="en" href="./">
+<link rel="alternate" hreflang="zh-CN" href="zh/">
+<script src="site-preferences.js"></script>
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
-<script>
-/* 这里曾是 Saan Diagram 介绍页，旧链接的锚点转到新位置 */
-if (location.hash.length > 1) location.replace('diagram/' + location.hash);
-</script>
-<style>
-/* Compare available skills by their outputs; each row opens its skill page. */
-:root{
-  --paper:#F6F7F9; --ink:#1F2329; --muted:#5B6370; --line:#4E5563; --node:#E3E5EA; --node-hover:#D0D3D9; --code:#ECEEF2;
-  --f-display:"Noto Serif SC","Songti SC","STSong",serif;
-  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
-  --f-mono:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --paper:#15171B; --ink:#E8EAED; --muted:#A0A7B3; --line:#A0A7B3; --node:#262A31; --node-hover:#33373F; --code:#1D2026; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --paper:#15171B; --ink:#E8EAED; --muted:#A0A7B3; --line:#A0A7B3; --node:#262A31; --node-hover:#33373F; --code:#1D2026; color-scheme:dark}
-*{box-sizing:border-box}
-html,body{margin:0}
-body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7;
-  padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
-main{max-width:640px;margin:0 auto;padding-block:clamp(56px,14vh,128px) 64px}
-h1{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(44px,9vw,72px);line-height:1.1}
-.lead{margin:16px 0 0;font-size:18px;color:var(--muted);text-wrap:balance}
-.skill-list{list-style:none;margin:48px 0 0;padding:0;display:grid;border-top:1px solid var(--node-hover)}
-.skill{display:grid;gap:8px;padding:28px 0;border-bottom:1px solid var(--node-hover);min-width:0}
-.skill h2{margin:0;font-size:22px;font-weight:500;line-height:1.4}
-.skill h2 a{color:inherit;text-decoration:none}
-.skill h2 a:hover,.more:hover{text-decoration:underline;text-underline-offset:4px}
-.skill p{margin:0}
-.fit{font-size:14.5px;color:var(--muted)}
-.skill .copy-row{margin-top:8px}
-.more{justify-self:start;margin-top:4px;font-size:14.5px;color:var(--muted);text-decoration:none}
-.planned{margin:20px 0 0;font-size:14.5px;color:var(--muted)}
-.install{display:grid;gap:12px;margin-top:48px}
-.install h2{font-size:18px;font-weight:500;margin:0}
-.install p{margin:0;font-size:14.5px;color:var(--muted)}
-.install summary{cursor:pointer;font-size:14.5px;color:var(--muted)}
-.install details .copy-row{margin-top:12px}
-pre{font-family:var(--f-mono);font-size:13px;line-height:1.7}
-footer{margin-top:24px;font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 20px}
-footer a{color:inherit}
-</style>
-<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="home.css?v=e049af6389">
+<link rel="stylesheet" href="site.css?v=85e8aacbdc">
 <script src="site.js" defer></script>
 </head>
 <body>
 <main>
+  <div class="hero-top">
+    <div class="site-controls">
+      <details class="preference-picker" data-preference="language" name="site-preferences">
+        <summary class="preference-trigger" aria-label="Language" title="Language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
+        <nav class="preference-menu" aria-label="Language"><a href="zh/?lang=zh" data-language="zh" lang="zh-CN" hreflang="zh-CN">中文</a><a href="./?lang=en" data-language="en" lang="en" hreflang="en" aria-current="page">English</a></nav>
+      </details>
+      <details class="preference-picker" data-preference="theme" data-theme-controls name="site-preferences" hidden>
+        <summary class="preference-trigger" data-preference-label="Appearance" aria-label="Appearance" title="Appearance"><svg data-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><svg data-theme-icon="light" hidden viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="dark" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></summary>
+        <div class="preference-menu" role="group" aria-label="Appearance"><button type="button" data-theme-choice="system" aria-label="System" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>System</span></button><button type="button" data-theme-choice="light" aria-label="Light" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><span>Light</span></button><button type="button" data-theme-choice="dark" aria-label="Dark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg><span>Dark</span></button></div>
+      </details>
+    </div>
+  </div>
   <h1>Saan Kits</h1>
-  <p class="lead">把需求变成图示、文档和原型的 Agent 技能集。每个技能都能单独安装。</p>
-  <ul class="skill-list">
+  <p class="lead">Skills for everyday work: think through a problem, prepare research, write requirements, or draw a business diagram. Choose what you need and install it in your AI assistant.</p>
+  <p class="skill-count">5 skills</p>
+  <ul class="skill-list" role="list">
     <li class="skill">
       <h2><a href="diagram/">Saan Diagram</a></h2>
-      <p>把业务描述、需求文档和白板截图，转成同一套规范下的中英文业务图。</p>
-      <p class="fit">适合汇报、对外交付和飞书画板，可导出 HTML、SVG 和 PNG。</p>
-      <div class="copy-row"><pre id="code-diagram"><code>npx skills add yishan/saankits <span class="nb">--skill saan-diagram</span></code></pre><button type="button" class="copy" data-copy="diagram" aria-label="复制 Saan Diagram 安装命令" hidden></button></div>
-      <a class="more" href="diagram/">查看图示类型、示例和依赖</a>
+      <p>Use documents or whiteboard screenshots to explain a business, system, or process with architecture diagrams, flowcharts, and swimlanes.</p>
+      <p class="fit">Keep functions, roles, and systems distinct, with consistent layout and colors. Save a web page or image, or write to a Feishu/Lark whiteboard. Keep the source for later edits.</p>
+      <div class="copy-row"><pre id="code-diagram"><code>npx skills add yishan/saankits <span class="nb">--skill saan-diagram</span></code></pre><button type="button" class="copy" data-copy="diagram" aria-label="Copy the Saan Diagram install command" hidden></button></div>
+      <a class="more" href="diagram/">See diagram examples and how to use them</a>
     </li>
     <li class="skill">
       <h2><a href="mermaid/">Saan Mermaid</a></h2>
-      <p>用 Mermaid 画图，并拿一份独立的控制点清单审查业务流程。</p>
-      <p class="fit">适合放进 Markdown 和设计文档的图，以及审批流程审查。</p>
-      <div class="copy-row"><pre id="code-mermaid"><code>npx skills add yishan/saankits <span class="nb">--skill saan-mermaid</span></code></pre><button type="button" class="copy" data-copy="mermaid" aria-label="复制 Saan Mermaid 安装命令" hidden></button></div>
-      <a class="more" href="mermaid/">查看审查规则、示例和依赖</a>
+      <p>Add diagrams to Markdown, READMEs, or design documents, then update them by editing text. Draw workflows, system interactions, record states, and schedules.</p>
+      <p class="fit">With an approval checklist, check for missing steps, paths that bypass a required review, and decisions with no return path.</p>
+      <div class="copy-row"><pre id="code-mermaid"><code>npx skills add yishan/saankits <span class="nb">--skill saan-mermaid</span></code></pre><button type="button" class="copy" data-copy="mermaid" aria-label="Copy the Saan Mermaid install command" hidden></button></div>
+      <a class="more" href="mermaid/">See diagrams and workflow checks</a>
+    </li>
+    <li class="skill">
+      <h2><a href="discovery/">Saan Discovery</a></h2>
+      <p>Prepare questions before an interview, then organize what people do, where they struggle, and what still needs asking. Use it for consumer, business, or public-service research.</p>
+      <p class="fit">If you have an existing product, compare it with customer needs and identify what still needs checking. Save the work as an interview guide, research notes, or follow-up questions.</p>
+      <div class="copy-row"><pre id="code-discovery"><code>npx skills add yishan/saankits <span class="nb">--skill saan-discovery</span></code></pre><button type="button" class="copy" data-copy="discovery" aria-label="Copy the Saan Discovery install command" hidden></button></div>
+      <a class="more" href="discovery/">See how to prepare and organize research</a>
+    </li>
+    <li class="skill">
+      <h2><a href="prd-writing/">Saan PRD Writing</a></h2>
+      <p>Bring requirements, review notes, and prototypes together in a document your team can discuss. Start with a whole project or describe just the feature being changed.</p>
+      <p class="fit">Explain who can act, what they enter, what changes, and what happens on failure. Include acceptance scenarios and list decisions that are still open.</p>
+      <div class="copy-row"><pre id="code-prd-writing"><code>npx skills add yishan/saankits <span class="nb">--skill saan-prd-writing</span></code></pre><button type="button" class="copy" data-copy="prd-writing" aria-label="Copy the Saan PRD Writing install command" hidden></button></div>
+      <a class="more" href="prd-writing/">See the document structure and a worked example</a>
+    </li>
+    <li class="skill">
+      <h2><a href="inquiry/">Saan Inquiry</a></h2>
+      <p>Start a conversation when a problem is hard to describe or a choice is hard to make. Separate what you know from what you suspect, and consider other explanations.</p>
+      <p class="fit">Once you have enough to decide, bring the discussion together and choose a next step. Return with the results to see what changed.</p>
+      <div class="copy-row"><pre id="code-inquiry"><code>npx skills add . <span class="nb">--skill saan-inquiry</span></code></pre><button type="button" class="copy" data-copy="inquiry" aria-label="Copy the local Saan Inquiry install command" hidden></button></div>
+      <a class="more" href="inquiry/">See conversation examples and local installation</a>
     </li>
   </ul>
-  <p class="planned">计划中：PRD 写作、原型。</p>
-  <section class="install" aria-labelledby="install">
-    <h2 id="install">全部安装</h2>
-    <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Kits 安装命令" hidden></button></div>
-    <p>安装时可以选择技能和目标 Agent。之后新增的技能需要再次安装。各技能的依赖见它们的介绍页。</p>
-    <details><summary>使用 Claude Code 插件</summary>
+  <p class="planned">Planned: prototyping.</p>
+  <section class="install" aria-labelledby="collection-install">
+    <h2 id="collection-install">Install the collection</h2>
+    <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits</code></pre><button type="button" class="copy" data-copy="install" aria-label="Copy the Saan Kits install command" hidden></button></div>
+    <p>Choose the skills and the AI assistant that will use them, such as Codex or Claude Code. Run the installer again for skills added later. Each drawing skill lists the software it needs.</p>
+    <details><summary>Use the Claude Code plugin</summary>
       <div class="copy-row"><pre id="code-plugin"><code>/plugin marketplace add yishan/saankits
-/plugin install saan-diagram@saan-diagram</code></pre><button type="button" class="copy" data-copy="plugin" aria-label="复制 Claude Code 插件安装命令" hidden></button></div>
+/plugin install saan-diagram@saan-diagram</code></pre><button type="button" class="copy" data-copy="plugin" aria-label="Copy the Claude Code plugin install command" hidden></button></div>
     </details>
   </section>
-  <footer><a href="https://github.com/yishan/saankits">GitHub</a><span>MIT</span><span>作者 Yishan</span></footer>
+  <footer class="site-footer"><span>Saan Kits · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits">Source</a><a href="https://github.com/yishan/saankits/blob/main/README.md">User guide</a><a href="./">Saan Kits</a></footer>
 </main>
 </body>
 </html>

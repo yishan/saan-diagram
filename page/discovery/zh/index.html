@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN" data-language-entry="explicit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Saan Discovery：准备访谈问题、整理调研记录，了解真实做法，并核实已有产品能否满足需求。">
+<title>Saan Discovery · 业务调研</title>
+<link rel="canonical" href="https://kits.yishan.app/discovery/zh/">
+<link rel="alternate" hreflang="en" href="../">
+<link rel="alternate" hreflang="zh-CN" href="./">
+<script src="../../site-preferences.js"></script>
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../discovery.css?v=71cfdd3369">
+<link rel="stylesheet" href="../../site.css?v=85e8aacbdc">
+<script src="../../site.js" defer></script>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-top">
+      <nav class="site-nav" aria-label="技能导航"><a href="../../zh/">Saan Kits</a><a href="../../diagram/zh/">Diagram</a><a href="../../mermaid/zh/">Mermaid</a><a href="./" aria-current="page">Discovery</a><a href="../../prd-writing/zh/">PRD Writing</a><a href="../../inquiry/zh/">Inquiry</a></nav>
+      <div class="site-controls">
+      <details class="preference-picker" data-preference="language" name="site-preferences">
+        <summary class="preference-trigger" aria-label="语言" title="语言"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
+        <nav class="preference-menu" aria-label="语言"><a href="./?lang=zh" data-language="zh" lang="zh-CN" hreflang="zh-CN" aria-current="page">中文</a><a href="../?lang=en" data-language="en" lang="en" hreflang="en">English</a></nav>
+      </details>
+      <details class="preference-picker" data-preference="theme" data-theme-controls name="site-preferences" hidden>
+        <summary class="preference-trigger" data-preference-label="外观" aria-label="外观" title="外观"><svg data-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><svg data-theme-icon="light" hidden viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="dark" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></summary>
+        <div class="preference-menu" role="group" aria-label="外观"><button type="button" data-theme-choice="system" aria-label="跟随系统" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>跟随系统</span></button><button type="button" data-theme-choice="light" aria-label="浅色" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><span>浅色</span></button><button type="button" data-theme-choice="dark" aria-label="深色" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg><span>深色</span></button></div>
+      </details>
+    </div>
+    </div>
+    <div class="skill-heading"><h1>Saan Discovery</h1><span class="skill-version">v0.2.0</span></div>
+    <p class="lead">访谈前想清楚该问什么，访谈后理清听到了什么，还有哪些事需要核实。</p>
+    <p>可以从客户背景、产品说明或已有访谈记录开始。它会围绕这次要了解的问题，帮你准备提纲、整理具体经历，再找出值得继续追问的地方。如果已有产品，也会对照实际做法，判断产品能满足哪些需要。</p>
+    <dl class="intro">
+      <div><dt>适合用在</dt><dd>消费者、企业和公共服务调研</dd></div>
+      <div><dt>得到什么</dt><dd>访谈提纲、调研纪要、补问清单与产品适用情况</dd></div>
+      <div><dt>使用准备</dt><dd>准备手头的材料即可，无需连接外部服务</dd></div>
+    </dl>
+  </header>
+
+  <section aria-labelledby="research-type">
+    <h2 id="research-type">不同对象，不同调研重点</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>对象</th><th>重点了解</th><th>整理成什么</th></tr></thead>
+      <tbody>
+        <tr><td>消费者 · ToC</td><td>场景、动机、真实经历、替代选择与放弃原因</td><td>用户完成一件事的过程、行为差异、困难与待验证的想法</td></tr>
+        <tr><td>企业与公共部门 · ToB/G</td><td>岗位职责、业务流转、审批规则、数据系统与实施约束</td><td>按业务整理的记录、组织间的差异、产品适用条件与待决定事项</td></tr>
+        <tr><td>混合场景</td><td>消费者或居民的体验，以及组织如何提供服务</td><td>分别记录用户的经历和组织的处理流程，说明两者如何衔接</td></tr>
+      </tbody>
+    </table></div>
+    <p>调研企业时，关注岗位如何协作、谁有权决定。调研公共服务时，还要了解服务对象、政策依据和责任归属。具体关注什么取决于业务，不能只凭国企身份就按公共服务调研。</p>
+    <p>先确定这次要弄清什么，再围绕一个主题逐步展开，通常一次问一个主要问题。你可以纠正、跳过，或让它先整理已有内容；也可以直接要求根据现有材料交付一份完整稿。</p>
+  </section>
+
+  <section aria-labelledby="workflow">
+    <h2 id="workflow">访谈前后怎么用</h2>
+    <ol class="stages">
+      <li><h3>访谈前准备</h3><p>结合产品材料、参加访谈的人和可用时间，列出必须问的问题，以及遇到特定回答时再追问的问题。</p></li>
+      <li><h3>访谈后整理</h3><p>按用户经历或业务主题整理实际做法、困难和期待。重要结论注明来自哪份材料，不同人的说法分别保留。</p></li>
+      <li><h3>查漏与补访</h3><p>列出还缺什么信息、适合找谁了解。拿到新答案后更新原有记录，已经问清的内容不再重复问。</p></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="example">
+    <h2 id="example">从一句抱怨，问到具体发生的事</h2>
+    <div class="example">
+      <blockquote>“付款审批很慢，希望能灵活一点。”</blockquote>
+      <ol>
+        <li>先确认本轮聚焦付款流程，还是审批人员与规则。</li>
+        <li>选择流程后，先问：最近一笔付款申请是怎样到达当前状态的？</li>
+        <li>得到回答后，再决定是否追问等待环节及原因。</li>
+      </ol>
+      <p>回答将决定下一问：补材料、排队等待、职责不清和系统操作成本，需要核实的内容不同。</p>
+      <p class="note">这是虚构的访谈示例。技能已包含准备问题和追问的方法，无需另装访谈技能。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="fit">
+    <h2 id="fit">对照已有产品，还要问清什么</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>产品怎么处理</th><th>要向客户了解什么</th><th>用来判断什么</th></tr></thead>
+      <tbody>
+        <tr><td>按金额和组织分配审批</td><td>金额口径、边界值、组织含义和例外授权</td><td>配置能否表达实际规则</td></tr>
+        <tr><td>单据按固定顺序流转</td><td>何时生效，退回、变更后怎样继续</td><td>产品是否能表达实际的处理过程</td></tr>
+        <tr><td>从其他系统取得数据</td><td>谁维护、何时更新、失败由谁处理</td><td>要对接哪些数据、由谁负责</td></tr>
+      </tbody>
+    </table></div>
+    <p>客户在系统外做的工作也要记下来。暂时没有产品资料，仍可继续了解客户；产品能否满足这些需要，留到有依据时再判断。</p>
+  </section>
+
+  <section aria-labelledby="evidence">
+    <h2 id="evidence">每个结论保留依据</h2>
+    <ul class="rules">
+      <li>当前做法、制度要求和目标期待分别记录。</li>
+      <li>审批通过、业务执行和核对完成分别记录。</li>
+      <li>不同岗位说法有冲突时，保留双方来源和核实动作。</li>
+      <li>手册写了什么、当前配置是什么、实际观察到什么，分别说明。</li>
+      <li>不知道的事列入补问清单。发现产品与需求不一致，先记录差异，是否开发另行决定。</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="install">
+    <h2 id="install">开始使用</h2>
+    <p>从 Saan Kits 单独安装 Discovery：</p>
+    <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-discovery</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Discovery 安装命令" hidden></button></div>
+    <p>安装后，把产品材料和客户背景交给 AI 助手，例如：</p>
+    <div class="copy-row"><pre id="code-request"><code>用 saan-discovery 带我做这次调研。先确认 ToC、ToB/G 或混合场景及本轮范围，再逐项展开，一次问一个主要问题，不清楚的内容先记为待核实。</code></pre><button type="button" class="copy" data-copy="request" aria-label="复制业务调研请求示例" hidden></button></div>
+    <p>交互与产出优先使用你指定的语言，否则沿用请求语言。中文提问默认得到中文产出。</p>
+    <p class="note">模拟验证覆盖访谈准备、记录整理、追加材料和产品资料缺失。真实客户访谈效果仍需在实际使用中检验。</p>
+  </section>
+
+  <footer class="site-footer"><span>Saan Discovery · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-discovery">技能源码</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-discovery/README.zh-CN.md">使用指南</a><a href="../../zh/">Saan Kits</a></footer>
+</main>
+</body>
+</html>

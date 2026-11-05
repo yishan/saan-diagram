@@ -1,138 +1,79 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en" data-language-entry="auto">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Saan Mermaid：用 Mermaid 画图，并按控制点清单审查业务流程。">
+<meta name="description" content="Saan Mermaid: draw Mermaid diagrams and review business workflows against a control checklist.">
 <title>Saan Mermaid</title>
+<link rel="canonical" href="https://kits.yishan.app/mermaid/">
+<link rel="alternate" hreflang="en" href="./">
+<link rel="alternate" hreflang="zh-CN" href="zh/">
+<script src="../site-preferences.js"></script>
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&family=JetBrains+Mono:wght@400;500&display=swap">
-<style>
-/* Layout: Saan Diagram 的同系规范手册；每个示例左边是代码、右边是它渲染出的图，因为代码就是这个 skill 的产物 */
-:root{
-  --paper:#F6F7F9; --sheet:#FFFFFF; --ink:#1F2329; --muted:#5B6370; --line:#DEE0E3; --soft:#EEF0F3;
-  --accent:#2F5FD0; --accent-tint:#E6EEFF; --code:#F1F3F6; --fig:#FFFFFF;
-  --f-display:"Noto Serif SC","Songti SC","STSong",serif;
-  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
-  --f-mono:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --paper:#15171B; --sheet:#1D2026; --ink:#E8EAED; --muted:#A0A7B3; --line:#33373F; --soft:#262A31;
-  --accent:#7FA6FF; --accent-tint:#1E2A44; --code:#14161A; --fig:#FFFFFF; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --paper:#15171B; --sheet:#1D2026; --ink:#E8EAED; --muted:#A0A7B3; --line:#33373F; --soft:#262A31;
-  --accent:#7FA6FF; --accent-tint:#1E2A44; --code:#14161A; --fig:#FFFFFF; color-scheme:dark}
-*{box-sizing:border-box}
-body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.wrap{max-width:1180px;margin:0 auto;padding-block:40px 72px}
-.narrow{max-width:760px;display:grid;gap:10px}
-h1,h2,h3{text-wrap:balance;margin:0}
-h2{font-family:var(--f-display);font-weight:900;font-size:28px;letter-spacing:.02em;line-height:1.3}
-h3{font-size:18px;font-weight:700}
-p{margin:0}
-code{font-family:var(--f-mono);font-size:.86em}
-a{color:var(--accent)}
-a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
-section{display:grid;gap:20px;padding-block:44px;border-top:1px solid var(--line);min-width:0}
-.tbl-wrap{overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:6px}
-table{border-collapse:collapse;width:100%;min-width:600px;font-size:13.5px}
-th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-weight:500;color:var(--muted);font-size:12px;letter-spacing:.06em}
-tbody th{color:var(--ink);font-size:13.5px;letter-spacing:0;white-space:nowrap}
-tr:last-child td,tr:last-child th{border-bottom:0}
-.gallery{display:grid;gap:28px}
-.ex{background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:18px;display:grid;gap:16px;scroll-margin-top:16px;min-width:0}
-.ex-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
-.ex-h h3{font-family:var(--f-display);font-weight:900;font-size:22px}
-.pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:14px;align-items:stretch}
-.pair.wide{grid-template-columns:minmax(0,1fr)}
-.pair.wide .fig{order:-1}
-.pair.wide pre{max-height:240px}
-.codebox{background:var(--code);border-radius:6px;min-width:0;display:flex;flex-direction:column}
-.bar{display:flex;justify-content:space-between;align-items:center;padding:8px 10px 0 14px;font-size:12px;color:var(--muted)}
-pre{margin:0;padding:10px 14px 14px;overflow:auto;font-size:12.5px;line-height:1.6;max-height:420px;flex:1}
-pre code{font-size:inherit}
-.fig{display:flex;align-items:center;justify-content:center;background:var(--fig);border:1px solid var(--line);border-radius:6px;padding:12px;min-width:0;overflow:auto;cursor:default}
-.fig img{display:block;max-width:100%;height:auto}
-.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
-.panel{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;gap:12px;align-content:start;min-width:0}
-.panel h3{font-size:15px}
-.rules{margin:0;padding-left:1.1em;display:grid;gap:6px;font-size:13.5px}
-.rules li::marker{color:var(--muted)}
-.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;counter-reset:s}
-.steps li{counter-increment:s;background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:14px;display:grid;gap:6px;align-content:start;min-width:0}
-.steps li::before{content:counter(s);font-family:var(--f-mono);font-size:12px;color:var(--muted)}
-.steps b{font-size:15px}
-.steps span{font-size:13px;color:var(--muted);line-height:1.6}
-.demo{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-.democol{display:grid;gap:14px;min-width:0}
-.out{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f-mono)}
-.sw{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px;font-size:13.5px}
-.sw div{display:flex;gap:10px;align-items:center;min-width:0}
-.sw i{font-style:normal;flex:none;width:76px;height:28px;border-radius:4px;display:grid;place-items:center;font-size:12px;font-weight:500}
-.block{background:var(--code);border-radius:6px;min-width:0}
-footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 24px}
-@media (max-width:760px){
-  .pair,.demo{grid-template-columns:minmax(0,1fr)}
-  .pair .fig{order:-1}
-  pre{max-height:280px}
-}
-@media (max-width:560px){
-  .ex{padding:12px}
-  h2{font-size:24px}
-}
-@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
-</style>
-<link rel="stylesheet" href="../site.css">
+<link rel="stylesheet" href="mermaid.css?v=87448d5621">
+<link rel="stylesheet" href="../site.css?v=85e8aacbdc">
 <script src="../site.js" defer></script>
 </head>
 <body>
 <main class="wrap">
 <header class="hero">
-  <nav class="site-nav" aria-label="技能导航"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="../mermaid/" aria-current="page">Mermaid</a></nav>
-  <h1>Saan Mermaid</h1>
-  <p class="lead">用 Mermaid 画图，并拿一份独立的控制点清单审查业务流程。</p>
-  <dl class="intro"><div><dt>输入</dt><dd>流程资料、制度要求或现有流程</dd></div><div><dt>产出</dt><dd>Mermaid 代码和审查发现</dd></div><div><dt>把关</dt><dd>脚本查走不通、可绕过和缺退回，有问题就报告</dd></div><div><dt>不适合</dt><dd>汇报用的精确排版、IDEF0、数据隔离组织图</dd></div></dl>
-  <nav class="section-nav" aria-label="页内导航"><a href="#install">安装</a><a href="#pick">图示类型</a><a href="#gallery">示例</a><a href="#lint">校验</a><a href="#limits">兼容性</a></nav>
+  <div class="hero-top">
+    <nav class="site-nav" aria-label="Skill navigation"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="./" aria-current="page">Mermaid</a><a href="../discovery/">Discovery</a><a href="../prd-writing/">PRD Writing</a><a href="../inquiry/">Inquiry</a></nav>
+    <div class="site-controls">
+      <details class="preference-picker" data-preference="language" name="site-preferences">
+        <summary class="preference-trigger" aria-label="Language" title="Language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
+        <nav class="preference-menu" aria-label="Language"><a href="zh/?lang=zh" data-language="zh" lang="zh-CN" hreflang="zh-CN">中文</a><a href="./?lang=en" data-language="en" lang="en" hreflang="en" aria-current="page">English</a></nav>
+      </details>
+      <details class="preference-picker" data-preference="theme" data-theme-controls name="site-preferences" hidden>
+        <summary class="preference-trigger" data-preference-label="Appearance" aria-label="Appearance" title="Appearance"><svg data-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><svg data-theme-icon="light" hidden viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="dark" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></summary>
+        <div class="preference-menu" role="group" aria-label="Appearance"><button type="button" data-theme-choice="system" aria-label="System" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>System</span></button><button type="button" data-theme-choice="light" aria-label="Light" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><span>Light</span></button><button type="button" data-theme-choice="dark" aria-label="Dark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg><span>Dark</span></button></div>
+      </details>
+    </div>
+  </div>
+  <div class="skill-heading"><h1>Saan Mermaid</h1><span class="skill-version">v1.1.0</span></div>
+  <p class="lead">Add a diagram you can update along with your document, and check for missing steps in the process.</p>
+  <p class="narrow">Mermaid describes a diagram in text, so it fits naturally into Markdown, READMEs, and design documents. Bring process notes, or ask for a diagram of system interactions, record states, or a schedule. For an approval review, add the requirements the process must follow to check for bypassed reviews and missing return paths.</p>
+  <dl class="intro"><div><dt>Bring</dt><dd>Process material, policies, or an existing workflow</dd></div><div><dt>Outputs</dt><dd>Editable Mermaid code and the issues found during checks</dd></div><div><dt>Checks</dt><dd>Scripts flag unreachable paths, control bypasses, and missing returns</dd></div><div><dt>Use another tool for</dt><dd>Precise presentation layouts, IDEF0, or organization/data-isolation diagrams</dd></div></dl>
+  <nav class="section-nav" aria-label="On this page"><a href="#install">Installation</a><a href="#pick">Diagram types</a><a href="#gallery">Examples</a><a href="#lint">Process checks</a><a href="#limits">Compatibility</a></nav>
 </header>
 
 <section aria-labelledby="install">
-  <div class="narrow"><h2 id="install">安装</h2></div>
+  <div class="narrow"><h2 id="install">Installation</h2></div>
   <ol class="install-steps">
-    <li><h3>安装技能</h3><div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits <span class="nb">--skill saan-mermaid</span></code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Mermaid 安装命令" hidden></button></div><p>默认装到当前项目，并让你选择目标 Agent。加 <code>-g</code> 装到用户级目录，加 <code>-a claude-code</code> 或 <code>-a codex</code> 可直接指定。</p></li>
-    <li><h3>准备环境</h3><ul class="rules"><li>审查流程：Python 3，只用标准库</li><li>渲染图片：<code>npm install -g @mermaid-js/mermaid-cli</code>，需要 12 或更高版本</li></ul></li>
-    <li><h3>直接说要什么</h3><ul class="rules"><li>“这是付款流程和制度要求，帮我查有没有能绕过财务复核的路径。”</li><li>“画一张时序图，说明结算单怎么推送到财务系统。”</li></ul></li>
+    <li><h3>Install the skill</h3><div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits <span class="nb">--skill saan-mermaid</span></code></pre><button type="button" class="copy" data-copy="install" aria-label="Copy the Saan Mermaid install command" hidden></button></div><p>Installs into the current project and prompts for a target agent. Add <code>-g</code> for a user-level installation. Use <code>-a claude-code</code> or <code>-a codex</code> to select an agent directly.</p></li>
+    <li><h3>Prepare the environment</h3><ul class="rules"><li>Process review: Python 3, standard library only</li><li>Render images: <code>npm install -g @mermaid-js/mermaid-cli</code>, version 12 or later required</li></ul></li>
+    <li><h3>Describe what you need</h3><ul class="rules"><li>“Review this payment process and policy for paths that bypass finance review.”</li><li>“Draw a sequence diagram showing how settlement records reach the finance system.”</li></ul></li>
   </ol>
-  <details class="alternatives"><summary>其他安装方式</summary><div class="tbl-wrap"><table class="inst">
-    <thead><tr><th>平台</th><th>安装方式</th></tr></thead>
+  <details class="alternatives"><summary>Other installation methods</summary><div class="tbl-wrap"><table class="inst">
+    <thead><tr><th>Platform</th><th>Installation method</th></tr></thead>
     <tbody>
-      <tr><td>Claude Code 插件</td><td><code>/plugin marketplace add yishan/saankits</code><br><code>/plugin install saan-diagram@saan-diagram</code><br>插件会一起安装工具集里的全部技能。</td></tr>
-      <tr><td>手动复制</td><td>把 <a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid"><code>skills/saan-mermaid/</code></a> 整个目录复制到 Agent 的技能目录，例如 <code>~/.claude/skills/saan-mermaid/</code>。</td></tr>
-      <tr><td>Claude.ai</td><td>把这个目录打成 zip（顶层为 <code>saan-mermaid/</code>），在设置里上传。</td></tr>
+      <tr><td>Claude Code plugin</td><td><code>/plugin marketplace add yishan/saankits</code><br><code>/plugin install saan-diagram@saan-diagram</code><br>The plugin installs all skills bundled in the collection.</td></tr>
+      <tr><td>Manual copy</td><td>Copy the entire <a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid"><code>skills/saan-mermaid/</code></a> directory into your agent's skill directory, for example <code>~/.claude/skills/saan-mermaid/</code>.</td></tr>
+      <tr><td>Claude.ai</td><td>Zip the directory with <code>saan-mermaid/</code> at the top level, then upload it in Settings.</td></tr>
     </tbody>
   </table></div></details>
 </section>
 
 <section aria-labelledby="pick">
-  <div class="narrow"><h2 id="pick">图示类型</h2>
-    <p>先分清要讲“有什么”还是“怎么走”，再按问题选图。一段文字能说清的，就不画。</p>
+  <div class="narrow"><h2 id="pick">Diagram types</h2>
+    <p>Decide whether to show what exists or how work flows, then choose a diagram for the question. Use prose when it is sufficient.</p>
   </div>
-  <div class="type-group"><h3 class="pick-h">架构图<small>讲“有什么”：节点是能力或功能</small></h3><ul class="pick"><li><a href="#arch"><span class="nm">架构图 · 按阶段</span><span class="q">每个阶段有哪些模块，接哪些系统。</span></a></li><li><a href="#layers"><span class="nm">架构图 · 按层</span><span class="q">平台由哪些层组成。</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">流程图<small>讲“怎么走”：节点是业务动作，泳道只是分列方式</small></h3><ul class="pick"><li><a href="#flow"><span class="nm">流程图</span><span class="q">一条流程怎么走，在哪里判断和退回。</span></a></li><li><a href="#swim"><span class="nm">流程图 · 泳道</span><span class="q">多个角色之间怎么交接。</span></a></li><li><a href="#overview"><span class="nm">流程图 · 总览</span><span class="q">跨系统看，业务从头到尾怎么走。</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">其他图示<small>时序、状态、对象、进度、优先级和原因</small></h3><ul class="pick"><li><a href="#seq"><span class="nm">时序图</span><span class="q">系统之间按什么顺序交互，失败时怎么走。</span></a></li><li><a href="#state"><span class="nm">状态图</span><span class="q">一张单据有哪些状态，什么动作触发流转。</span></a></li><li><a href="#er"><span class="nm">实体关系图</span><span class="q">有哪些业务对象，彼此几对几。</span></a></li><li><a href="#gantt"><span class="nm">甘特图</span><span class="q">任务排期和前后依赖。</span></a></li><li><a href="#timeline"><span class="nm">时间线</span><span class="q">关键节点什么时候到。</span></a></li><li><a href="#quad"><span class="nm">四象限图</span><span class="q">一组事项在两个维度上该先做哪个。</span></a></li><li><a href="#fish"><span class="nm">鱼骨图</span><span class="q">一个结果背后有哪些原因。</span></a></li></ul></div>
+  <div class="type-group"><h3 class="pick-h">Architecture diagrams<small>Show what exists: nodes represent capabilities or functions</small></h3><ul class="pick"><li><a href="#arch"><span class="nm">Architecture · by stage</span><span class="q">Modules at each stage and the systems they connect to.</span></a></li><li><a href="#layers"><span class="nm">Architecture · by layer</span><span class="q">The layers that make up the platform.</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">Process diagrams<small>Show how work flows: nodes are business actions; swimlanes organize the columns</small></h3><ul class="pick"><li><a href="#flow"><span class="nm">Process diagram</span><span class="q">The process path, decisions, and returns.</span></a></li><li><a href="#swim"><span class="nm">Process · swimlanes</span><span class="q">Handoffs between roles.</span></a></li><li><a href="#overview"><span class="nm">Process · overview</span><span class="q">The end-to-end business flow across systems.</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">Other diagrams<small>Sequences, states, objects, schedules, priorities, and causes</small></h3><ul class="pick"><li><a href="#seq"><span class="nm">Sequence diagram</span><span class="q">The order of system interactions and their failure paths.</span></a></li><li><a href="#state"><span class="nm">State diagram</span><span class="q">Record states and the actions that trigger transitions.</span></a></li><li><a href="#er"><span class="nm">Entity relationship diagram</span><span class="q">Business objects and their cardinalities.</span></a></li><li><a href="#gantt"><span class="nm">Gantt chart</span><span class="q">Task schedules and dependencies.</span></a></li><li><a href="#timeline"><span class="nm">Timeline</span><span class="q">When key milestones occur.</span></a></li><li><a href="#quad"><span class="nm">Quadrant chart</span><span class="q">Priorities across two dimensions.</span></a></li><li><a href="#fish"><span class="nm">Fishbone diagram</span><span class="q">Causes that may explain an outcome.</span></a></li></ul></div>
 </section>
 
 <section aria-labelledby="gallery">
-  <div class="narrow"><h2 id="gallery">示例</h2>
-  <p>示例内容均为虚构。复制代码包含<a href="#theme">主题配置</a>；<a href="#limits">Beta 语法需确认平台版本</a>。</p></div>
+  <div class="narrow"><h2 id="gallery">Examples</h2>
+  <p>Examples retain their original source language and contain fictional content. Copied code includes <a href="#theme">theme configuration</a>; <a href="#limits">Confirm platform versions before using beta syntax</a>.</p></div>
   <div class="gallery">
 <article class="ex" id="arch">
-  <header class="ex-h"><h3>架构图 · 按阶段</h3></header>
+  <header class="ex-h"><h3>Architecture · by stage</h3></header>
   <div class="pair wide">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="arch" data-copy-prefix="theme" aria-label="复制架构图 · 按阶段代码（含主题配置）" hidden>复制</button></div><pre id="code-arch"><code>%% saan: arch
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="arch" data-copy-prefix="theme" aria-label="Copy stage-based architecture code with theme configuration" hidden>Copy</button></div><pre id="code-arch"><code>%% saan: arch
 flowchart LR
   classDef external fill:#8FB0FF,stroke:#8FB0FF,color:#1F2329
   subgraph contract[合同阶段]
@@ -152,28 +93,28 @@ flowchart LR
   contract --&gt; settle
   s2 --&gt; fin
 </code></pre></div>
-    <a class="fig" href="img/arch.png" target="_blank" rel="noopener"><img src="img/arch.png" loading="lazy" alt="架构图 · 按阶段示例：每个阶段有哪些模块，接哪些系统。" style="width:716px"></a>
+    <a class="fig" href="img/arch.png" target="_blank" rel="noopener"><img src="img/arch.png" loading="lazy" alt="Stage-based architecture example: modules at each stage and connected systems." style="width:716px"></a>
   </div>
-  <p class="example-note">节点写能力，只画阶段之间和对外系统的连线。</p>
+  <p class="example-note">Nodes represent capabilities. Draw only stage-to-stage and external-system connections.</p>
 </article>
 <article class="ex" id="layers">
-  <header class="ex-h"><h3>架构图 · 按层</h3></header>
+  <header class="ex-h"><h3>Architecture · by layer</h3></header>
   <div class="pair">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="layers" data-copy-prefix="theme" aria-label="复制架构图 · 按层代码（含主题配置）" hidden>复制</button></div><pre id="code-layers"><code>block-beta
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="layers" data-copy-prefix="theme" aria-label="Copy layered architecture code with theme configuration" hidden>Copy</button></div><pre id="code-layers"><code>block-beta
   columns 3
   app[&quot;应用层&quot;]:3
   a1[&quot;合同管理&quot;] a2[&quot;结算管理&quot;] a3[&quot;经营分析&quot;]
   data[&quot;数据层&quot;]:3
   d1[&quot;主数据&quot;] d2[&quot;业务数据&quot;] d3[&quot;指标数据&quot;]
 </code></pre></div>
-    <a class="fig" href="img/layers.png" target="_blank" rel="noopener"><img src="img/layers.png" loading="lazy" alt="架构图 · 按层示例：平台由哪些层组成。" style="width:315px"></a>
+    <a class="fig" href="img/layers.png" target="_blank" rel="noopener"><img src="img/layers.png" loading="lazy" alt="Layered architecture example: the platform&#x27;s layers." style="width:315px"></a>
   </div>
-  <p class="example-note">Beta 语法，放不下侧栏。要标注对外接口或体系约束，改用 Saan Diagram。</p>
+  <p class="example-note">Beta syntax does not support sidebars. Use Saan Diagram to annotate external interfaces or governing frameworks.</p>
 </article>
 <article class="ex" id="flow">
-  <header class="ex-h"><h3>流程图</h3></header>
+  <header class="ex-h"><h3>Process diagram</h3></header>
   <div class="pair wide">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="flow" data-copy-prefix="theme" aria-label="复制流程图代码（含主题配置）" hidden>复制</button></div><pre id="code-flow"><code>%% saan: approval
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="flow" data-copy-prefix="theme" aria-label="Copy process flow code with theme configuration" hidden>Copy</button></div><pre id="code-flow"><code>%% saan: approval
 flowchart LR
   classDef core fill:#E2EBFF,stroke:#2B5FD8,color:#1F2329
   apply[提交申请] --&gt; check{审核通过?}
@@ -182,14 +123,14 @@ flowchart LR
   fix -.-&gt; apply
   sign --&gt; archive[合同归档]
 </code></pre></div>
-    <a class="fig" href="img/flow.png" target="_blank" rel="noopener"><img src="img/flow.png" loading="lazy" alt="流程图示例：一条流程怎么走，在哪里判断和退回。" style="width:784px"></a>
+    <a class="fig" href="img/flow.png" target="_blank" rel="noopener"><img src="img/flow.png" loading="lazy" alt="Process example: flow, decisions, and returns." style="width:784px"></a>
   </div>
-  <p class="example-note">声明 saan: approval 后，缺判断或缺退回都会被查出来。退回用虚线。节点多时改成纵向。</p>
+  <p class="example-note">With saan: approval, missing decisions and returns are detected. Use dashed return lines. Switch to a vertical layout for larger flows.</p>
 </article>
 <article class="ex" id="swim">
-  <header class="ex-h"><h3>流程图 · 泳道</h3></header>
+  <header class="ex-h"><h3>Process · swimlanes</h3></header>
   <div class="pair">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="swim" data-copy-prefix="theme" aria-label="复制流程图 · 泳道代码（含主题配置）" hidden>复制</button></div><pre id="code-swim"><code>%% saan: approval
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="swim" data-copy-prefix="theme" aria-label="Copy swimlane code with theme configuration" hidden>Copy</button></div><pre id="code-swim"><code>%% saan: approval
 swimlane-beta LR
   subgraph biz[业务部门]
     apply[发起付款申请]
@@ -204,14 +145,14 @@ swimlane-beta LR
   audit --&gt;|退回| fix
   fix -.-&gt; apply
 </code></pre></div>
-    <a class="fig" href="img/swim.png" target="_blank" rel="noopener"><img src="img/swim.png" loading="lazy" alt="流程图 · 泳道示例：多个角色之间怎么交接。" style="width:702px"></a>
+    <a class="fig" href="img/swim.png" target="_blank" rel="noopener"><img src="img/swim.png" loading="lazy" alt="Swimlane example: handoffs between roles." style="width:702px"></a>
   </div>
-  <p class="example-note">需要 Mermaid 12。泳道对齐，但线路和间距控制不了。泳道也是岗位分离检查的依据。</p>
+  <p class="example-note">Requires Mermaid 12. Lanes align, but routing and spacing cannot be controlled precisely. Lanes also establish responsibility for duty-separation checks.</p>
 </article>
 <article class="ex" id="overview">
-  <header class="ex-h"><h3>流程图 · 总览</h3></header>
+  <header class="ex-h"><h3>Process · overview</h3></header>
   <div class="pair wide">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="overview" data-copy-prefix="theme" aria-label="复制流程图 · 总览代码（含主题配置）" hidden>复制</button></div><pre id="code-overview"><code>%% saan: overview
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="overview" data-copy-prefix="theme" aria-label="Copy overview flow code with theme configuration" hidden>Copy</button></div><pre id="code-overview"><code>%% saan: overview
 flowchart LR
   classDef core fill:#E2EBFF,stroke:#2B5FD8,color:#1F2329
   classDef external fill:#8FB0FF,stroke:#8FB0FF,color:#1F2329
@@ -222,14 +163,14 @@ flowchart LR
   bid[招采系统]:::external --&gt;|中标结果| p1
   p3 --&gt;|凭证数据| fin[财务系统]:::external
 </code></pre></div>
-    <a class="fig" href="img/overview.png" target="_blank" rel="noopener"><img src="img/overview.png" loading="lazy" alt="流程图 · 总览示例：跨系统看，业务从头到尾怎么走。" style="width:784px"></a>
+    <a class="fig" href="img/overview.png" target="_blank" rel="noopener"><img src="img/overview.png" loading="lazy" alt="Overview example: the end-to-end flow across systems." style="width:784px"></a>
   </div>
-  <p class="example-note">只画正向主线，出现回路会被查出来。审批和审计流程不用这张。</p>
+  <p class="example-note">Only the forward main path belongs here; cycles are flagged. Use another view for approval or audit flows.</p>
 </article>
 <article class="ex" id="seq">
-  <header class="ex-h"><h3>时序图</h3></header>
+  <header class="ex-h"><h3>Sequence diagram</h3></header>
   <div class="pair">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="seq" data-copy-prefix="theme" aria-label="复制时序图代码（含主题配置）" hidden>复制</button></div><pre id="code-seq"><code>sequenceDiagram
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="seq" data-copy-prefix="theme" aria-label="Copy sequence diagram code with theme configuration" hidden>Copy</button></div><pre id="code-seq"><code>sequenceDiagram
   autonumber
   participant U as 业务人员
   participant P as 平台
@@ -243,14 +184,14 @@ flowchart LR
     P--&gt;&gt;U: 退回修改
   end
 </code></pre></div>
-    <a class="fig" href="img/seq.png" target="_blank" rel="noopener"><img src="img/seq.png" loading="lazy" alt="时序图示例：系统之间按什么顺序交互，失败时怎么走。" style="width:650px"></a>
+    <a class="fig" href="img/seq.png" target="_blank" rel="noopener"><img src="img/seq.png" loading="lazy" alt="Sequence example: system interaction order and failure paths." style="width:650px"></a>
   </div>
-  <p class="example-note">用 alt 写失败分支。消息文字避免冒号和分号。</p>
+  <p class="example-note">Use alt for failure branches. Avoid colons and semicolons in message text.</p>
 </article>
 <article class="ex" id="state">
-  <header class="ex-h"><h3>状态图</h3></header>
+  <header class="ex-h"><h3>State diagram</h3></header>
   <div class="pair wide">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="state" data-copy-prefix="theme" aria-label="复制状态图代码（含主题配置）" hidden>复制</button></div><pre id="code-state"><code>stateDiagram-v2
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="state" data-copy-prefix="theme" aria-label="Copy state diagram code with theme configuration" hidden>Copy</button></div><pre id="code-state"><code>stateDiagram-v2
   direction LR
   [*] --&gt; 草稿
   草稿 --&gt; 审批中: 提交
@@ -259,27 +200,27 @@ flowchart LR
   已生效 --&gt; 已归档: 归档
   已归档 --&gt; [*]
 </code></pre></div>
-    <a class="fig" href="img/state.png" target="_blank" rel="noopener"><img src="img/state.png" loading="lazy" alt="状态图示例：一张单据有哪些状态，什么动作触发流转。" style="width:784px"></a>
+    <a class="fig" href="img/state.png" target="_blank" rel="noopener"><img src="img/state.png" loading="lazy" alt="State example: record states and transition triggers." style="width:784px"></a>
   </div>
-  <p class="example-note">每条流转都写触发动作。</p>
+  <p class="example-note">Label every transition with its triggering action.</p>
 </article>
 <article class="ex" id="er">
-  <header class="ex-h"><h3>实体关系图</h3></header>
+  <header class="ex-h"><h3>Entity relationship diagram</h3></header>
   <div class="pair wide">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="er" data-copy-prefix="theme" aria-label="复制实体关系图代码（含主题配置）" hidden>复制</button></div><pre id="code-er"><code>erDiagram
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="er" data-copy-prefix="theme" aria-label="Copy entity relationship code with theme configuration" hidden>Copy</button></div><pre id="code-er"><code>erDiagram
   direction LR
   合同 ||--o{ 结算单 : 产生
   结算单 ||--|{ 付款单 : 拆分
   供应商 ||--o{ 合同 : 签订
 </code></pre></div>
-    <a class="fig" href="img/er.png" target="_blank" rel="noopener"><img src="img/er.png" loading="lazy" alt="实体关系图示例：有哪些业务对象，彼此几对几。" style="width:740px"></a>
+    <a class="fig" href="img/er.png" target="_blank" rel="noopener"><img src="img/er.png" loading="lazy" alt="Entity relationship example: business objects and cardinalities." style="width:740px"></a>
   </div>
-  <p class="example-note">默认画到概念层。用户要字段时才写字段。</p>
+  <p class="example-note">Stay at the conceptual level by default. Include fields only when requested.</p>
 </article>
 <article class="ex" id="gantt">
-  <header class="ex-h"><h3>甘特图</h3></header>
+  <header class="ex-h"><h3>Gantt chart</h3></header>
   <div class="pair wide">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="gantt" data-copy-prefix="theme" aria-label="复制甘特图代码（含主题配置）" hidden>复制</button></div><pre id="code-gantt"><code>gantt
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="gantt" data-copy-prefix="theme" aria-label="Copy Gantt chart code with theme configuration" hidden>Copy</button></div><pre id="code-gantt"><code>gantt
   title 上线计划（示例）
   dateFormat YYYY-MM-DD
   axisFormat %m-%d
@@ -292,27 +233,27 @@ flowchart LR
   联调测试 :a4, after a3, 14d
   上线 :milestone, m1, after a4, 0d
 </code></pre></div>
-    <a class="fig" href="img/gantt.png" target="_blank" rel="noopener"><img src="img/gantt.png" loading="lazy" alt="甘特图示例：任务排期和前后依赖。" style="width:784px"></a>
+    <a class="fig" href="img/gantt.png" target="_blank" rel="noopener"><img src="img/gantt.png" loading="lazy" alt="Gantt example: task schedules and dependencies." style="width:784px"></a>
   </div>
-  <p class="example-note">用 after 写依赖，改一个任务的工期，后续任务自动顺延。</p>
+  <p class="example-note">Use after for dependencies. Changing a task duration shifts subsequent tasks automatically.</p>
 </article>
 <article class="ex" id="timeline">
-  <header class="ex-h"><h3>时间线</h3></header>
+  <header class="ex-h"><h3>Timeline</h3></header>
   <div class="pair">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="timeline" data-copy-prefix="theme" aria-label="复制时间线代码（含主题配置）" hidden>复制</button></div><pre id="code-timeline"><code>timeline
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="timeline" data-copy-prefix="theme" aria-label="Copy timeline code with theme configuration" hidden>Copy</button></div><pre id="code-timeline"><code>timeline
   title 平台里程碑（示例）
   第一季度 : 需求确认
   第二季度 : 合同模块上线 : 数据迁移
   第三季度 : 结算模块上线
 </code></pre></div>
-    <a class="fig" href="img/timeline.png" target="_blank" rel="noopener"><img src="img/timeline.png" loading="lazy" alt="时间线示例：关键节点什么时候到。" style="width:784px"></a>
+    <a class="fig" href="img/timeline.png" target="_blank" rel="noopener"><img src="img/timeline.png" loading="lazy" alt="Timeline example: key milestones." style="width:784px"></a>
   </div>
-  <p class="example-note">只表达时间，不表达计划和实际的偏差。要看偏差，改用 Saan Diagram。</p>
+  <p class="example-note">Shows timing, not variance between planned and actual dates. Use Saan Diagram to show variance.</p>
 </article>
 <article class="ex" id="quad">
-  <header class="ex-h"><h3>四象限图</h3></header>
+  <header class="ex-h"><h3>Quadrant chart</h3></header>
   <div class="pair">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="quad" data-copy-prefix="theme" aria-label="复制四象限图代码（含主题配置）" hidden>复制</button></div><pre id="code-quad"><code>quadrantChart
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="quad" data-copy-prefix="theme" aria-label="Copy quadrant chart code with theme configuration" hidden>Copy</button></div><pre id="code-quad"><code>quadrantChart
   title 优先级（示例）
   x-axis 低投入 --&gt; 高投入
   y-axis 低价值 --&gt; 高价值
@@ -324,14 +265,14 @@ flowchart LR
   智能问答: [0.7, 0.6]
   报表换肤: [0.25, 0.2]
 </code></pre></div>
-    <a class="fig" href="img/quad.png" target="_blank" rel="noopener"><img src="img/quad.png" loading="lazy" alt="四象限图示例：一组事项在两个维度上该先做哪个。" style="width:500px"></a>
+    <a class="fig" href="img/quad.png" target="_blank" rel="noopener"><img src="img/quad.png" loading="lazy" alt="Quadrant example: priorities across two dimensions." style="width:500px"></a>
   </div>
-  <p class="example-note">坐标是相对位置，不代表测算结果，标签要短。</p>
+  <p class="example-note">Coordinates are relative positions, not measured findings. Keep labels short.</p>
 </article>
 <article class="ex" id="fish">
-  <header class="ex-h"><h3>鱼骨图</h3></header>
+  <header class="ex-h"><h3>Fishbone diagram</h3></header>
   <div class="pair">
-    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="fish" data-copy-prefix="theme" aria-label="复制鱼骨图代码（含主题配置）" hidden>复制</button></div><pre id="code-fish"><code>ishikawa-beta
+    <div class="codebox"><div class="bar"><button type="button" class="copy" data-copy="fish" data-copy-prefix="theme" aria-label="Copy fishbone diagram code with theme configuration" hidden>Copy</button></div><pre id="code-fish"><code>ishikawa-beta
   付款延迟
   流程
     审批层级多
@@ -341,22 +282,22 @@ flowchart LR
   系统
     接口失败
 </code></pre></div>
-    <a class="fig" href="img/fish.png" target="_blank" rel="noopener"><img src="img/fish.png" loading="lazy" alt="鱼骨图示例：一个结果背后有哪些原因。" style="width:400px"></a>
+    <a class="fig" href="img/fish.png" target="_blank" rel="noopener"><img src="img/fish.png" loading="lazy" alt="Fishbone example: possible causes of an outcome." style="width:400px"></a>
   </div>
-  <p class="example-note">Beta 语法，版本要求高。先确认文档平台能渲染。</p>
+  <p class="example-note">Beta syntax requires a recent version. Confirm that the document platform can render it.</p>
 </article>
   </div>
 </section>
 
 <section aria-labelledby="lint">
-  <div class="narrow"><h2 id="lint">流程审查</h2>
-  <p>先确定控制点清单，再审查流程。优先使用你提供的清单；从同一份资料提取时，结果会标明“不是独立依据”。</p></div>
+  <div class="narrow"><h2 id="lint">Process review</h2>
+  <p>List what the process must do, such as “finance must review every payment before it is made.” This is the control checklist. Use a checklist you supply where possible. If the checklist and diagram come from the same material, the review explains that both may share the same omissions.</p></div>
   <div class="pair demo">
-    <div class="democol"><div class="codebox"><div class="bar"><span>controls.txt，制度要求</span></div><pre><code>source: user
+    <div class="democol"><div class="codebox"><div class="bar"><span>controls.txt · policy requirements</span></div><pre><code>source: user
 control: 财务复核
 must_pass: 执行付款 through 审核单据
 separate: 提交付款申请 | 审核单据
-</code></pre></div><div class="codebox"><div class="bar"><span>一张能渲染的付款流程</span></div><pre><code>%% saan: approval
+</code></pre></div><div class="codebox"><div class="bar"><span>A renderable payment flow</span></div><pre><code>%% saan: approval
 swimlane-beta LR
   subgraph biz[业务部门]
     apply[提交付款申请]
@@ -369,78 +310,78 @@ swimlane-beta LR
   audit --&gt; pay
   apply --&gt;|小额| pay
 </code></pre></div></div>
-    <div class="codebox"><div class="bar"><span>check_mermaid.py 的实际输出</span></div><pre class="out"><code>必须修改 [CP1] 控制点清单里的『财务复核』不在图上。补上节点，或告诉用户它为什么不用画
+    <div class="codebox"><div class="bar"><span>Actual check_mermaid.py output</span></div><pre class="out"><code>必须修改 [CP1] 控制点清单里的『财务复核』不在图上。补上节点，或告诉用户它为什么不用画
 业务发现 [RT1] 1 个审批判断没有退回分支，资料或流程要写明未通过怎么走：审核单据
 业务发现 [P1] 可以绕过『审核单据』到达『执行付款』
 业务发现 [P5] 『提交付款申请』与『审核单据』都由『业务部门』执行，违反岗位分离</code></pre></div>
   </div>
   <div class="tbl-wrap"><table>
-    <thead><tr><th>图的声明或清单项</th><th>检查什么</th></tr></thead>
+    <thead><tr><th>Diagram declaration or checklist item</th><th>What it checks</th></tr></thead>
     <tbody>
-      <tr><th><code>saan: flow</code></th><td>P2 走不到 · P3 死路 · P4 判断只有一个出口</td></tr>
-      <tr><th><code>saan: approval / audit</code></th><td>再加 AP1 没有判断节点 · RT1 审批判断没有退回</td></tr>
-      <tr><th><code>saan: overview</code></th><td>再加 OV1 总览出现回路</td></tr>
-      <tr><th><code>saan: arch</code></th><td>AR1 架构图里混入判断节点</td></tr>
-      <tr><th><code>control</code></th><td>CP1 清单里的控制点不在图上</td></tr>
-      <tr><th><code>must_pass</code></th><td>P1 可以绕过控制点</td></tr>
-      <tr><th><code>separate</code></th><td>P5 不相容的两步由同一泳道执行</td></tr>
+      <tr><th><code>saan: flow</code></th><td>P2 unreachable step · P3 dead end · P4 decision with one exit</td></tr>
+      <tr><th><code>saan: approval / audit</code></th><td>Also AP1 no decision node · RT1 approval decision without a return path</td></tr>
+      <tr><th><code>saan: overview</code></th><td>Also OV1 cycle in an overview</td></tr>
+      <tr><th><code>saan: arch</code></th><td>AR1 decision node inside an architecture diagram</td></tr>
+      <tr><th><code>control</code></th><td>CP1 required control absent from the diagram</td></tr>
+      <tr><th><code>must_pass</code></th><td>P1 path bypasses a control</td></tr>
+      <tr><th><code>separate</code></th><td>P5 incompatible steps assigned to the same lane</td></tr>
     </tbody>
   </table></div>
-  <p>业务发现要报告给你，不会为了通过校验而删线。确认属实又确实要保留的，写 <code>%% accept P1: 原因</code>，脚本会标为已确认。</p>
+  <p>Report business findings rather than deleting edges to pass validation. To acknowledge a confirmed finding that must remain, add <code>%% accept P1: reason</code>; the script marks it as acknowledged.</p>
 </section>
 
 <section aria-labelledby="which">
-  <div class="narrow"><h2 id="which">工具对比</h2>
+  <div class="narrow"><h2 id="which">Compare the tools</h2>
   </div>
   <div class="tbl-wrap"><table>
     <thead><tr><th></th><th>Saan Mermaid</th><th>Saan Diagram</th></tr></thead>
     <tbody>
-      <tr><th>产出</th><td>Mermaid 代码，可做 diff</td><td>图片、HTML、飞书画板</td></tr>
-      <tr><th>适合</th><td>README、Markdown、设计文档</td><td>汇报、对外交付、飞书画板</td></tr>
-      <tr><th>排版</th><td>自动布局，泳道能对齐，线路控制不了</td><td>引擎精确控制</td></tr>
-      <tr><th>质量保证</th><td>按控制点清单审查、配色校验、真实渲染、人工看图</td><td>几何、对比度和业务规则校验</td></tr>
-      <tr><th>独有的图</th><td>时序图、状态图、甘特图</td><td>IDEF0、组织架构与数据隔离</td></tr>
+      <tr><th>Outputs</th><td>Text-based diagram code, so changes are easy to compare</td><td>Images, HTML, and Feishu/Lark whiteboards</td></tr>
+      <tr><th>Best for</th><td>READMEs, Markdown, and design documents</td><td>Presentations, external delivery, and Feishu/Lark whiteboards</td></tr>
+      <tr><th>Layout</th><td>Automatic layout; lanes align, but routing cannot be controlled precisely</td><td>Finer control over placement, spacing, and lines</td></tr>
+      <tr><th>Quality checks</th><td>Control checklist review, palette validation, actual rendering, and visual inspection</td><td>Geometry, contrast, and business-rule validation</td></tr>
+      <tr><th>Distinctive types</th><td>Sequence, state, and Gantt diagrams</td><td>IDEF0 and organization/data-isolation diagrams</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <section aria-labelledby="rules">
-  <div class="narrow"><h2 id="rules">绘图规则</h2></div>
+  <div class="narrow"><h2 id="rules">Drawing rules</h2></div>
   <div class="two">
-    <div class="panel"><h3>画法规则</h3><ul class="rules">
-      <li>只画来源支持的内容，假设写在图外。</li>
-      <li>确实有分支才加判断节点。</li>
-      <li>总览只画正向主线。审批和审计流程必须保留判断和退回，否则会藏掉控制风险。</li>
-      <li>交接不是重点时，不写内部角色泳道。</li>
-      <li>默认实线，虚线只留给退回或可选路径。</li>
-      <li>核心节点最多高亮 3 个。</li>
-      <li>一张流程图约 15 个节点，超过就拆成总览加细节。</li>
-      <li>节点文字要短，功能清单写在正文里。</li>
+    <div class="panel"><h3>Modeling conventions</h3><ul class="rules">
+      <li>Include only source-supported content; state assumptions outside the diagram.</li>
+      <li>Add a decision node only for a real branch.</li>
+      <li>Overview diagrams show the forward main path. Approval and audit flows retain decisions and returns so control risks remain visible.</li>
+      <li>Omit internal-role lanes when handoffs are not the focus.</li>
+      <li>Use solid lines by default; reserve dashed lines for returns or optional paths.</li>
+      <li>Highlight at most three core nodes.</li>
+      <li>Aim for about 15 nodes in one process diagram; split larger flows into an overview and details.</li>
+      <li>Keep node labels short and put feature lists in the surrounding prose.</li>
     </ul></div>
-    <div class="panel"><h3>常见语法错误</h3><ul class="rules">
-      <li>文字含标点或括号时加引号：<code>A["合同(草稿)"]</code></li>
-      <li>节点 ID 用英文，中文写在标签里：<code>apply[提交申请]</code></li>
-      <li>不要用小写 <code>end</code> 作节点 ID。</li>
-      <li>分组内要纵向排列时，写 <code>direction TB</code>。</li>
-      <li>流程图标签换行用 <code>&lt;br/&gt;</code>。</li>
-      <li>时序图消息文字避免 <code>:</code> 和 <code>;</code>。</li>
+    <div class="panel"><h3>Common syntax errors</h3><ul class="rules">
+      <li>Quote labels containing punctuation or parentheses: <code>A["Contract (draft)"]</code></li>
+      <li>Use English node IDs and place localized text inside labels: <code>apply[Submit request]</code></li>
+      <li>Do not use lowercase <code>end</code> as a node ID.</li>
+      <li>For vertical ordering within a group, use <code>direction TB</code>.</li>
+      <li>For a line break in flowchart labels, use <code>&lt;br/&gt;</code>.</li>
+      <li>In sequence-diagram messages, avoid <code>:</code> and <code>;</code>.</li>
     </ul></div>
   </div>
 </section>
 
 <section aria-labelledby="theme">
-  <div class="narrow"><h2 id="theme">主题配置</h2>
-  <p>放在每张图最顶部，换一个平台也不用重新配。页面有深色模式时，要再看一眼效果。</p></div>
+  <div class="narrow"><h2 id="theme">Theme configuration</h2>
+  <p>Place this configuration at the top of each diagram so it travels between platforms. Inspect the result again when the host page has a dark theme.</p></div>
   <div class="sw">
-    <div><i style="background:#E3E5EA;color:#1F2329">业务节点</i><span>默认，不用写</span></div>
-    <div><i style="background:#D0D3D9;color:#1F2329">hub</i><span>汇聚枢纽</span></div>
-    <div><i style="background:#E2EBFF;color:#1F2329;outline:1px solid #2B5FD8;outline-offset:-1px">core</i><span>核心节点，最多 3 个</span></div>
-    <div><i style="background:#2B5FD8;color:#FFFFFF">system</i><span>内部系统</span></div>
-    <div><i style="background:#8FB0FF;color:#1F2329">external</i><span>外部系统</span></div>
-    <div><i style="background:#FDEBD8;color:#1F2329;outline:1px solid #F5C99B;outline-offset:-1px">ai</i><span>AI 能力</span></div>
+    <div><i style="background:#E3E5EA;color:#1F2329">Business node</i><span>Default; no extra declaration</span></div>
+    <div><i style="background:#D0D3D9;color:#1F2329">hub</i><span>Hub</span></div>
+    <div><i style="background:#E2EBFF;color:#1F2329;outline:1px solid #2B5FD8;outline-offset:-1px">core</i><span>Core node; at most 3</span></div>
+    <div><i style="background:#2B5FD8;color:#FFFFFF">system</i><span>Internal system</span></div>
+    <div><i style="background:#8FB0FF;color:#1F2329">external</i><span>External system</span></div>
+    <div><i style="background:#FDEBD8;color:#1F2329;outline:1px solid #F5C99B;outline-offset:-1px">ai</i><span>AI capability</span></div>
   </div>
-  <p>和 Saan Diagram 同一套色值。自造颜色、用 <code>style</code> 单独改色、核心节点超过 3 个，校验都不放行。</p>
-  <div class="block"><div class="bar"><span>frontmatter</span><button type="button" class="copy" data-copy="theme" aria-label="复制主题配置" hidden>复制</button></div><pre id="code-theme"><code>---
+  <p>Uses the same palette as Saan Diagram. Custom colors, per-node overrides with <code>style</code>, and more than three core nodes fail validation.</p>
+  <div class="block"><div class="bar"><span>Theme settings at the top of the diagram</span><button type="button" class="copy" data-copy="theme" aria-label="Copy theme configuration" hidden>Copy</button></div><pre id="code-theme"><code>---
 config:
   theme: base
   look: classic
@@ -467,39 +408,39 @@ config:
 </section>
 
 <section aria-labelledby="check">
-  <div class="narrow"><h2 id="check">交付检查</h2>
-  <p>脚本会一起检查错误占位图和图宽，宽度超过 1200 就提醒。自动布局可能挤成一团，所以每张图还要看一眼。</p></div>
+  <div class="narrow"><h2 id="check">Delivery checks</h2>
+  <p>The script checks error placeholders and diagram width, warning above 1200 px. Automatic layouts can become crowded, so inspect every rendered diagram.</p></div>
   <div class="block"><pre><code>mmdc -i diagram.mmd -o diagram.svg -b white -q
 python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code></pre></div>
   <ol class="steps">
-    <li><b>能读</b><span>每个标签都看得清，没有重叠。</span></li>
-    <li><b>顺向</b><span>主线朝一个方向走，避开能避免的交叉。</span></li>
-    <li><b>不漏</b><span>流程要求的判断和退回都在。</span></li>
-    <li><b>不编</b><span>每个节点和连线都来自来源或写明的假设。</span></li>
+    <li><b>Readable</b><span>Every label is legible and free from overlap.</span></li>
+    <li><b>Directional</b><span>The main flow follows one direction and avoids unnecessary crossings.</span></li>
+    <li><b>Complete</b><span>Required decisions and returns are present.</span></li>
+    <li><b>Grounded</b><span>Every node and connection comes from a source or an explicit assumption.</span></li>
   </ol>
-  <p>调一两次仍然缠在一起，就拆图。需要精确摆放，就换 Saan Diagram。</p>
+  <p>If one or two adjustments leave the diagram tangled, split it. Use Saan Diagram when precise placement is needed.</p>
 </section>
 
 <section aria-labelledby="limits">
-  <div class="narrow"><h2 id="limits">兼容性与限制</h2></div>
+  <div class="narrow"><h2 id="limits">Compatibility and limits</h2></div>
   <div class="two">
-    <div class="panel"><h3>泳道依赖 Mermaid 12</h3><p style="font-size:13.5px"><code>swimlane-beta</code> 能对齐泳道，但泳道之间没有分隔，线路也可能绕到外侧。低版本平台只能退回分组框，各列对不齐。</p></div>
-    <div class="panel"><h3>平台版本不同</h3><p style="font-size:13.5px">每个平台内置的 Mermaid 版本不同。本页的图用 Mermaid CLI 12.2 渲染，还没在 GitHub 或飞书文档里测过。</p></div>
-    <div class="panel"><h3>只查结构和清单</h3><p style="font-size:13.5px">它不判断业务本身对不对，清单之外的问题也查不出。清单如果和图出自同一个人，独立性就很弱。时序图等类型只查配色。</p></div>
-    <div class="panel"><h3>不保证画得更好</h3><p style="font-size:13.5px">一次小样本匿名对比中，用它画图的总分没有超过不用它。它的价值在审查，不在画图本身。</p></div>
-    <div class="panel"><h3>Beta 类型风险最大</h3><p style="font-size:13.5px"><code>swimlane-beta</code>、<code>block-beta</code> 和 <code>ishikawa-beta</code> 在旧版本上可能无法显示。要跨平台的文档，优先用稳定类型。</p></div>
+    <div class="panel"><h3>Swimlanes require Mermaid 12</h3><p style="font-size:13.5px"><code>swimlane-beta</code> aligns lanes, but does not separate them visually, and edges may route outside. Older platforms fall back to groups whose columns do not align.</p></div>
+    <div class="panel"><h3>Platform versions differ</h3><p style="font-size:13.5px">Each platform bundles a different Mermaid version. These images were rendered with Mermaid CLI 12.2 and have not been tested inside GitHub or Feishu documents.</p></div>
+    <div class="panel"><h3>Use the checks alongside business judgment</h3><p style="font-size:13.5px">Checks use the diagram structure, stated requirements, and built-in rules. They cannot establish whether the real business process is sound. A diagram and checklist based on the same understanding may share omissions. Each diagram type has different checks; passing them does not verify the business.</p></div>
+    <div class="panel"><h3>What the drawing comparison found</h3><p style="font-size:13.5px">In one small blind comparison, drawings made with the skill did not outscore those made without it. That comparison did not show better drawing quality. Process checks serve a separate purpose.</p></div>
+    <div class="panel"><h3>Beta types carry the most compatibility risk</h3><p style="font-size:13.5px"><code>swimlane-beta</code>, <code>block-beta</code> and <code>ishikawa-beta</code> may not render in older versions. Prefer stable diagram types for documents that travel across platforms.</p></div>
   </div>
 </section>
 
 <section aria-labelledby="ask">
-  <div class="narrow"><h2 id="ask">更多请求示例</h2></div>
+  <div class="narrow"><h2 id="ask">More example requests</h2></div>
   <ul class="rules">
-    <li>“用 Mermaid 画一下付款审批流程，放进这份设计文档。付款前必须经过财务复核。”</li>
-    <li>“给 README 加一张合同单据的状态图。”</li>
+    <li>“Draw the payment approval flow in Mermaid for this design document. Finance review must happen before payment.”</li>
+    <li>“Add a contract-record state diagram to the README.”</li>
   </ul>
 </section>
 
-<footer><a href="https://github.com/yishan/saankits/blob/main/skills/saan-mermaid/SKILL.md">SKILL.md</a><span>Saan Mermaid v1.1.0，作者 Yishan，MIT</span><a href="../">Saan Kits</a><a href="../diagram/">Saan Diagram</a><a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid">源码</a></footer>
+<footer class="site-footer"><span>Saan Mermaid · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid">Skill source</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-mermaid/README.md">User guide</a><a href="../">Saan Kits</a></footer>
 </main>
 
 

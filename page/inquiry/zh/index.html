@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN" data-language-entry="explicit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Saan Inquiry：通过对话把问题想清楚，比较可能的解释，决定下一步，并根据结果调整判断。">
+<title>Saan Inquiry</title>
+<link rel="canonical" href="https://kits.yishan.app/inquiry/zh/">
+<link rel="alternate" hreflang="en" href="../">
+<link rel="alternate" hreflang="zh-CN" href="./">
+<script src="../../site-preferences.js"></script>
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../inquiry.css?v=e813618a5c">
+<link rel="stylesheet" href="../../site.css?v=85e8aacbdc">
+<script src="../../site.js" defer></script>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-top">
+      <nav class="site-nav" aria-label="技能导航"><a href="../../zh/">Saan Kits</a><a href="../../diagram/zh/">Diagram</a><a href="../../mermaid/zh/">Mermaid</a><a href="../../discovery/zh/">Discovery</a><a href="../../prd-writing/zh/">PRD Writing</a><a href="./" aria-current="page">Inquiry</a></nav>
+      <div class="site-controls">
+      <details class="preference-picker" data-preference="language" name="site-preferences">
+        <summary class="preference-trigger" aria-label="语言" title="语言"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
+        <nav class="preference-menu" aria-label="语言"><a href="./?lang=zh" data-language="zh" lang="zh-CN" hreflang="zh-CN" aria-current="page">中文</a><a href="../?lang=en" data-language="en" lang="en" hreflang="en">English</a></nav>
+      </details>
+      <details class="preference-picker" data-preference="theme" data-theme-controls name="site-preferences" hidden>
+        <summary class="preference-trigger" data-preference-label="外观" aria-label="外观" title="外观"><svg data-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><svg data-theme-icon="light" hidden viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="dark" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></summary>
+        <div class="preference-menu" role="group" aria-label="外观"><button type="button" data-theme-choice="system" aria-label="跟随系统" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>跟随系统</span></button><button type="button" data-theme-choice="light" aria-label="浅色" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><span>浅色</span></button><button type="button" data-theme-choice="dark" aria-label="深色" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg><span>深色</span></button></div>
+      </details>
+    </div>
+    </div>
+    <div class="skill-heading"><h1>Saan Inquiry</h1><span class="skill-version">v0.1.0</span></div>
+    <p class="lead">问题还说不清，或几个选择都拿不定主意时，可以从这里开始聊。</p>
+    <p>不必先整理好一整套背景。说说发生了什么、哪里让你困惑，它会跟着你的回答追问，或提出一种解释供你修正。信息足够时，就整理已有判断；如果需要先试一试，也会说明之后看什么结果。</p>
+    <dl class="intro">
+      <div><dt>适合用在</dt><dd>澄清问题、探索可能原因、梳理难做的选择</dd></div>
+      <div><dt>得到什么</dt><dd>说清楚的问题、当前判断，以及下一步怎么做、怎么看结果</dd></div>
+      <div><dt>使用准备</dt><dd>直接开始对话，无需连接外部服务或安装其他技能</dd></div>
+    </dl>
+    <nav class="section-nav" aria-label="页内导航"><a href="#moves">对话方式</a><a href="#example">示例</a><a href="#closure">下一步</a><a href="#scope">适用场景</a><a href="#install">开始使用</a></nav>
+  </header>
+  <section aria-labelledby="moves">
+    <h2 id="moves">对话会跟着你的问题走</h2>
+    <ul class="rules">
+      <li>缺少的信息会影响判断时，一次问清一个关键问题。</li>
+      <li>一时说不清时，先给一个具体例子或另一种解释，你可以指出哪里不对。</li>
+      <li>遇到可能漏掉的因素，会说明它可能影响什么，再和你一起核对。</li>
+      <li>已经足够做决定，或你想先试试时，就整理当前结论和下一步。</li>
+    </ul>
+    <p class="note">可以随时纠正、跳过、说“不知道”，或要求先给暂定建议，无须填完一份问卷。</p>
+  </section>
+  <section aria-labelledby="example">
+    <h2 id="example">有了新结果，就重新看原来的判断</h2>
+    <div class="example">
+      <p class="label">虚构示例 · 团队交付</p>
+      <blockquote>“评审已经变快了，但交付还是一样慢。”</blockquote>
+      <p>现在知道评审等待缩短了，但整体交付时间没变。可能还有返工、工作量变化或其他交接环节的影响，目前还分不清。</p>
+      <p>接下来可以看一笔近期任务：除了评审，时间还花在了哪里？用新结果检查原来的解释，再决定要调整哪一步。</p>
+    </div>
+  </section>
+  <section aria-labelledby="closure">
+    <h2 id="closure">聊到哪里，可以先停下来</h2>
+    <div class="structure">
+      <div><h3>已经有了当前判断</h3><p>整理目前想清楚的事、仍影响决定的疑问，以及接下来能做什么。如果只是想把一句话说清楚，改好这句话就可以结束。</p></div>
+      <div><h3>拿到结果之后</h3><p>把实际结果和原先的预期放在一起看：问题解决了多少，原来的解释是否还成立，下一步是否要改。计划中的尝试，要等做过后再判断效果。</p></div>
+    </div>
+    <p class="note">原因可能相互作用。技能不保证找到唯一根因或所有盲点，也不会在证据不足时制造确定性。</p>
+  </section>
+  <section aria-labelledby="scope">
+    <h2 id="scope">什么时候选它，什么时候用其他技能</h2>
+    <p>可以讨论产品想法、团队问题、学习计划和日常选择。客户调研提纲适合用 <a href="../../discovery/zh/">Saan Discovery</a>，需求文档适合用 <a href="../../prd-writing/zh/">Saan PRD Writing</a>；它们都不是必需依赖。</p>
+    <p>例如，产品有人试用却少有人继续使用，可以一起梳理可能原因；学习计划总是中断，也可以从最近一次中断的经历聊起。问题会随具体情况变化，无需按固定问卷逐项回答。</p>
+  </section>
+  <section aria-labelledby="install">
+    <h2 id="install">开始使用</h2>
+    <p>在包含此技能的 Saan Kits 仓库根目录执行：</p>
+    <div class="copy-row"><pre id="code-install"><code>npx skills add . --skill saan-inquiry</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Inquiry 本地安装命令" hidden></button></div>
+    <p>用自己的话说出眼前的问题：</p>
+    <div class="copy-row"><pre id="code-request"><code>用 saan-inquiry 帮我把这个问题想清楚，看看遗漏了什么，并决定有用的下一步。只追问会影响理解或行动的内容。</code></pre><button type="button" class="copy" data-copy="request" aria-label="复制追问请求" hidden></button></div>
+    <p class="note">已有包检查和模拟对话记录，长期使用效果仍需观察。</p>
+  </section>
+  <footer class="site-footer"><span>Saan Inquiry · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-inquiry">技能源码</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-inquiry/README.zh-CN.md">使用指南</a><a href="../../zh/">Saan Kits</a></footer>
+</main>
+</body>
+</html>

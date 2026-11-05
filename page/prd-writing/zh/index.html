@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN" data-language-entry="explicit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Saan PRD Writing：把需求、评审记录和原型整理成需求文档，写清操作条件、处理结果和验收方法。">
+<title>Saan PRD Writing</title>
+<link rel="canonical" href="https://kits.yishan.app/prd-writing/zh/">
+<link rel="alternate" hreflang="en" href="../">
+<link rel="alternate" hreflang="zh-CN" href="./">
+<script src="../../site-preferences.js"></script>
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../prd-writing.css?v=e813618a5c">
+<link rel="stylesheet" href="../../site.css?v=85e8aacbdc">
+<script src="../../site.js" defer></script>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-top">
+      <nav class="site-nav" aria-label="技能导航"><a href="../../zh/">Saan Kits</a><a href="../../diagram/zh/">Diagram</a><a href="../../mermaid/zh/">Mermaid</a><a href="../../discovery/zh/">Discovery</a><a href="./" aria-current="page">PRD Writing</a><a href="../../inquiry/zh/">Inquiry</a></nav>
+      <div class="site-controls">
+      <details class="preference-picker" data-preference="language" name="site-preferences">
+        <summary class="preference-trigger" aria-label="语言" title="语言"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
+        <nav class="preference-menu" aria-label="语言"><a href="./?lang=zh" data-language="zh" lang="zh-CN" hreflang="zh-CN" aria-current="page">中文</a><a href="../?lang=en" data-language="en" lang="en" hreflang="en">English</a></nav>
+      </details>
+      <details class="preference-picker" data-preference="theme" data-theme-controls name="site-preferences" hidden>
+        <summary class="preference-trigger" data-preference-label="外观" aria-label="外观" title="外观"><svg data-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><svg data-theme-icon="light" hidden viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="dark" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></summary>
+        <div class="preference-menu" role="group" aria-label="外观"><button type="button" data-theme-choice="system" aria-label="跟随系统" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>跟随系统</span></button><button type="button" data-theme-choice="light" aria-label="浅色" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><span>浅色</span></button><button type="button" data-theme-choice="dark" aria-label="深色" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg><span>深色</span></button></div>
+      </details>
+    </div>
+    </div>
+    <div class="skill-heading"><h1>Saan PRD Writing</h1><span class="skill-version">v1.0.0</span></div>
+    <p class="lead">把零散的需求和原型整理成需求文档，让团队能逐项讨论，也让开发和验收有据可查。</p>
+    <p>把需求说明、评审意见、现有文档或可读取的原型交给它。它会先理清范围，再展开每个功能：谁来用、需要什么条件、操作后改变什么、失败时怎么处理。只改一个功能时，就围绕这次改动写，不必重写整份文档。</p>
+    <dl class="intro">
+      <div><dt>适合用在</dt><dd>新项目需求、功能改动与现有文档修订</dd></div>
+      <div><dt>得到什么</dt><dd>需求文档、验收场景和待确认事项</dd></div>
+      <div><dt>使用准备</dt><dd>准备需求材料；技能内附中英文模板和示例</dd></div>
+    </dl>
+  </header>
+
+  <section aria-labelledby="structure">
+    <h2 id="structure">先说明整体，再展开功能</h2>
+    <div class="structure">
+      <div><h3>完整需求规格说明书</h3><ol>
+        <li>引言：范围、读者、术语与来源</li>
+        <li>项目概况：背景、问题与目标</li>
+        <li>系统概述：边界、流程与功能清单</li>
+        <li>功能需求：模块与功能详情</li>
+        <li>非功能需求：质量要求与验证条件</li>
+        <li>总体设计约束：已确认的外部限制</li>
+      </ol></div>
+      <div><h3>每个功能按同一逻辑展开</h3><ol>
+        <li>业务描述：角色、场景与业务结果</li>
+        <li>界面设计：入口、区域与交互</li>
+        <li>业务字段：类型、格式、必填与用途</li>
+        <li>功能约束：条件、处理、状态与反馈</li>
+      </ol><p class="note">只写局部改动时，保留相关章节，并注明沿用哪一版需求。确有补充内容时再使用「其他」一节。</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="example">
+    <h2 id="example">把一句要求写到可以验收</h2>
+    <div class="example">
+      <p class="label">虚构示例 · 采购申请批量归档</p>
+      <blockquote>“自己创建且已完成的申请可以批量归档。选中任意不符合条件的记录时，整批中止。”</blockquote>
+      <ol>
+        <li>触发：采购专员选中申请，发起批量归档。</li>
+        <li>校验：全部选中申请均由本人创建，且状态为「已完成」。</li>
+        <li>结果：任意一条不符合条件时，整批中止，所有记录保持原状。</li>
+        <li>验收：选中一条他人创建的申请，检查整批记录均未改变。</li>
+      </ol>
+      <p class="note">如果处理到一半发生系统错误，已处理的记录是否要恢复，仍需确认。上面的要求只说明了不符合归档条件时怎么办。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="evidence">
+    <h2 id="evidence">哪些已经确定，哪些还要讨论</h2>
+    <ul class="rules">
+      <li>每条规则只完整写一次，界面说明、字段表和验收场景引用同一个编号，避免改动后各处说法不一致。</li>
+      <li>单据处于什么状态、归在哪个列表、页面显示什么、谁能操作，分别说明。</li>
+      <li>来源相互冲突时，保留双方依据及需要作出的决定。</li>
+      <li>模板不预设性能数值、安全等级、技术架构或服务承诺。</li>
+      <li>建议使用的文案和尚未决定的规则会明确标出。验收场景只依据已经确认的要求。</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="resources">
+    <h2 id="resources">两种模板，一个完整写作示例</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>资源</th><th>适用情况</th><th>包含内容</th></tr></thead>
+      <tbody>
+        <tr><td>完整需求文档 · 中英文</td><td>新项目或完整评审</td><td>六章正文、版本与修订记录、验收场景和待确认事项</td></tr>
+        <tr><td>局部变更 · 中英文</td><td>已有项目中的一个需求</td><td>改动范围、功能详情、对现有需求的影响与验收</td></tr>
+        <tr><td>采购申请批量归档</td><td>参考规则写到多细</td><td>虚构需求、具体规则、状态变化和待确认事项的写法</td></tr>
+      </tbody>
+    </table></div>
+    <p>独立试写另用「会议室预约与改期」需求，检查相邻时段、并发冲突、改期失败保留原预约，以及未决规则的处理。验证材料保留在仓库中。</p>
+    <p class="note">原型需要当前工具能读取，例如已导出的页面或文件。技能不自带读取 Axure .rp 文件的通用工具；需要 Word 或 PDF 版本时，可另用文档工具排版。</p>
+  </section>
+
+  <section aria-labelledby="install">
+    <h2 id="install">开始使用</h2>
+    <p>从 Saan Kits 单独安装 PRD Writing：</p>
+    <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-prd-writing</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan PRD Writing 安装命令" hidden></button></div>
+    <p>把需求简报、评审记录或可读取的原型交给 AI 助手，例如：</p>
+    <div class="copy-row"><pre id="code-request"><code>用 saan-prd-writing，把这些材料整理成中文需求规格说明书。先交付草稿，写清功能、字段、状态变化和验收检查，未决事项集中列出。</code></pre><button type="button" class="copy" data-copy="request" aria-label="复制 PRD 写作请求示例" hidden></button></div>
+    <p class="note">文档检查与模拟试写不代表实际业务验收。</p>
+  </section>
+
+  <footer class="site-footer"><span>Saan PRD Writing · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-prd-writing">技能源码</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-prd-writing/README.zh-CN.md">使用指南</a><a href="../../zh/">Saan Kits</a></footer>
+</main>
+</body>
+</html>
