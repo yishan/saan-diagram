@@ -2,7 +2,7 @@
 
 ## ID formats
 
-By default `check.py` and `build.py` find open questions as `Q-<n>`, acceptance scenarios as `AC-<n>`, and rules as `FR-<letters><n>`. If the source uses other IDs, declare them in the manifest:
+By default `check.py` and `build.py` find open questions as `Q-<n>`, acceptance scenarios as `AC-<n>`, and rules as `FR-<n>` or `FR-<letters><n>` (for example `FR-3`, `FR-B05`). If the source uses other IDs, declare them in the manifest:
 
 ```json
 "id_patterns": {"open": "TBD-\\d+", "acceptance": "TC-\\d+", "rule": "REQ-\\d+"}

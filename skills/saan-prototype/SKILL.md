@@ -27,12 +27,12 @@ Propose a short list: pages, roles, and scenarios, for example "4 pages, 2 roles
 
 ## Build
 
-Copy `assets/example/` as the starting structure into the user's working directory as `prototype/`. Read it once; it is a complete, minimal prototype. Then write, in this order:
+Copy `assets/example/` as the starting structure into the user's working directory as `prototype/`. Read it once; it is a complete, minimal prototype. Replace its `source.md` with a copy of the user's specification, so the folder still builds after it is moved; keep the original file unchanged. Then write, in this order:
 
-1. `manifest.json`: title, `source` (path to the specification, relative to the manifest), roles, states, `confirmed_text`, pages, theme. States and roles come from the source.
+1. `manifest.json`: title, `source` (the copied specification, relative to the manifest), roles, states, `confirmed_text`, pages, theme. States and roles come from the source. `confirmed_text` lists only wording the source confirms; it is empty when nothing is confirmed.
 2. `rules.js`: confirmed rules only, as pure functions on `Proto.rules`, each commented with its rule ID. An open question never becomes logic.
 3. `scenarios.json`: one scenario per demonstrable acceptance scenario, with `acceptance`, `role`, `now` (an ISO time with offset; time-based rules depend on it), and initial `data`. Read [scenarios](references/scenarios.md).
-4. `pages/*.js`: `Proto.page(id, {label, roles, render})` and `Proto.action(name, fn)`. Feedback comes from the rule functions. Choose layouts from `patterns/` (list, form, detail, timeline, dialog, states) and use the runtime classes they show; do not invent components.
+4. `pages/*.js`: `Proto.page(id, {label, roles, nav, proposal, render})` and `Proto.action(name, fn)`. `nav: false` keeps a sub-page out of the navigation; open it with `data-go` or `c.go(id)`. Actions run from buttons, forms, and from `<input>` or `<select>` with `data-action` (the new value arrives as `a.value`). Feedback comes from the rule functions. Choose layouts from `patterns/` (list, form, detail, timeline, dialog, states) and use the runtime classes they show; do not invent components.
 5. Annotations, as described in [annotations](references/annotations.md): `data-proposal` on proposed wording, `data-open` on open questions (render a pending block, never an invented answer), and `data-rule` on controls governed by a confirmed rule.
 6. `trace.md`: page and scenario to source IDs, plus a 「不涉及」 table giving a reason for every open question the prototype does not show.
 

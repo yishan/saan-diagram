@@ -12,5 +12,6 @@ for (var m = 9 * 60; m < 18 * 60; m += 30) slots.push(m);
 }).join("") + "</div>"
 ```
 
+- A booking that covers several slots is one block: render it once with `style="grid-column: span N"` (N = number of slots) and skip the slots it covers.
 - Slot size and day range come from the source; do not widen them.
 - What a viewer may see inside a busy slot is a rule; name it.

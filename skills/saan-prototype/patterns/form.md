@@ -24,3 +24,5 @@ Proto.action("book", function (c, a) {
 - A form submits through `data-action` on the `<form>`; values arrive in `a.fields`.
 - Field limits the source leaves open (for example a length limit) stay unenforced and get a `data-open` note next to the field.
 - On failure keep the user on the form unless the source says otherwise.
+- A form can be a sub-page (`Proto.page("book", {nav: false, …})`) or a dialog (`c.dialog(html)`). Prefer a dialog when the source names no page for it.
+- A date or filter field can refresh the page by itself: `<input type="date" name="day" data-action="setDay">`, then `Proto.action("setDay", function (c, a) { c.data.day = a.value; })`.

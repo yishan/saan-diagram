@@ -119,6 +119,16 @@ class CheckTests(unittest.TestCase):
         self.assertNotIn("T2", self.codes(lambda p: None))
         self.assertIn("T2", self.codes(lambda p: p.update(trace=p["trace"].replace("不涉及：", ""))))
 
+    def test_assigned_annotation_counts_as_shown(self):
+        add = '\nvar opt = {}; opt.open = "Q-01";\n'
+        drop = lambda s: s.replace('data-open="Q-01"', "")
+        self.assertIn("T2", self.codes(lambda p: p.update(pages=[(r, drop(s)) for r, s in p["pages"]])))
+        self.assertNotIn("T2", self.codes(lambda p: p.update(pages=[(r, drop(s) + add) for r, s in p["pages"]])))
+
+    def test_variable_annotation_is_a_note(self):
+        add = '\nc.flash("x", { rule: why.rule });\n'
+        self.assertIn("N2", self.codes(lambda p: p.update(pages=[(r, s + add) for r, s in p["pages"]])))
+
     def test_exit_codes(self):
         self.assertEqual(mod("check").report([]), 0)
         self.assertEqual(mod("check").report([("finding", "C1", "m", "x")]), 2)

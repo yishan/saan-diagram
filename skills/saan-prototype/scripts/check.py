@@ -22,7 +22,8 @@ import contrast  # noqa: E402
 import source_index  # noqa: E402
 
 ATTR = re.compile(r"""data-(proposal|open|rule)\s*=\s*\\?["']([^"'\\]*)\\?["']""")
-FLASH = re.compile(r"""\b(proposal|open|rule)\s*:\s*["']([^"']+)["']""")
+FLASH = re.compile(r"""\b(proposal|open|rule)\s*[:=]\s*["']([^"']+)["']""")      # { open: "Q-1" } or x.open = "Q-1"
+VARIABLE = re.compile(r"""\b(proposal|open|rule)\s*[:=]\s*(?!["'\s])([A-Za-z_$][\w.$\[\]]*)""")  # { rule: why.rule }
 EXTERNAL = re.compile(r"""(?:src|href)\s*=\s*\\?["']https?://|url\(\s*["']?https?://|\bfetch\s*\(|XMLHttpRequest|\bimport\s*\(""")
 KIND_OF_ATTR = {"open": "open", "rule": "rule"}
 LEVELS = {"error": "必须修改", "finding": "业务发现", "note": "提示"}
@@ -48,6 +49,8 @@ def annotations(pages):
                 for m in rx.finditer(line):
                     for i in m.group(2).split():
                         yield rel, n, m.group(1), i
+            for m in VARIABLE.finditer(line):
+                yield rel, n, m.group(1), "${" + m.group(2) + "}"
 
 
 def check_parts(p, all_themes=None):
@@ -62,7 +65,7 @@ def check_parts(p, all_themes=None):
     for rel, n, kind, i in annotations(p["pages"]):
         where = f"{rel}:{n}"
         if "${" in i or "+" in i:
-            add("note", "N2", where, f"标注编号 '{i}' 是动态拼出来的，无法核对")
+            add("note", "N2", where, f"标注编号 '{i}' 是运行时才确定的，无法核对；能写死的编号请写死")
             continue
         if i not in known:
             add("error", "T1", where, f"data-{kind}='{i}' 在来源中找不到")

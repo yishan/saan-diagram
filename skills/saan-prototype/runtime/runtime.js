@@ -16,6 +16,7 @@
   function visible() {
     return pages.filter(function (p) { return !p.roles || p.roles.indexOf(S.role) >= 0; });
   }
+  function inNav(p) { return p.nav !== false; }
   function ctx() {
     return {
       data: S.data, role: role(), now: S.now, rules: Proto.rules, scenario: S.scenario, esc: esc,
@@ -55,7 +56,10 @@
   function decorate(root) {
     ["proposal", "open", "rule"].forEach(function (k) {
       root.querySelectorAll("[data-" + k + "]").forEach(function (el) {
+        var done = el.__badged || (el.__badged = {});
         el.getAttribute("data-" + k).split(/\s+/).filter(Boolean).forEach(function (id) {
+          if (done[id]) return;  // the same ID as proposal and rule gets one badge
+          done[id] = true;
           var b = document.createElement("span");
           b.className = "p-badge " + k;
           b.textContent = (k === "proposal" ? "建议 " : "") + id;
@@ -72,8 +76,11 @@
     document.body.classList.toggle("p-review-off", !S.review);
     bar();
     var vis = visible();
-    if (!vis.some(function (p) { return p.id === S.page; })) S.page = vis.length ? vis[0].id : null;
-    document.getElementById("p-nav").innerHTML = vis.map(function (p) {
+    if (!vis.some(function (p) { return p.id === S.page; })) {
+      var first = vis.filter(inNav)[0] || vis[0];
+      S.page = first ? first.id : null;
+    }
+    document.getElementById("p-nav").innerHTML = vis.filter(inNav).map(function (p) {
       return '<button data-go="' + esc(p.id) + '"' + (p.id === S.page ? ' aria-current="page"' : "") + attrs(p) + ">" + esc(p.label) + "</button>";
     }).join("");
     var page = vis.filter(function (p) { return p.id === S.page; })[0];
@@ -102,6 +109,7 @@
   function run(name, el, extra) {
     var fn = actions[name];
     if (!fn) { S.flash = { text: "原型未实现动作：" + name, kind: "error" }; return render(); }
+    S.flash = null;  // a new action replaces the previous message
     fn(ctx(), Object.assign({}, el.dataset, extra || {}), el);
     render();
   }
@@ -126,7 +134,11 @@
   });
   document.addEventListener("change", function (e) {
     var k = e.target.getAttribute("data-bar");
-    if (!k) return;
+    if (!k) {
+      var field = e.target.closest("input[data-action], select[data-action]");
+      if (field) run(field.getAttribute("data-action"), field, { value: field.type === "checkbox" ? field.checked : field.value });
+      return;
+    }
     if (k === "scenario") return load(e.target.value);
     if (k === "role") { S.role = e.target.value; S.flash = null; S.dialog = null; }
     if (k === "theme") S.theme = e.target.value;

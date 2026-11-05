@@ -13,4 +13,5 @@ return '<section class="p-card"><h2 class="p-h">我的预约</h2>' +
 ```
 
 - Show an action only when the rule allows it, and still check the rule inside the action: the source usually says the server re-checks.
+- Exception: when a scenario exists to show a rejection (for example "已被借出" in the bundled example), keep the action visible in that state so the reviewer can trigger the rejection. Say so in `trace.md`.
 - Sorting and paging belong to the source. If it does not say, keep the source order and mark the order as open or proposed.
