@@ -53,6 +53,11 @@ def script_safe(text):
     return text.replace("</script", "<\\/script").replace("<!--", "<\\!--")
 
 
+def json_safe(text):
+    """Escape serialized JSON for a <script> element. Every '<' is inside a string, and \\u003c stays valid JSON."""
+    return text.replace("<", "\\u003c")
+
+
 def build(manifest_path, out=None, theme=None):
     parts = load(manifest_path)
     m = parts["manifest"]
@@ -69,7 +74,7 @@ def build(manifest_path, out=None, theme=None):
     html = (rt / "shell.html").read_text(encoding="utf-8")
     html = html.replace("@LANG@", m.get("language", "zh-CN")).replace("@TITLE@", m["title"])
     html = html.replace("/*@CSS@*/", (rt / "runtime.css").read_text(encoding="utf-8"))
-    html = html.replace("/*@DATA@*/", script_safe(json.dumps(data, ensure_ascii=False)))
+    html = html.replace("/*@DATA@*/", json_safe(json.dumps(data, ensure_ascii=False)))
     html = html.replace("/*@RUNTIME@*/", script_safe((rt / "runtime.js").read_text(encoding="utf-8")))
     html = html.replace("/*@RULES@*/", script_safe(parts["rules"]))
     html = html.replace("/*@PAGES@*/", "\n".join(f"/* {rel} */\n{script_safe(src)}" for rel, src in parts["pages"]))

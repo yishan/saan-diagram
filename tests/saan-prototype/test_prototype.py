@@ -89,6 +89,23 @@ class BuildTests(unittest.TestCase):
             html = mod("build").build(src / "manifest.json", self.out).read_text(encoding="utf-8")
             self.assertIn('"<\\/script>"', html)
 
+    def test_markup_in_data_keeps_json_valid(self):
+        note = "<!-- review note --> </script>"
+        p = mod("build").load(EXAMPLE)
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "proto"
+            src.mkdir()
+            for f in ("manifest.json", "source.md", "rules.js", "trace.md"):
+                (src / f).write_text((EXAMPLE.parent / f).read_text(encoding="utf-8"), encoding="utf-8")
+            p["scenarios"][0]["data"]["note"] = note
+            (src / "scenarios.json").write_text(json.dumps(p["scenarios"], ensure_ascii=False), encoding="utf-8")
+            (src / "pages").mkdir()
+            (src / "pages" / "devices.js").write_text((EXAMPLE.parent / "pages" / "devices.js").read_text(encoding="utf-8"), encoding="utf-8")
+            html = mod("build").build(src / "manifest.json", self.out).read_text(encoding="utf-8")
+        raw = re.search(r'<script type="application/json" id="p-data">(.*?)</script>', html, re.S).group(1)
+        self.assertNotIn("<", raw)
+        self.assertEqual(json.loads(raw)["scenarios"][0]["data"]["note"], note)
+
     def test_unknown_theme_fails(self):
         with self.assertRaises(mod("build").BuildError):
             mod("build").build(EXAMPLE, self.out, theme="pink")
