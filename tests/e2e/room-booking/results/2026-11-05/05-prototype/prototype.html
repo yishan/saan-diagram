@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>会议室预约与改期 · 评审原型</title>
+<style>
+:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: var(--font_size)/1.6 "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+#p-bar { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 6px 16px; background: var(--surface); border-bottom: 1px dashed var(--border); font-size: 12px; color: var(--muted); }
+#p-bar label { display: flex; gap: 6px; align-items: center; }
+#p-bar select { padding: 2px 4px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+#p-bar .p-tag-review { margin-right: auto; font-weight: 600; }
+#p-nav { display: flex; gap: 4px; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+#p-nav button { padding: 10px 14px; border: 0; border-bottom: 2px solid transparent; background: none; cursor: pointer; color: var(--muted); }
+#p-nav button[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+#p-main { max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; }
+.p-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.p-h { margin: 0 0 12px; font-size: 1.15em; }
+.p-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.p-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; }
+.p-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent_text); }
+.p-btn.danger { color: var(--danger); }
+.p-btn:disabled { opacity: .5; cursor: not-allowed; }
+.p-field { display: grid; gap: 4px; margin-bottom: 12px; }
+.p-field > span { color: var(--muted); font-size: .9em; }
+.p-field input, .p-field select, .p-field textarea { padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.p-table { width: 100%; border-collapse: collapse; }
+.p-table th, .p-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.p-table th { color: var(--muted); font-weight: 500; }
+.p-tag { display: inline-block; padding: 0 8px; border: 1px solid var(--border); border-radius: 999px; font-size: .85em; }
+.p-timeline { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(28px, 1fr); gap: 2px; }
+.p-slot { min-height: 34px; border: 1px solid var(--border); border-radius: 3px; background: var(--bg); font-size: 12px; padding: 2px 4px; overflow: hidden; }
+.p-slot.busy { background: var(--accent); color: var(--accent_text); border-color: var(--accent); }
+button.p-slot { cursor: pointer; text-align: left; }
+.p-empty { padding: 32px; text-align: center; color: var(--muted); }
+.p-flash { padding: 10px 12px; margin-bottom: 16px; border: 1px solid currentColor; border-radius: var(--radius); background: var(--surface); }
+.p-flash.error { color: var(--danger); }
+.p-flash.ok { color: var(--text); }
+.p-dialog { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(0, 0, 0, .35); }
+.p-dialog > div { width: min(440px, 92vw); background: var(--surface); border-radius: var(--radius); padding: 20px; }
+.p-pending { padding: 10px 12px; border: 1px dashed var(--notice); border-radius: var(--radius); color: var(--notice); }
+/* review annotations */
+.p-badge { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 3px; font-size: 11px; line-height: 16px; vertical-align: middle; cursor: help; border: 1px solid; background: var(--surface); }
+.p-badge.proposal { color: var(--notice); }
+.p-badge.open { color: var(--danger); cursor: pointer; }
+.p-badge.rule { color: var(--muted); }
+[data-proposal] { text-decoration: underline dotted var(--notice); text-underline-offset: 3px; }
+body.p-review-off .p-badge, body.p-review-off .p-review-only { display: none; }
+body.p-review-off [data-proposal] { text-decoration: none; }
+#p-pop { position: fixed; z-index: 30; max-width: 360px; padding: 10px 12px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 6px 20px rgba(0, 0, 0, .18); font-size: 12px; }
+
+</style>
+</head>
+<body>
+<div id="p-bar"></div>
+<nav id="p-nav"></nav>
+<main id="p-main"></main>
+<div id="p-pop" hidden></div>
+<script type="application/json" id="p-data">{"title": "会议室预约与改期 · 评审原型", "language": "zh-CN", "timezone": "Asia/Shanghai", "roles": [{"id": "jia", "label": "员工甲"}, {"id": "yi", "label": "员工乙"}, {"id": "bing", "label": "员工丙"}, {"id": "m", "label": "管理员 M（负责会议室 A）"}], "states": ["有效", "已取消"], "theme": "neutral", "themes": {"blue": {"label": "品牌蓝", "bg": "#F4F7FC", "surface": "#FFFFFF", "border": "#D3DCEB", "text": "#1B2333", "muted": "#566176", "accent": "#2B5FD8", "accent_text": "#FFFFFF", "danger": "#B42318", "notice": "#8A5A00", "radius": "6px", "font_size": "14px"}, "dark": {"label": "暗色", "bg": "#16181D", "surface": "#1F232A", "border": "#363C47", "text": "#E8EAED", "muted": "#A3AAB5", "accent": "#7EA6F7", "accent_text": "#10131A", "danger": "#F27A6E", "notice": "#E7B65C", "radius": "6px", "font_size": "14px"}, "neutral": {"label": "中性灰", "bg": "#F5F6F8", "surface": "#FFFFFF", "border": "#D5D8DE", "text": "#1F2329", "muted": "#5C6370", "accent": "#3A4250", "accent_text": "#FFFFFF", "danger": "#B42318", "notice": "#8A5A00", "radius": "6px", "font_size": "14px"}}, "scenarios": [{"id": "ac01", "label": "甲预约 A 09:00—10:00「周会」", "acceptance": ["AC-01"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": []}}, {"id": "ac02", "label": "乙预约 A 10:00—11:00（首尾相接）", "acceptance": ["AC-02"], "role": "yi", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}]}}, {"id": "ac03", "label": "乙预约 A 09:30—10:30（冲突）", "acceptance": ["AC-03"], "role": "yi", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}]}}, {"id": "ac04", "label": "乙预约 B 09:00—10:00（不同会议室）", "acceptance": ["AC-04"], "role": "yi", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}]}}, {"id": "ac05", "label": "时间规则：17:30—18:00 可约，开始不早于结束被拒", "acceptance": ["AC-05"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": []}}, {"id": "ac06", "label": "主题为空被拒", "acceptance": ["AC-06"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": []}}, {"id": "ac07", "label": "创建人固定为当前员工", "acceptance": ["AC-07"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": []}}, {"id": "ac08", "label": "乙提交 B 14:00—15:00，甲已先成功（并发的失败方）", "acceptance": ["AC-08"], "role": "yi", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "B", "date": "2026-11-10", "start": "14:00", "end": "15:00", "topic": "方案评审", "creator": "jia", "status": "有效"}]}}, {"id": "ac09", "label": "甲、M、乙分别查看 A 的占用", "acceptance": ["AC-09"], "role": "yi", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}]}}, {"id": "ac10", "label": "M 查看 B 的占用（非所管会议室）", "acceptance": ["AC-10"], "role": "m", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b2", "room": "B", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "项目同步", "creator": "yi", "status": "有效"}]}}, {"id": "ac11", "label": "甲改期到 B 15:00—16:00，丙再约 A 09:00", "acceptance": ["AC-11"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "mine", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}]}}, {"id": "ac12", "label": "甲改期为 A 09:30—10:30（不与自己冲突）", "acceptance": ["AC-12"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "mine", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}, {"id": "b2", "room": "A", "date": "2026-11-10", "start": "11:00", "end": "12:00", "topic": "培训", "creator": "yi", "status": "有效"}]}}, {"id": "ac13", "label": "甲改期为 A 10:00—11:00（与乙冲突）", "acceptance": ["AC-13"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "mine", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}, {"id": "b2", "room": "A", "date": "2026-11-10", "start": "10:00", "end": "11:00", "topic": "客户访谈", "creator": "yi", "status": "有效"}]}}, {"id": "ac14", "label": "甲查看乙的预约：无改期、取消入口", "acceptance": ["AC-14"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b2", "room": "A", "date": "2026-11-10", "start": "14:00", "end": "15:00", "topic": "客户访谈", "creator": "yi", "status": "有效"}]}}, {"id": "ac15", "label": "停用的会议室 C 不可选（新建与改期）", "acceptance": ["AC-15", "AC-16"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "mine", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}]}}, {"id": "ac17", "label": "进行中的预约：甲不能改期取消，M 不能取消", "acceptance": ["AC-17"], "role": "jia", "now": "2026-11-10T09:30:00+08:00", "page": "mine", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}]}}, {"id": "ac18", "label": "甲取消尚未开始的预约，乙再约该时段", "acceptance": ["AC-18"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "mine", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}]}}, {"id": "ac19", "label": "已取消的预约不再提供改期、取消", "acceptance": ["AC-19"], "role": "jia", "now": "2026-11-09T10:00:00+08:00", "page": "mine", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "已取消", "cancelledBy": "jia", "cancelledAt": "2026-11-09 09:40"}]}}, {"id": "ac20", "label": "M 取消乙在 A 的预约：先不填原因，再填「场地临时检修」", "acceptance": ["AC-20", "AC-21"], "role": "m", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b2", "room": "A", "date": "2026-11-10", "start": "10:00", "end": "11:00", "topic": "客户访谈", "creator": "yi", "status": "有效"}]}}, {"id": "ac22", "label": "M 查看乙在 B 的预约：无取消入口", "acceptance": ["AC-22"], "role": "m", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b2", "room": "B", "date": "2026-11-10", "start": "10:00", "end": "11:00", "topic": "项目同步", "creator": "yi", "status": "有效"}]}}, {"id": "ac23", "label": "M 查看乙在 A 的预约：无改期入口", "acceptance": ["AC-23"], "role": "m", "now": "2026-11-09T10:00:00+08:00", "page": "rooms", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b2", "room": "A", "date": "2026-11-10", "start": "10:00", "end": "11:00", "topic": "客户访谈", "creator": "yi", "status": "有效"}]}}, {"id": "ac24", "label": "M 改期自己在 B 的预约", "acceptance": ["AC-24"], "role": "m", "now": "2026-11-09T10:00:00+08:00", "page": "mine", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b3", "room": "B", "date": "2026-11-10", "start": "13:00", "end": "14:00", "topic": "设备盘点", "creator": "m", "status": "有效"}]}}, {"id": "empty", "label": "丙的「我的预约」为空", "acceptance": [], "role": "bing", "now": "2026-11-09T10:00:00+08:00", "page": "mine", "data": {"viewDate": "2026-11-10", "rooms": [{"id": "A", "name": "会议室 A", "capacity": 8, "enabled": true, "admins": ["m"]}, {"id": "B", "name": "会议室 B", "capacity": 6, "enabled": true, "admins": []}, {"id": "C", "name": "会议室 C", "capacity": 10, "enabled": false, "admins": []}], "bookings": [{"id": "b1", "room": "A", "date": "2026-11-10", "start": "09:00", "end": "10:00", "topic": "周会", "creator": "jia", "status": "有效"}]}}], "defs": {"Q-21": "Q-21 | 「我的预约」的排序方式、有效预约的显示文案，以及已开始、已结束的有效预约如何显示（是否另设「已结束」）？ | 1.3、3.2、4.2.2 | 状态与显示文案映射 | 待指定；中；材料未提及", "Q-13": "Q-13 | 同一员工能否在同一时段持有不同会议室的预约？S-01 §3 的冲突定义未写会议室，§4 讲同一会议室 | FR-C04 | 冲突是否跨会议室按人判断。本稿按会议室判断，AC-04 使用不同员工以避开此问题 | 建议：行政负责人；中；含义不明", "Q-07": "Q-07 | 恰好到开始时刻时是否算“已经开始”？以服务器时间为准吗？ | FR-R02、FR-X02、FR-M02 | 边界判断与时间基准 | 建议：行政负责人、门户技术负责人；中；未写明", "Q-01": "Q-01 | 会议室与管理员的对应关系记录在哪里、由谁维护？一间会议室可否有多名管理员？现有会议室资料只含名称、容量、启用状态（S-01 §背景） | 3.1；FR-V02、4.3 全部 | 决定数据来源；若需改动会议室资料模块，需确认是否调整范围。**先决事项** | 建议：会议室资料模块负责人、行政负责人；高；未解决", "Q-18": "Q-18 | 管理员取消与预约人改期或取消同一预约同时发生时以哪个为准？ | 4.3.1 其他、FR-C05 | 并发一致性的业务预期 | 建议：门户技术负责人、行政负责人；中；未提及", "Q-10": "Q-10 | 预约成功、改期、取消（尤其管理员取消他人预约）时是否通知、通知谁、经何渠道？（S-01 §其他资料：未讨论） | FR-B05、FR-X03、FR-M04、5.6 | 通知范围与渠道；门户现有通知能力 | 建议：行政负责人、门户负责人；高；未讨论", "Q-17": "Q-17 | 门户技术栈、部署环境、性能与可用性指标（S-01 §其他资料：未提供） | 5.1、5.2、5.5、6.3 | 提供基线或明确指标 | 建议：门户技术负责人；中；未提供", "Q-12": "Q-12 | 冲突反馈及其他提示的正式文案（S-01 §4：未定稿） | FR-C05、FR-B06、FR-R06 及各〔建议〕文案 | 确认或替换本稿建议文案 | 建议：产品或界面负责人、行政负责人；低；未定稿", "Q-02": "Q-02 | 新预约的最小提前量。行政代表：“新预约至少提前 24 小时提交。”业务代表：“提前 2 小时就应该可以预约。”两方无决策优先级，主持人未选定（S-02） | FR-C08、FR-B04 | 先明确决策人，再定数值；同时决定是否允许预约当前时刻之前的时段 | 建议：评审主持人明确决策人；高；冲突未决", "Q-03": "Q-03 | 改期是否有提前量要求？若有，是否与新预约相同？（S-02：未讨论） | FR-C08、4.2.3 | 依赖 Q-02 | 同 Q-02；高；未讨论", "Q-04": "Q-04 | 最远可预约多少天之后？每人可同时持有多少条有效预约？（S-02：没有约定） | FR-C08、4.2.1 其他 | 决定是否设限及数值 | 建议：行政负责人；高；未讨论", "Q-16": "Q-16 | 周末、法定节假日是否可预约？ | FR-C08 | 是否增加日期限制 | 建议：行政负责人；中；未提及", "Q-20": "Q-20 | 停用的会议室在「会议室」中是否展示？如展示，如何标识？ | 4.1.1 | 展示方式 | 待指定；低；材料未提及", "Q-14": "Q-14 | 会议室容量本期仅作展示，还是需要填写人数并校验？ | 4.1.1、4.2.1 | 是否增加人数字段 | 建议：行政负责人；低；未提及", "Q-19": "Q-19 | 管理员查看所管会议室占用时，是否显示预约人？其他员工只看到「已占用」已确认 | FR-V03、4.3.1 | 管理员可见字段范围 | 待指定；中；材料未提及", "Q-05": "Q-05 | 会议主题最大长度？纯空格是否视为未填写？（S-01 §1：长度未确定） | 4.2.1 业务字段、FR-B03 | 长度值与空白处理 | 建议：行政负责人、门户负责人；中；未确定", "Q-11": "Q-11 | 网络中断、超时后如何重试？重复提交是否可能产生两条预约？（S-01 §其他资料：未讨论） | 4.2.1 其他、5.2 | 失败处理与重复提交要求 | 建议：门户技术负责人；中；未讨论", "Q-08": "Q-08 | 取消记录保存多久？取消原因、取消操作人谁可以查看（被取消的预约人、其他管理员、行政）？（S-01 §10：尚未决定） | 4.2.2、4.2.4、4.3.1、5.3 | 保存期限与可见范围 | 建议：行政负责人、信息安全或合规负责人（若有）；高；未决定", "Q-15": "Q-15 | 改期是否保留原会议室、原时段等变更历史？ | 4.2.3 其他 | 是否需要改期记录及其可见范围 | 建议：行政负责人；低；未提及", "Q-06": "Q-06 | 会议室停用前已存在的有效预约如何处理（保留、自动取消、通知改期等），由谁操作？原会议室已停用的预约能否改期到其他会议室、能否取消？（S-01 §11） | FR-C07、4.2.3 其他、4.2.4 | 存量预约的状态与操作规则 | S-01 指明由行政负责人确认；高；待确认", "Q-22": "Q-22 | 改期目标与原预约完全相同时如何处理（拒绝或视为成功）？ | 4.2.3 | 处理方式 | 待指定；低；材料未提及", "Q-09": "Q-09 | 员工自己取消时是否填写原因？（S-02：未讨论，不能套用管理员必填） | 4.2.4 | 是否增加字段及必填性 | 建议：行政负责人、业务代表；中；未讨论", "Q-24": "Q-24 | 管理员执行取消的“会议室占用记录”位于何处：「会议室」页中的所管会议室，还是单独的管理入口？（S-02 只说明“在会议室占用记录中执行取消操作”） | 4.3.1 界面设计 | 入口位置 | 待指定；中；未明确", "Q-25": "Q-25 | 管理员取消原因的长度上限？纯空格是否视为未填写？ | FR-M03 | 长度值与空白处理 | 待指定；低；未提及", "Q-26": "Q-26 | 管理员本人创建的预约位于其所管会议室时，取消是走预约人路径（是否需原因取决于 Q-09）还是管理员路径（原因必填）？S-01 §9 规定本人预约按预约人规则 | FR-M05 | 界面入口与原因要求 | 待指定；低；需澄清", "Q-23": "Q-23 | 员工离职或账号停用后，其有效预约如何处理？ | 4.2 | 处理规则与负责人 | 待指定；低；材料未提及", "AC-08": "AC-08 | FR-C05 | B 在 D 日 14:00—15:00 无预约 | 甲、乙同时提交 B，D 日 14:00—15:00（可用 14:00—15:00 与 14:30—15:30 重复验证） | 恰好一个成功；另一方得到冲突反馈；B 在该区间只有一条有效预约 | 并发测试、数据", "AC-14": "AC-14 | FR-R02、FR-X01、FR-C06 | 乙有一条尚未开始的有效预约 | 甲直接提交对乙预约的改期请求和取消请求 | 均被拒绝；乙的预约不变 | 直接请求、数据", "AC-19": "AC-19 | FR-X05 | AC-18 完成 | 甲直接提交对该预约的改期和再次取消 | 均被拒绝；状态仍为「已取消」 | 直接请求、数据", "AC-21": "AC-21 | FR-M04 | 同 AC-20 | M 取消该预约，原因「场地临时检修」 | 状态变为「已取消」；保存操作人 M、取消时间和原因；占用释放；乙的「我的预约」中显示「已取消」 | 页面、数据", "AC-01": "AC-01 | FR-B05、FR-V01 | A 在 D 日无预约 | 甲预约 A，D 日 09:00—10:00，主题「周会」 | 生成一条有效预约，创建人为甲；「会议室」中 A 的 09:00—10:00 显示占用；甲的「我的预约」中出现该预约 | 页面、数据", "AC-02": "AC-02 | FR-C04 | AC-01 完成 | 乙预约 A，D 日 10:00—11:00 | 预约成功，两条有效预约首尾相接 | 页面、数据", "AC-03": "AC-03 | FR-C04、FR-B06 | AC-01 完成 | 乙预约 A，D 日 09:30—10:30 | 提交失败，得到冲突反馈；不生成预约；甲的预约不变 | 页面、数据", "AC-04": "AC-04 | FR-C04 | AC-01 完成 | 乙预约 B，D 日 09:00—10:00 | 预约成功（不同会议室不冲突） | 页面、数据", "AC-05": "AC-05 | FR-C02、FR-C03 | A 在 D 日 17:00 后无预约 | 分别提交：09:15—10:00；08:30—09:30；17:30—18:30；10:00—10:00；11:00—10:00；17:30—18:00 | 前五项均被拒绝且不生成预约；17:30—18:00 预约成功 | 页面、数据、直接请求", "AC-06": "AC-06 | FR-B03 | — | 甲提交主题为空的预约 | 被拒绝，不生成预约 | 页面、直接请求", "AC-07": "AC-07 | FR-B02 | — | 甲提交预约，请求中指定创建人为乙 | 不存在创建人为乙的新预约；若成功创建，创建人为甲 | 直接请求、数据", "AC-09": "AC-09 | FR-V02 | AC-01 完成 | 甲、M、乙分别查看 A 在 D 日的占用 | 甲、M 看到主题「周会」；乙看到「已占用」，看不到主题 | 页面、接口返回", "AC-10": "AC-10 | FR-V02 | 乙在 B 有 D 日 09:00—10:00 预约（AC-04） | M 查看 B 的占用 | M 看到「已占用」，看不到主题 | 页面、接口返回", "AC-11": "AC-11 | FR-R05 | AC-01 完成 | 甲将该预约改期到 B，D 日 15:00—16:00（B 该时段空闲） | 改期成功；预约位于 B 15:00—16:00，仍为有效，主题仍为「周会」；A 的 09:00—10:00 释放，丙随后可预约该时段 | 页面、数据", "AC-12": "AC-12 | FR-R04 | 甲在 A 有 D 日 09:00—10:00 有效预约，A 09:30—10:30 除此外无其他预约 | 甲改期为 A，D 日 09:30—10:30 | 改期成功，不因自己的原占用而冲突 | 页面、数据", "AC-13": "AC-13 | FR-R06 | 甲在 A 有 09:00—10:00 预约；乙在 A 有 10:00—11:00 预约 | 甲改期为 A，10:00—11:00 | 改期失败，冲突反馈；甲的预约仍为 A 09:00—10:00、有效；乙的预约不变 | 页面、数据", "AC-15": "AC-15 | FR-R03、FR-C07 | 甲在 A 有有效预约 | 甲改期到停用的 C | 改期失败；原预约不变 | 页面、直接请求、数据", "AC-16": "AC-16 | FR-C07 | — | 甲新建 C 的预约 | 被拒绝，不生成预约 | 直接请求、数据", "AC-17": "AC-17 | FR-R02、FR-X02、FR-M02 | 甲在 A 有一条正在进行中的预约 | 甲提交改期、取消；M 提交取消 | 均被拒绝；预约不变 | 直接请求、数据", "AC-18": "AC-18 | FR-X03、FR-X04、FR-L02、FR-L03 | 甲在 A 有尚未开始的有效预约 | 甲取消该预约 | 状态变为「已取消」；记录取消操作人甲和取消时间；A 该时段不再显示占用，乙可预约该时段；记录仍在甲的「我的预约」中显示「已取消」，无改期、取消操作 | 页面、数据", "AC-20": "AC-20 | FR-M03 | 乙在 A 有尚未开始的有效预约 | M 取消该预约，不填原因 | 被拒绝；预约不变 | 页面、直接请求", "AC-22": "AC-22 | FR-M02 | 乙在 B 有尚未开始的有效预约 | M 直接提交取消该预约 | 被拒绝；预约不变 | 直接请求、数据", "AC-23": "AC-23 | FR-R07 | 乙在 A 有尚未开始的有效预约 | M 查看该预约；M 直接提交对该预约的改期 | 界面不提供改期操作；改期请求被拒绝，预约不变 | 页面、直接请求", "AC-24": "AC-24 | FR-M05、FR-R05 | M 在 B 有本人创建、尚未开始的有效预约 | M 改期该预约至 B 空闲时段 | 按预约人规则改期成功 | 页面、数据", "FR-C05": "FR-C05 | 同一会议室、区间有交集的多个提交（新建或改期）被同时处理 | 最多一个提交成功；任何时刻同一会议室不存在两个互相冲突的有效预约 | 仅成功方产生或更新有效预约 | 失败方得到冲突反馈；文案未定稿（Q-12） | S-01 §3、§4、§6", "FR-B05": "FR-B05 | 全部校验通过，且与同一会议室的有效预约无冲突（FR-C04） | 创建预约 | 新增一条有效预约，立即占用该时段；「会议室」与「我的预约」均可见 | 提示成功〔建议〕；通知是否发送见 Q-10", "FR-R05": "FR-R05 | FR-R02—FR-R04 全部通过，且在并发中为成功方（FR-C05） | 执行改期 | 原占用释放；该预约的会议室、日期、时段更新为目标值，保持有效，主题与创建人不变 | 提示成功〔建议〕；「会议室」与「我的预约」反映新时段", "FR-R06": "FR-R06 | 目标冲突，或在并发中未成为成功方 | 改期失败 | 原预约的会议室、日期、时段和有效状态全部不变，原占用不释放 | 冲突反馈，文案未定稿（Q-12）", "FR-X03": "FR-X03 | 满足 FR-X01 | 执行取消 | 状态变为「已取消」；占用释放，该时段可被他人预约；保存取消操作人、取消时间 | 提示成功〔建议〕；通知见 Q-10", "FR-M04": "FR-M04 | 满足 FR-M01 且原因已填写 | 执行取消 | 状态变为「已取消」；占用释放；保存取消操作人、取消时间、取消原因；预约人的「我的预约」中该记录显示「已取消」 | 提示成功〔建议〕；是否通知预约人见 Q-10", "FR-R02": "FR-R02 | 原预约不是当前员工创建，或不是有效预约，或已经开始 | 拒绝改期 | 原预约不变 | 提示不可改期〔建议：「该预约当前不可改期」〕。开始时刻边界见 Q-07", "FR-X02": "FR-X02 | 不满足 FR-X01 | 拒绝取消 | 预约不变 | 提示不可取消〔建议：「该预约当前不可取消」〕；开始时刻边界见 Q-07", "FR-M02": "FR-M02 | 不满足 FR-M01（非所管会议室、「已取消」、已经开始） | 拒绝取消 | 预约不变 | 提示不可取消〔建议〕；已经开始的历史预约不可修改", "FR-X05": "FR-X05 | 对「已取消」预约提交改期或再次取消 | 拒绝 | 预约不变 | 提示不可操作〔建议〕", "FR-V02": "FR-V02 | 展示某个有效预约的占用 | 查看者为该预约的预约人，或为该会议室的管理员：显示会议主题；其他员工：只显示「已占用」 | — | 其他员工看不到主题。返回给其他员工的数据同样不包含主题〔建议，见 5.3〕", "FR-C01": "FR-C01 | 所有日期、时间的判断与展示 | 以 Asia/Shanghai 时区为准 | — | — | S-01 §2", "FR-C02": "FR-C02 | 提交新建或改期的时段 | 同时校验：①开始与结束在同一日；②开始、结束均为半小时刻度；③开始 ≥ 09:00，结束 ≤ 18:00；④开始早于结束 | 任一不满足：不创建、不修改任何预约 | 提示时间不符合规则（文案见 4.2.1〔建议〕） | S-01 §2、§5", "FR-C03": "FR-C03 | 按 FR-C02 可推出的边界 | 可选开始时间为 09:00—17:30，结束时间为 09:30—18:00；单次最短 30 分钟、最长 9 小时 | — | — | 由 S-01 §2 推出（D-01 I-01），请评审确认表述", "FR-C04": "FR-C04 | 判断两个预约是否冲突 | 占用区间为 [开始, 结束)。同一会议室的两个有效预约区间有交集即冲突；首尾相接（如 09:00—10:00 与 10:00—11:00）不冲突。「已取消」预约不参与判断 | — | — | S-01 §3、§7；同一员工跨会议室重叠见 Q-13", "FR-C06": "FR-C06 | 处理新建、改期、取消请求 | 时间规则、归属（创建人／管理范围）、预约状态、是否已开始、会议室启用状态、冲突均在提交处理时校验，不以前端按钮状态代替 | 校验不通过：不修改任何数据 | 返回对应失败反馈 | S-02 §明确结论 4", "FR-C07": "FR-C07 | 新建或改期的目标会议室为停用状态 | 拒绝提交 | 不创建、不修改任何预约 | 提示会议室不可预约〔建议〕 | S-01 §11", "FR-C08": "FR-C08 | 可预约的日期范围 | 示例日期、时间只用于说明规则，不限定日期范围。最小提前量、最远可预约天数、节假日限制均未确定 | — | — | S-01 §3；Q-02、Q-03、Q-04、Q-16", "FR-V01": "FR-V01 | 已登录员工查看某日占用 | 返回所有会议室在该日的有效预约占用时段 | 只读，不改变数据 | 「已取消」预约不显示为占用", "FR-M01": "FR-M01 | 管理员提交取消他人预约 | 校验：预约属于该管理员所管会议室、为有效、尚未开始 | — | —", "FR-V03": "FR-V03 | 管理员查看所管会议室中的预约 | 除主题外是否显示预约人姓名，材料未规定 | — | 见 Q-19", "FR-B02": "FR-B02 | 提交新建预约 | 创建人取提交处理时的当前登录员工，不接受指定其他员工 | 创建人为当前登录员工 | —", "FR-B04": "FR-B04 | 时间、会议室状态校验 | 按 FR-C02、FR-C07 校验；提前量等待确认项见 FR-C08 | 不通过：不创建预约 | 见界面设计中的结果反馈〔建议〕", "FR-B03": "FR-B03 | 会议主题为空 | 拒绝提交 | 不创建预约 | 提示主题必填〔建议文案：「请填写会议主题」〕", "FR-B06": "FR-B06 | 与同一会议室的有效预约冲突，或在并发中未成为成功方（FR-C05） | 拒绝提交 | 不创建预约，已有预约不受影响 | 冲突反馈，文案未定稿（Q-12）", "FR-B01": "FR-B01 | 员工提交新建预约 | 每次预约仅包含一间会议室、一个日期、一个时段 | — | 不支持周期、多会议室预约（范围外）", "FR-L01": "FR-L01 | 员工进入「我的预约」 | 返回创建人为当前登录员工的预约，含有效与「已取消」 | 只读 | 无预约时显示空状态〔建议：「暂无预约」〕", "FR-L02": "FR-L02 | 预约已被取消（预约人或管理员取消） | 记录仍保留在「我的预约」中 | 状态为「已取消」 | 显示「已取消」", "FR-R01": "FR-R01 | 预约人提交改期 | 改期内容仅限会议室、日期、时段；请求中携带的主题变更不生效 | 主题保持不变 | —", "FR-X01": "FR-X01 | 预约人提交取消 | 校验：本人创建、有效、尚未开始 | — | —", "FR-L03": "FR-L03 | 计算可操作项 | 仅当预约为有效且尚未开始时，可改期、可取消 | — | 「已取消」、已经开始的预约不提供改期与取消", "FR-R04": "FR-R04 | 冲突判断 | 按 FR-C04 判断目标与同一目标会议室中其他有效预约是否冲突；原预约自身的占用不计入 | — | 例：原 09:00—10:00 改为同室 09:30—10:30，不因原占用而冲突", "FR-R03": "FR-R03 | 目标不符合 FR-C02，或目标会议室停用（FR-C07） | 拒绝改期 | 原预约的会议室、日期、时段和有效状态不变 | 对应提示〔建议〕", "FR-R07": "FR-R07 | 管理员改期 | 管理员只能按 FR-R01—FR-R06 改期本人创建的预约；不能改期他人预约 | 他人预约不变 | 不向管理员提供他人预约的改期操作；服务端拒绝", "FR-X04": "FR-X04 | 取消成功后 | 记录保留在「我的预约」 | 不删除预约 | 显示「已取消」", "FR-M03": "FR-M03 | 取消原因为空 | 拒绝取消 | 预约不变 | 提示原因必填〔建议〕；纯空格是否视为空待确认（Q-25）", "FR-M05": "FR-M05 | 管理员操作本人创建的预约 | 按 4.2.3、4.2.4 预约人规则处理 | — | 本人预约位于所管会议室时，走哪条取消路径、是否需填原因见 Q-26"}}</script>
+<script>
+/* Saan Prototype runtime: review bar, annotations, roles, scenarios, themes. */
+(function () {
+  "use strict";
+  var D = JSON.parse(document.getElementById("p-data").textContent);
+  var pages = [], actions = {};
+  var S = { scenario: null, role: null, now: null, data: null, page: null, flash: null, dialog: null,
+            review: true, theme: D.theme };
+  var KIND = { proposal: "建议", open: "待确认", rule: "规则" };
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function role() { return D.roles.filter(function (r) { return r.id === S.role; })[0] || D.roles[0]; }
+  function visible() {
+    return pages.filter(function (p) { return !p.roles || p.roles.indexOf(S.role) >= 0; });
+  }
+  function ctx() {
+    return {
+      data: S.data, role: role(), now: S.now, rules: Proto.rules, scenario: S.scenario, esc: esc,
+      go: function (id) { S.page = id; S.flash = null; },
+      flash: function (text, opt) { S.flash = Object.assign({ text: text, kind: "ok" }, opt || {}); },
+      dialog: function (html) { S.dialog = html; },
+      close: function () { S.dialog = null; }
+    };
+  }
+  function attrs(opt) {
+    var out = "";
+    ["proposal", "open", "rule"].forEach(function (k) { if (opt && opt[k]) out += " data-" + k + '="' + esc(opt[k]) + '"'; });
+    return out;
+  }
+  function applyTheme() {
+    var t = D.themes[S.theme] || D.themes[Object.keys(D.themes)[0]];
+    Object.keys(t).forEach(function (k) { if (k !== "label") document.documentElement.style.setProperty("--" + k, t[k]); });
+  }
+  function option(value, label, current) {
+    return '<option value="' + esc(value) + '"' + (value === current ? " selected" : "") + ">" + esc(label) + "</option>";
+  }
+  function bar() {
+    var sc = D.scenarios.map(function (s) {
+      return option(s.id, s.label + (s.acceptance && s.acceptance.length ? "（" + s.acceptance.join("、") + "）" : ""), S.scenario.id);
+    }).join("");
+    var ro = D.roles.map(function (r) { return option(r.id, r.label, S.role); }).join("");
+    var th = Object.keys(D.themes).map(function (k) { return option(k, D.themes[k].label || k, S.theme); }).join("");
+    document.getElementById("p-bar").innerHTML =
+      '<span class="p-tag-review">评审原型 · 示例数据为虚构</span>' +
+      '<label>场景 <select data-bar="scenario">' + sc + "</select></label>" +
+      '<label>角色 <select data-bar="role">' + ro + "</select></label>" +
+      '<label>主题 <select data-bar="theme">' + th + "</select></label>" +
+      '<label><input type="checkbox" data-bar="review"' + (S.review ? " checked" : "") + "> 标注</label>" +
+      "<span>当前时间 " + esc(new Intl.DateTimeFormat(D.language, { timeZone: D.timezone, dateStyle: "medium", timeStyle: "short" }).format(S.now)) +
+      "（" + esc(D.timezone) + "）</span>";
+  }
+  function decorate(root) {
+    ["proposal", "open", "rule"].forEach(function (k) {
+      root.querySelectorAll("[data-" + k + "]").forEach(function (el) {
+        el.getAttribute("data-" + k).split(/\s+/).filter(Boolean).forEach(function (id) {
+          var b = document.createElement("span");
+          b.className = "p-badge " + k;
+          b.textContent = (k === "proposal" ? "建议 " : "") + id;
+          b.setAttribute("data-def", id);
+          b.title = KIND[k] + " · " + id + "\n" + (D.defs[id] || "来源中未找到该编号");
+          el.appendChild(b);
+        });
+      });
+    });
+  }
+  function render() {
+    document.getElementById("p-pop").hidden = true;  // its badge is about to be replaced
+    applyTheme();
+    document.body.classList.toggle("p-review-off", !S.review);
+    bar();
+    var vis = visible();
+    if (!vis.some(function (p) { return p.id === S.page; })) S.page = vis.length ? vis[0].id : null;
+    document.getElementById("p-nav").innerHTML = vis.map(function (p) {
+      return '<button data-go="' + esc(p.id) + '"' + (p.id === S.page ? ' aria-current="page"' : "") + attrs(p) + ">" + esc(p.label) + "</button>";
+    }).join("");
+    var page = vis.filter(function (p) { return p.id === S.page; })[0];
+    var html = S.flash ? '<div class="p-flash ' + esc(S.flash.kind) + '"' + attrs(S.flash) + ">" + esc(S.flash.text) + "</div>" : "";
+    html += page ? page.render(ctx()) : '<div class="p-empty">当前角色没有可见页面</div>';
+    if (S.dialog) html += '<div class="p-dialog"><div>' + S.dialog + "</div></div>";
+    var main = document.getElementById("p-main");
+    main.innerHTML = html;
+    decorate(document.getElementById("p-nav"));
+    decorate(main);
+  }
+  function load(id) {
+    var sc = D.scenarios.filter(function (s) { return s.id === id; })[0] || D.scenarios[0];
+    S.scenario = sc; S.role = sc.role || D.roles[0].id; S.now = new Date(sc.now || Date.now());
+    S.data = JSON.parse(JSON.stringify(sc.data || {})); S.flash = null; S.dialog = null;
+    if (sc.page) S.page = sc.page;
+    render();
+  }
+  function popover(badge) {
+    var pop = document.getElementById("p-pop"), r = badge.getBoundingClientRect(), id = badge.getAttribute("data-def");
+    pop.innerHTML = "<strong>" + esc(id) + "</strong><br>" + esc(D.defs[id] || "来源中未找到该编号");
+    pop.style.left = Math.min(r.left, innerWidth - 380) + "px";
+    pop.style.top = (r.bottom + 6) + "px";
+    pop.hidden = false;
+  }
+  function run(name, el, extra) {
+    var fn = actions[name];
+    if (!fn) { S.flash = { text: "原型未实现动作：" + name, kind: "error" }; return render(); }
+    fn(ctx(), Object.assign({}, el.dataset, extra || {}), el);
+    render();
+  }
+
+  document.addEventListener("click", function (e) {
+    var pop = document.getElementById("p-pop");
+    var badge = e.target.closest(".p-badge.open");
+    if (badge) { e.preventDefault(); e.stopPropagation(); return popover(badge); }
+    pop.hidden = true;
+    var go = e.target.closest("[data-go]");
+    if (go) { S.page = go.getAttribute("data-go"); S.flash = null; S.dialog = null; return render(); }
+    var act = e.target.closest("button[data-action], a[data-action]");
+    if (act && !act.disabled) { e.preventDefault(); run(act.getAttribute("data-action"), act); }
+  });
+  document.addEventListener("submit", function (e) {
+    var form = e.target.closest("form[data-action]");
+    if (!form) return;
+    e.preventDefault();
+    var fields = {};
+    new FormData(form).forEach(function (v, k) { fields[k] = v; });
+    run(form.getAttribute("data-action"), form, { fields: fields });
+  });
+  document.addEventListener("change", function (e) {
+    var k = e.target.getAttribute("data-bar");
+    if (!k) return;
+    if (k === "scenario") return load(e.target.value);
+    if (k === "role") { S.role = e.target.value; S.flash = null; S.dialog = null; }
+    if (k === "theme") S.theme = e.target.value;
+    if (k === "review") S.review = e.target.checked;
+    render();
+  });
+
+  window.Proto = {
+    rules: {},
+    page: function (id, def) { pages.push(Object.assign({ id: id }, def)); },
+    action: function (name, fn) { actions[name] = fn; },
+    start: function () { load(D.scenarios[0] && D.scenarios[0].id); },
+    esc: esc
+  };
+})();
+
+</script>
+<script>
+/* Confirmed rules only (需求规格说明书 V0.1 第 4 章). Each function is pure and names the rule it implements.
+   Open questions are never decided here: where a rule depends on one, the function returns {open: "Q-…"}
+   and the page shows a pending message instead of an answer. */
+(function (R) {
+  var TZ = "+08:00";                                    // FR-C01：以 Asia/Shanghai 为准
+
+  R.toMin = function (hhmm) {                           // "09:30" -> 570；格式不对返回 NaN
+    var m = /^(\d{2}):(\d{2})$/.exec(hhmm || "");
+    return m ? Number(m[1]) * 60 + Number(m[2]) : NaN;
+  };
+  R.hhmm = function (min) {
+    return String(Math.floor(min / 60)).padStart(2, "0") + ":" + String(min % 60).padStart(2, "0");
+  };
+  R.at = function (date, hhmm) {                        // FR-C01
+    return new Date(date + "T" + hhmm + ":00" + TZ);
+  };
+  R.today = function (now) {                            // FR-C01：当前日期按 Asia/Shanghai
+    return new Date(now.getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+  };
+  R.stamp = function (now) {                            // FR-C01：记录时间按 Asia/Shanghai 展示
+    return new Date(now.getTime() + 8 * 3600 * 1000).toISOString().slice(0, 16).replace("T", " ");
+  };
+
+  R.timeProblem = function (date, start, end) {         // FR-C02
+    var s = R.toMin(start), e = R.toMin(end);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date || "") || isNaN(s) || isNaN(e)) return "FR-C02";
+    if (s % 30 || e % 30) return "FR-C02";              // ② 半小时刻度
+    if (s < 9 * 60 || e > 18 * 60) return "FR-C02";     // ③ 09:00—18:00
+    if (s >= e) return "FR-C02";                         // ④ 开始早于结束（① 同一日：表单只有一个日期）
+    return null;
+  };
+
+  R.room = function (data, id) {
+    return data.rooms.filter(function (r) { return r.id === id; })[0] || null;
+  };
+  R.roomEnabled = function (room) {                     // FR-C07
+    return !!(room && room.enabled);
+  };
+
+  R.overlaps = function (a, b) {                        // FR-C04：[开始, 结束) 左闭右开，首尾相接不冲突
+    return a.room === b.room && a.date === b.date &&
+      R.toMin(a.start) < R.toMin(b.end) && R.toMin(b.start) < R.toMin(a.end);
+  };
+  R.conflict = function (data, target, exceptId) {      // FR-C04；FR-R04 原预约自身不计入
+    return data.bookings.filter(function (b) {
+      return b.status === "有效" && b.id !== exceptId && R.overlaps(b, target);   // 「已取消」不参与
+    })[0] || null;
+  };
+
+  R.startState = function (b, now) {                   // 尚未开始／已经开始；恰好等于开始时刻见 Q-07
+    var t = R.at(b.date, b.start).getTime(), n = now.getTime();
+    return n < t ? "not_started" : n > t ? "started" : "boundary";
+  };
+
+  R.isRoomAdmin = function (room, roleId) {             // 4.3；对应关系来源未定（Q-01），原型取示例数据
+    return !!(room && (room.admins || []).indexOf(roleId) >= 0);
+  };
+  R.canSeeTopic = function (b, room, roleId) {          // FR-V02
+    return b.creator === roleId || R.isRoomAdmin(room, roleId);
+  };
+
+  R.bookProblem = function (f, data) {                  // FR-B03、FR-B04（FR-C02、FR-C07）、FR-B06（FR-C04）
+    if (!f.topic) return { rule: "FR-B03" };            // 纯空格是否视为空未定（Q-05），原型不判断
+    if (R.timeProblem(f.date, f.start, f.end)) return { rule: "FR-C02" };
+    if (!R.roomEnabled(R.room(data, f.room))) return { rule: "FR-C07" };
+    if (R.conflict(data, f)) return { rule: "FR-B06" };
+    return null;
+  };
+  R.newBooking = function (f, roleId, id) {             // FR-B02 创建人取当前登录员工；FR-B05 成为有效预约
+    return { id: id, room: f.room, date: f.date, start: f.start, end: f.end, topic: f.topic,
+             creator: roleId, status: "有效" };
+  };
+
+  R.ownerProblem = function (b, roleId, now, kind) {    // FR-L03；改期 FR-R02，取消 FR-X01/FR-X02；已取消 FR-X05
+    if (b.status === "已取消") return { rule: "FR-X05" };
+    if (b.creator !== roleId) return { rule: kind === "cancel" ? "FR-X02" : "FR-R02" };
+    var st = R.startState(b, now);
+    if (st === "boundary") return { open: "Q-07" };
+    if (st === "started") return { rule: kind === "cancel" ? "FR-X02" : "FR-R02" };
+    return null;
+  };
+
+  R.rescheduleProblem = function (b, t, data, roleId, now) {   // FR-R01—FR-R06、FR-R07
+    var p = R.ownerProblem(b, roleId, now, "reschedule");
+    if (p) return p;
+    if (R.timeProblem(t.date, t.start, t.end)) return { rule: "FR-R03", why: "FR-C02" };
+    if (!R.roomEnabled(R.room(data, t.room))) return { rule: "FR-R03", why: "FR-C07" };
+    if (t.room === b.room && t.date === b.date && t.start === b.start && t.end === b.end) return { open: "Q-22" };
+    if (R.conflict(data, t, b.id)) return { rule: "FR-R06" };
+    return null;
+  };
+  R.applyReschedule = function (b, t) {                 // FR-R05；FR-R01 主题、创建人不变
+    b.room = t.room; b.date = t.date; b.start = t.start; b.end = t.end;
+  };
+
+  R.cancel = function (b, roleId, now, reason) {        // FR-X03 / FR-M04：状态变为「已取消」，保存操作人与时间
+    b.status = "已取消"; b.cancelledBy = roleId; b.cancelledAt = R.stamp(now);
+    if (reason !== undefined) b.cancelReason = reason;
+  };
+
+  R.adminProblem = function (b, room, roleId, now) {    // FR-M01、FR-M02、FR-M05
+    if (b.creator === roleId) return { open: "Q-26" };  // 本人预约走哪条取消路径未定
+    if (!R.isRoomAdmin(room, roleId) || b.status !== "有效") return { rule: "FR-M02" };
+    var st = R.startState(b, now);
+    if (st === "boundary") return { open: "Q-07" };
+    if (st === "started") return { rule: "FR-M02" };
+    return null;
+  };
+  R.adminCancelProblem = function (b, room, roleId, now, reason) {   // FR-M01—FR-M03
+    var p = R.adminProblem(b, room, roleId, now);
+    if (p) return p;
+    if (!reason) return { rule: "FR-M03" };             // 纯空格是否视为空未定（Q-25），原型不判断
+    return null;
+  };
+})(Proto.rules);
+
+</script>
+<script>
+/* pages/shared.js */
+/* Shared dialogs and actions: 新建预约、改期、取消预约、管理员取消预约, and the booking detail opened from 会议室.
+   All wording here is 〔建议〕 from the specification unless listed in manifest.confirmed_text. */
+window.RB = (function () {
+  var MSG = {
+    "FR-B03": "请填写会议主题",
+    "FR-C02": "请选择 09:00—18:00 内的半小时整点时段，且开始早于结束",
+    "FR-C07": "该会议室暂不可预约",
+    "FR-B06": "该时段已被占用，请选择其他时段",
+    "FR-R06": "目标时段已被占用，原预约保持不变",
+    "FR-R02": "该预约当前不可改期",
+    "FR-X02": "该预约当前不可取消",
+    "FR-X05": "该预约已取消，不可操作",
+    "FR-M02": "该预约当前不可取消",
+    "FR-M03": "请填写取消原因",
+    "Q-07": "恰好到开始时刻是否算“已经开始”尚未确定，原型不作判断",
+    "Q-22": "改期目标与原预约完全相同时如何处理尚未确定，原型不作判断",
+    "Q-26": "管理员本人预约位于所管会议室时走哪条取消路径尚未确定"
+  };
+  var CONFLICT = { "FR-B06": 1, "FR-R06": 1 };
+
+  /* A rejected action: text from the specification's proposed wording, annotated with the rule it comes from. */
+  function problemOpts(p) {
+    if (p.open) return { text: MSG[p.open], opt: { kind: "error", open: p.open } };
+    var shown = p.why || p.rule;
+    var rule = p.why ? p.rule + " " + p.why : p.rule;
+    var opt = { kind: "error", rule: rule, proposal: shown };
+    if (CONFLICT[p.rule]) opt.open = "Q-12";              // 冲突反馈文案未定稿
+    return { text: MSG[shown], opt: opt };
+  }
+  function fail(c, p) { var x = problemOpts(p); c.flash(x.text, x.opt); }
+  function errorHtml(c, p) {
+    if (!p) return "";
+    var x = problemOpts(p), a = "";
+    ["proposal", "open", "rule"].forEach(function (k) { if (x.opt[k]) a += " data-" + k + '="' + c.esc(x.opt[k]) + '"'; });
+    return '<div class="p-flash error"' + a + ">" + c.esc(x.text) + "</div>";
+  }
+
+  function roomName(c, id) { var r = c.rules.room(c.data, id); return r ? r.name : id; }
+  function roleLabel(id) {
+    var labels = { jia: "员工甲", yi: "员工乙", bing: "员工丙", m: "管理员 M" };
+    return labels[id] || id;
+  }
+  function find(c, id) { return c.data.bookings.filter(function (b) { return b.id === id; })[0]; }
+
+  function opt(v, label, cur) {
+    return '<option value="' + Proto.esc(v) + '"' + (v === cur ? " selected" : "") + ">" + Proto.esc(label) + "</option>";
+  }
+  /* FR-C03〔建议〕：选项只提供半小时刻度；开始 09:00—17:30，结束 09:30—18:00 */
+  function timeOptions(c, from, to, cur) {
+    var out = opt("", "请选择", cur);
+    for (var m = from; m <= to; m += 30) out += opt(c.rules.hhmm(m), c.rules.hhmm(m), cur);
+    return out;
+  }
+  /* 4.2.1〔建议〕：只可选择启用的会议室；服务端仍按 FR-C07 校验 */
+  function roomOptions(c, cur) {
+    return c.data.rooms.filter(function (r) { return c.rules.roomEnabled(r); })
+      .map(function (r) { return opt(r.id, r.name + "（容量 " + r.capacity + "）", cur); }).join("");
+  }
+  function slotFields(c, v) {
+    return '<label class="p-field" data-proposal="FR-C07"><span>会议室</span><select name="room">' + roomOptions(c, v.room) + "</select></label>" +
+      '<label class="p-field"><span>日期</span><input type="date" name="date" value="' + c.esc(v.date) + '"></label>' +
+      '<div class="p-row">' +
+      '<label class="p-field" data-proposal="FR-C03"><span>开始时间</span><select name="start">' + timeOptions(c, 9 * 60, 17 * 60 + 30, v.start) + "</select></label>" +
+      '<label class="p-field" data-proposal="FR-C03"><span>结束时间</span><select name="end">' + timeOptions(c, 9 * 60 + 30, 18 * 60, v.end) + "</select></label>" +
+      "</div>";
+  }
+
+  /* ---------- 新建预约 4.2.1 ---------- */
+  function bookDialog(c, v, p) {
+    return '<h2 class="p-h" data-proposal="FR-B05">新建预约</h2>' + errorHtml(c, p) +
+      '<form data-action="book">' + slotFields(c, v) +
+      '<label class="p-field" data-rule="FR-B03"><span>会议主题 *</span><input name="topic" value="' + c.esc(v.topic || "") + '"></label>' +
+      '<p class="p-pending p-review-only" data-open="Q-05">主题长度上限、纯空格是否算未填写待定，原型不限制长度、不去除空格</p>' +
+      '<div class="p-field" data-rule="FR-B02"><span data-proposal="FR-B02">创建人</span><div>' + c.esc(c.role.label) + "</div></div>" +
+      '<p class="p-pending p-review-only" data-open="Q-02 Q-04 Q-16">最小提前量、最远可预约天数、人均有效预约上限、节假日限制待定，原型不做这些校验（也不拦截当前时刻之前的时段）</p>' +
+      '<p class="p-pending p-review-only" data-open="Q-13">同一员工能否同时段持有不同会议室的预约待定，原型只按同一会议室判断冲突（FR-C04）</p>' +
+      '<p class="p-pending p-review-only" data-open="Q-14">是否填写参会人数并按容量校验待定，原型只展示容量</p>' +
+      '<div class="p-row"><button class="p-btn primary" data-proposal="FR-B05">提交预约</button>' +
+      '<button type="button" class="p-btn" data-action="closeDialog" data-proposal="FR-B05">返回</button></div>' +
+      '<p class="p-pending p-review-only" data-open="Q-11">防止重复点击、超时重试的方式待定，原型不模拟</p>' +
+      '<p class="p-pending p-review-only" data-open="Q-12">冲突反馈及各项提示的正式文案未定稿，原型使用规格中的建议文案</p>' +
+      "</form>";
+  }
+  Proto.action("pick", function (c, a) {               // 4.2.1〔建议〕从空闲格进入，预填会议室、日期、开始时间
+    c.dialog(bookDialog(c, { room: a.room, date: a.date, start: a.start, end: "", topic: "" }));
+  });
+  Proto.action("book", function (c, a) {
+    var f = a.fields;
+    var p = c.rules.bookProblem(f, c.data);
+    if (p) return c.dialog(bookDialog(c, f, p));        // 失败时保留已填写内容〔建议〕
+    c.data.bookings.push(c.rules.newBooking(f, c.role.id, "n" + (c.data.bookings.length + 1)));
+    c.close();
+    c.data.viewDate = f.date;
+    c.flash("预约成功", { proposal: "FR-B05", rule: "FR-B05", open: "Q-10" });
+  });
+
+  /* ---------- 改期 4.2.3 ---------- */
+  function rescheduleDialog(c, b, v, p) {
+    return '<h2 class="p-h" data-proposal="FR-R05">改期</h2>' + errorHtml(c, p) +
+      '<table class="p-table" data-rule="FR-R01"><tbody>' +
+      "<tr><th>原会议室</th><td>" + c.esc(roomName(c, b.room)) + "</td></tr>" +
+      "<tr><th>原时间</th><td>" + c.esc(b.date + " " + b.start + "—" + b.end) + "</td></tr>" +
+      "<tr><th>会议主题</th><td>" + c.esc(b.topic) + "</td></tr></tbody></table>" +
+      '<form data-action="reschedule" data-id="' + c.esc(b.id) + '" style="margin-top:12px">' +
+      '<p data-proposal="FR-R03">目标默认为原预约的值</p>' + slotFields(c, v) +
+      '<p class="p-pending p-review-only" data-open="Q-03">改期是否有提前量要求待定，原型不校验</p>' +
+      '<p class="p-pending p-review-only" data-open="Q-22">目标与原预约完全相同时如何处理待定，原型提交后只提示待确认</p>' +
+      '<p class="p-pending p-review-only" data-open="Q-06">原会议室已停用时能否改期到其他会议室待定，示例数据中没有这种预约</p>' +
+      '<p class="p-pending p-review-only" data-open="Q-15">改期是否保留原会议室、原时段的变更历史待定，原型不保存历史</p>' +
+      '<div class="p-row"><button class="p-btn primary" data-proposal="FR-R05">确认改期</button>' +
+      '<button type="button" class="p-btn" data-action="closeDialog" data-proposal="FR-R05">返回</button></div></form>';
+  }
+  Proto.action("askReschedule", function (c, a) {
+    var b = find(c, a.id);
+    var p = c.rules.ownerProblem(b, c.role.id, c.now, "reschedule");
+    if (p) { c.close(); return fail(c, p); }
+    c.dialog(rescheduleDialog(c, b, { room: b.room, date: b.date, start: b.start, end: b.end }));
+  });
+  Proto.action("reschedule", function (c, a) {
+    var b = find(c, a.id), t = a.fields;
+    var p = c.rules.rescheduleProblem(b, t, c.data, c.role.id, c.now);
+    if (p) return c.dialog(rescheduleDialog(c, b, t, p));   // FR-R06：原预约不变；停留在改期界面〔建议〕
+    c.rules.applyReschedule(b, t);
+    c.close();
+    c.flash("改期成功", { proposal: "FR-R05", rule: "FR-R05", open: "Q-10" });
+  });
+
+  /* ---------- 预约人取消 4.2.4 ---------- */
+  Proto.action("askCancel", function (c, a) {
+    var b = find(c, a.id);
+    var p = c.rules.ownerProblem(b, c.role.id, c.now, "cancel");
+    if (p) { c.close(); return fail(c, p); }
+    c.dialog('<h2 class="p-h" data-proposal="FR-X03">确定取消该预约？</h2>' +
+      "<p>" + c.esc(roomName(c, b.room) + " · " + b.date + " " + b.start + "—" + b.end + " · " + b.topic) + "</p>" +
+      '<p class="p-pending p-review-only" data-open="Q-09">员工自己取消时是否填写原因待定，原型不设原因输入</p>' +
+      '<div class="p-row"><button class="p-btn danger" data-action="cancel" data-id="' + c.esc(b.id) + '" data-proposal="FR-X03">确定取消</button>' +
+      '<button class="p-btn" data-action="closeDialog" data-proposal="FR-X03">不取消</button></div>');
+  });
+  Proto.action("cancel", function (c, a) {
+    var b = find(c, a.id);
+    var p = c.rules.ownerProblem(b, c.role.id, c.now, "cancel");   // FR-X01、FR-X02、FR-X05
+    c.close();
+    if (p) return fail(c, p);
+    c.rules.cancel(b, c.role.id, c.now);
+    c.flash("预约已取消", { proposal: "FR-X03", rule: "FR-X03", open: "Q-10" });
+  });
+
+  /* ---------- 管理员取消 4.3.1 ---------- */
+  function adminCancelDialog(c, b, reason, p) {
+    return '<h2 class="p-h" data-proposal="FR-M04">取消预约</h2>' + errorHtml(c, p) +
+      "<p>" + c.esc(roomName(c, b.room) + " · " + b.date + " " + b.start + "—" + b.end + " · " + b.topic) + "</p>" +
+      '<form data-action="adminCancel" data-id="' + c.esc(b.id) + '">' +
+      '<label class="p-field" data-rule="FR-M03"><span>取消原因 *</span><textarea name="reason">' + c.esc(reason || "") + "</textarea></label>" +
+      '<p class="p-pending p-review-only" data-open="Q-25">原因长度上限、纯空格是否算未填写待定，原型不限制长度、不去除空格</p>' +
+      '<div class="p-row"><button class="p-btn danger" data-proposal="FR-M04">确认取消</button>' +
+      '<button type="button" class="p-btn" data-action="closeDialog" data-proposal="FR-M04">返回</button></div></form>';
+  }
+  Proto.action("askAdminCancel", function (c, a) {
+    var b = find(c, a.id), room = c.rules.room(c.data, b.room);
+    var p = c.rules.adminProblem(b, room, c.role.id, c.now);
+    if (p) { c.close(); return fail(c, p); }
+    c.dialog(adminCancelDialog(c, b, ""));
+  });
+  Proto.action("adminCancel", function (c, a) {
+    var b = find(c, a.id), room = c.rules.room(c.data, b.room), reason = a.fields.reason;
+    var p = c.rules.adminCancelProblem(b, room, c.role.id, c.now, reason);
+    if (p && p.rule === "FR-M03") return c.dialog(adminCancelDialog(c, b, reason, p));
+    c.close();
+    if (p) return fail(c, p);
+    c.rules.cancel(b, c.role.id, c.now, reason);
+    c.flash("预约已取消", { proposal: "FR-M04", rule: "FR-M04", open: "Q-10" });
+  });
+
+  /* ---------- 从「会议室」占用块打开的预约详情 ---------- */
+  function ownerButtons(c, b) {
+    var room = c.rules.room(c.data, b.room), out = "";
+    var pr = c.rules.ownerProblem(b, c.role.id, c.now, "reschedule");
+    var pc = c.rules.ownerProblem(b, c.role.id, c.now, "cancel");
+    if (pr && pr.open) return '<p class="p-pending p-review-only" data-open="Q-07">该预约恰好到开始时刻，能否改期、取消待定</p>';
+    if (!pr) out += '<button class="p-btn" data-action="askReschedule" data-id="' + c.esc(b.id) + '" data-rule="FR-L03" data-proposal="FR-L03">改期</button>';
+    if (!pc && c.rules.isRoomAdmin(room, c.role.id))
+      out += '<p class="p-pending p-review-only" data-open="Q-26">本人预约位于所管会议室：取消走预约人路径还是管理员路径（是否必填原因）待定，原型暂不提供取消</p>';
+    else if (!pc) out += '<button class="p-btn danger" data-action="askCancel" data-id="' + c.esc(b.id) + '" data-rule="FR-L03" data-proposal="FR-L03">取消预约</button>';
+    return out;
+  }
+  Proto.action("openBooking", function (c, a) {
+    var b = find(c, a.id), room = c.rules.room(c.data, b.room);
+    if (!b || !c.rules.canSeeTopic(b, room, c.role.id)) return;   // FR-V02：其他员工没有详情入口
+    var mine = b.creator === c.role.id, acts = "";
+    if (mine) acts = ownerButtons(c, b);
+    else if (!c.rules.adminProblem(b, room, c.role.id, c.now))
+      acts = '<button class="p-btn danger" data-action="askAdminCancel" data-id="' + c.esc(b.id) + '" data-rule="FR-M01" data-proposal="FR-M01">取消预约</button>';
+    c.dialog('<h2 class="p-h" data-rule="FR-V02">' + c.esc(b.topic) + "</h2>" +
+      '<table class="p-table"><tbody>' +
+      "<tr><th>会议室</th><td>" + c.esc(room.name) + "</td></tr>" +
+      "<tr><th>时间</th><td>" + c.esc(b.date + " " + b.start + "—" + b.end) + "</td></tr>" +
+      (mine ? "" : '<tr><th>预约人</th><td><span class="p-pending p-review-only" data-open="Q-19">管理员是否能看到预约人待定，原型不显示</span></td></tr>') +
+      "</tbody></table>" +
+      (mine ? "" : '<p class="p-review-only" data-rule="FR-R07">评审说明：管理员不能改期他人预约，此处不提供改期</p>') +
+      '<div class="p-row" style="margin-top:12px">' + acts +
+      '<button class="p-btn" data-action="closeDialog" data-proposal="FR-V01">关闭</button></div>');
+  });
+
+  Proto.action("closeDialog", function (c) { c.close(); });
+
+  return { MSG: MSG, fail: fail, roomName: roomName, roleLabel: roleLabel, ownerButtons: ownerButtons };
+})();
+
+/* pages/rooms.js */
+/* 4.1.1 查看会议室占用；4.3.1 管理员取消的入口（位置待定 Q-24） */
+Proto.page("rooms", {
+  label: "会议室",
+  render: function (c) {
+    var R = c.rules, date = c.data.viewDate || R.today(c.now);
+    var isAdmin = c.data.rooms.some(function (r) { return R.isRoomAdmin(r, c.role.id); });
+    var head = "";
+    for (var h = 9 * 60; h < 18 * 60; h += 30)
+      head += '<div style="font-size:11px;color:var(--muted)">' + (h % 60 ? "" : c.esc(R.hhmm(h))) + "</div>";
+
+    function timeline(room) {
+      var cells = "", m = 9 * 60;
+      while (m < 18 * 60) {
+        var b = c.data.bookings.filter(function (x) {      // FR-V01：只显示有效预约
+          return x.status === "有效" && x.room === room.id && x.date === date && R.toMin(x.start) <= m && m < R.toMin(x.end);
+        })[0];
+        if (b) {
+          var end = R.toMin(b.end), span = (end - m) / 30, when = b.start + "—" + b.end;
+          var style = ' style="grid-column: span ' + span + '"';
+          cells += R.canSeeTopic(b, room, c.role.id)
+            ? '<button class="p-slot busy"' + style + ' title="' + c.esc(when + " " + b.topic) + '" data-action="openBooking" data-id="' + c.esc(b.id) + '" data-rule="FR-V02">' + c.esc(b.topic) + "</button>"
+            : '<div class="p-slot busy"' + style + ' title="' + c.esc(when) + ' 已占用" data-rule="FR-V02">已占用</div>';
+          m = end;
+        } else {
+          cells += '<button class="p-slot" title="' + c.esc(R.hhmm(m)) + ' 空闲" data-action="pick" data-room="' + c.esc(room.id) +
+            '" data-date="' + c.esc(date) + '" data-start="' + c.esc(R.hhmm(m)) + '"></button>';
+          m += 30;
+        }
+      }
+      return '<div class="p-timeline">' + head + '</div><div class="p-timeline" style="margin-top:2px">' + cells + "</div>";
+    }
+
+    var rooms = c.data.rooms.filter(function (r) { return R.roomEnabled(r); }).map(function (r) {
+      return '<section class="p-card"><div class="p-row" style="margin-bottom:8px"><strong>' + c.esc(r.name) + "</strong>" +
+        '<span style="color:var(--muted)">容量 ' + c.esc(r.capacity) + "</span></div>" + timeline(r) + "</section>";
+    }).join("");
+
+    return '<section class="p-card"><h2 class="p-h">会议室</h2>' +
+      '<form class="p-row" data-action="setDate">' +
+      '<label class="p-row"><span data-proposal="FR-C08">日期</span><input type="date" name="date" value="' + c.esc(date) + '"></label>' +
+      '<button class="p-btn" data-proposal="FR-C08">查看</button>' +
+      '<span style="color:var(--muted)" data-proposal="FR-C01">默认显示当天；时间均为 Asia/Shanghai</span></form>' +
+      '<p style="color:var(--muted)" data-proposal="FR-V01">以半小时为格，覆盖 09:00—18:00。点击空闲格发起新建预约；点击可看到主题的占用块查看详情</p>' +
+      '<p class="p-pending p-review-only" data-open="Q-20">停用的会议室（示例中的会议室 C）是否在此展示、如何标识待定，原型暂不列出</p>' +
+      (isAdmin ? '<p class="p-pending p-review-only" data-open="Q-01 Q-24">管理员与会议室的对应关系来源待定，原型按示例数据：M 负责会议室 A；管理员取消入口是否就在本页待定，原型暂放在本页占用块的详情中</p>' : "") +
+      "</section>" + rooms;
+  }
+});
+Proto.action("setDate", function (c, a) {
+  if (a.fields.date) c.data.viewDate = a.fields.date;
+});
+
+/* pages/mine.js */
+/* 4.2.2 我的预约；改期、取消入口（4.2.3、4.2.4） */
+Proto.page("mine", {
+  label: "我的预约",
+  render: function (c) {
+    var R = c.rules;
+    var rows = c.data.bookings.filter(function (b) { return b.creator === c.role.id; });   // FR-L01
+    if (!rows.length)
+      return '<section class="p-card"><h2 class="p-h">我的预约</h2><div class="p-empty" data-proposal="FR-L01">暂无预约</div></section>';
+    var body = rows.map(function (b) {
+      var status, acts;
+      if (b.status === "已取消") {                                                         // FR-L02、FR-X04
+        status = '<span class="p-tag" data-rule="FR-L02">已取消</span>' +
+          '<div style="font-size:12px;color:var(--muted)" data-proposal="FR-X03">取消时间 ' + c.esc(b.cancelledAt || "") + "</div>";
+        acts = "";                                                                            // FR-L03、FR-X05
+      } else {
+        var started = R.startState(b, c.now) !== "not_started";
+        status = started
+          ? '<span class="p-tag" data-proposal="FR-L02" data-open="Q-21">已预约</span>'
+          : '<span class="p-tag" data-proposal="FR-L02">已预约</span>';
+        acts = RB.ownerButtons(c, b);
+      }
+      return "<tr><td>" + c.esc(RB.roomName(c, b.room)) + "</td><td>" + c.esc(b.date) + "</td><td>" + c.esc(b.start + "—" + b.end) +
+        "</td><td>" + c.esc(b.topic) + "</td><td>" + status + '</td><td><div class="p-row">' + (acts || "—") + "</div></td></tr>";
+    }).join("");
+    return '<section class="p-card"><h2 class="p-h">我的预约</h2>' +
+      '<table class="p-table"><thead><tr><th>会议室</th><th>日期</th><th>时间</th><th>会议主题</th><th>状态</th><th>操作</th></tr></thead><tbody>' +
+      body + "</tbody></table>" +
+      '<p class="p-pending p-review-only" data-open="Q-21" style="margin-top:12px">排序方式、有效预约的正式显示文案、已开始或已结束的有效预约如何显示待定；原型按数据顺序列出，有效预约暂用建议文案「已预约」</p>' +
+      '<p class="p-pending p-review-only" data-open="Q-08">取消记录保存多久、是否向预约人显示取消操作人和原因待定，原型只显示取消时间</p>' +
+      "</section>";
+  }
+});
+
+</script>
+<script>Proto.start();</script>
+</body>
+</html>
