@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN" data-language-entry="explicit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Saan Prototype：把需求规格变成单个离线 HTML 评审原型，可切换角色和场景，执行已确认规则，并在界面上标出待确认事项。">
+<title>Saan Prototype</title>
+<link rel="canonical" href="https://kits.yishan.app/prototype/zh/">
+<link rel="alternate" hreflang="en" href="../">
+<link rel="alternate" hreflang="zh-CN" href="./">
+<script src="../../site-preferences.js"></script>
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../prototype.css?v=ce55511b56">
+<link rel="stylesheet" href="../../site.css?v=85e8aacbdc">
+<script src="../../site.js" defer></script>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-top">
+      <nav class="site-nav" aria-label="技能导航"><a href="../../zh/">Saan Kits</a><a href="../../diagram/zh/">Diagram</a><a href="../../mermaid/zh/">Mermaid</a><a href="../../discovery/zh/">Discovery</a><a href="../../prd-writing/zh/">PRD Writing</a><a href="./" aria-current="page">Prototype</a><a href="../../inquiry/zh/">Inquiry</a></nav>
+      <div class="site-controls">
+      <details class="preference-picker" data-preference="language" name="site-preferences">
+        <summary class="preference-trigger" aria-label="语言" title="语言"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
+        <nav class="preference-menu" aria-label="语言"><a href="./?lang=zh" data-language="zh" lang="zh-CN" hreflang="zh-CN" aria-current="page">中文</a><a href="../?lang=en" data-language="en" lang="en" hreflang="en">English</a></nav>
+      </details>
+      <details class="preference-picker" data-preference="theme" data-theme-controls name="site-preferences" hidden>
+        <summary class="preference-trigger" data-preference-label="外观" aria-label="外观" title="外观"><svg data-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><svg data-theme-icon="light" hidden viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="dark" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></summary>
+        <div class="preference-menu" role="group" aria-label="外观"><button type="button" data-theme-choice="system" aria-label="跟随系统" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>跟随系统</span></button><button type="button" data-theme-choice="light" aria-label="浅色" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><span>浅色</span></button><button type="button" data-theme-choice="dark" aria-label="深色" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg><span>深色</span></button></div>
+      </details>
+    </div>
+    </div>
+    <div class="skill-heading"><h1>Saan Prototype</h1><span class="skill-version">v0.1.0</span></div>
+    <p class="lead">把需求规格变成可交互的评审原型，在开发之前让大家先点一遍。</p>
+    <p>把带编号的规则、验收场景和待确认事项交给它，它会生成一个离线的 HTML 文件：切换角色和场景，试一试成功和失败时的反馈，看清哪些文案还是建议、哪些问题还没定。</p>
+    <dl class="intro">
+      <div><dt>适合</dt><dd>评审页面、角色、状态和规则</dd></div>
+      <div><dt>产出</dt><dd>单个 HTML 文件、可修改的源码，以及与规格对应的追溯表</dd></div>
+      <div><dt>准备</dt><dd>最好是一份 PRD；只有一段描述也可以，会先列出假设</dd></div>
+    </dl>
+  </header>
+
+  <section aria-labelledby="example">
+    <h2 id="example">试一试内置示例</h2>
+    <div class="demo">
+      <p>一份虚构的设备借用规格，两个角色、三个场景。用顶部的评审栏切换场景、角色、主题和标注。</p>
+      <iframe src="../example.html" title="Saan Prototype 示例：设备借用" loading="lazy"></iframe>
+      <p class="note">示例数据为虚构。<a href="../example.html">单独打开示例</a>。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="review">
+    <h2 id="review">评审时可以做什么</h2>
+    <ul class="rules">
+      <li>选一个场景。每个场景写明对应的验收编号，带着自己的数据和当前时间，因为“已开始”这类规则靠时间判断。</li>
+      <li>切换角色，对比不同的人在同一页面能看到什么、能做什么。</li>
+      <li>打开标注，看到建议文案、显示为占位块的待确认事项，以及每个控件背后的规则编号。关掉后是干净的演示版。</li>
+      <li>在中性灰、品牌蓝和暗色三套主题之间切换，每套都通过对比度检查。</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="checks">
+    <h2 id="checks">只做规格确认过的内容</h2>
+    <ul class="rules">
+      <li>已确认的规则写成小函数，页面的反馈都由它们决定。</li>
+      <li>待确认事项不会被猜成一个答案。它显示为占位块，或者在追溯表里写明为什么不涉及。</li>
+      <li>不加规格之外的页面、步骤或状态。只为串联页面而加的元素标为建议。</li>
+      <li>检查器把每个标注和场景追溯到来源编号，拒绝新增状态和外部请求，并列出没有被任何场景覆盖的验收场景。</li>
+    </ul>
+    <p>两个案例各在全新上下文中跑了两轮，评审标准在生成前写定：room-booking 的 PRD（24 个验收场景），以及一段只有三条规则、没有 PRD 的描述。四次都符合标准。评审中发现的运行时和说明问题，已在两轮之间修改。</p>
+    <p class="note">检查只核对编号和文本，不评价交互是否好用；原型也没有做过真实用户测试。</p>
+  </section>
+
+  <section aria-labelledby="install">
+    <h2 id="install">开始使用</h2>
+    <p>从 Saan Kits 中只安装 Saan Prototype：</p>
+    <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-prototype</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Prototype 安装命令" hidden></button></div>
+    <p>把规格交给 Agent：</p>
+    <div class="copy-row"><pre id="code-request"><code>用 saan-prototype 根据 prd.md 做一个评审原型。先给我页面、角色和场景清单。</code></pre><button type="button" class="copy" data-copy="request" aria-label="复制原型请求示例" hidden></button></div>
+    <p class="note">打包和检查需要 Python 3（只用标准库），打开原型需要一个浏览器。</p>
+  </section>
+
+  <footer class="site-footer"><span>Saan Prototype · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-prototype">技能源码</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-prototype/README.zh-CN.md">使用说明</a><a href="../../zh/">Saan Kits</a></footer>
+</main>
+</body>
+</html>

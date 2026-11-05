@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Saan Kits: skills for thinking through problems, preparing research, writing requirements, and drawing business diagrams.">
+<meta name="description" content="Saan Kits: skills for thinking through problems, preparing research, writing requirements, building review prototypes, and drawing business diagrams.">
 <title>Saan Kits</title>
 <link rel="canonical" href="https://kits.yishan.app/">
 <link rel="alternate" hreflang="en" href="./">
@@ -34,8 +34,8 @@
     </div>
   </div>
   <h1>Saan Kits</h1>
-  <p class="lead">Skills for everyday work: think through a problem, prepare research, write requirements, or draw a business diagram. Choose what you need and install it in your AI assistant.</p>
-  <p class="skill-count">5 skills</p>
+  <p class="lead">Skills for everyday work: think through a problem, prepare research, write requirements, build a review prototype, or draw a business diagram. Choose what you need and install it in your AI assistant.</p>
+  <p class="skill-count">6 skills</p>
   <ul class="skill-list" role="list">
     <li class="skill">
       <h2><a href="diagram/">Saan Diagram</a></h2>
@@ -66,6 +66,13 @@
       <a class="more" href="prd-writing/">See the document structure and a worked example</a>
     </li>
     <li class="skill">
+      <h2><a href="prototype/">Saan Prototype</a></h2>
+      <p>Turn a requirements specification into a clickable prototype for review. Switch roles and scenarios to see what each person can do and what happens on success or failure.</p>
+      <p class="fit">Only confirmed rules are simulated. Proposed wording and open questions are marked where they appear, and the result is one HTML file that opens offline.</p>
+      <div class="copy-row"><pre id="code-prototype"><code>npx skills add yishan/saankits <span class="nb">--skill saan-prototype</span></code></pre><button type="button" class="copy" data-copy="prototype" aria-label="Copy the Saan Prototype install command" hidden></button></div>
+      <a class="more" href="prototype/">Try the example prototype</a>
+    </li>
+    <li class="skill">
       <h2><a href="inquiry/">Saan Inquiry</a></h2>
       <p>Start a conversation when a problem is hard to describe or a choice is hard to make. Separate what you know from what you suspect, and consider other explanations.</p>
       <p class="fit">Once you have enough to decide, bring the discussion together and choose a next step. Return with the results to see what changed.</p>
@@ -73,7 +80,6 @@
       <a class="more" href="inquiry/">See conversation examples and local installation</a>
     </li>
   </ul>
-  <p class="planned">Planned: prototyping.</p>
   <section class="install" aria-labelledby="collection-install">
     <h2 id="collection-install">Install the collection</h2>
     <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits</code></pre><button type="button" class="copy" data-copy="install" aria-label="Copy the Saan Kits install command" hidden></button></div>

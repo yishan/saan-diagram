@@ -7,6 +7,8 @@ Static pages for the collection, currently in Chinese, published at [kits.yishan
 | `/` | `index.html` | Saan Kits overview |
 | `/diagram/` | `diagram/` | Saan Diagram introduction and gallery |
 | `/mermaid/` | `mermaid/` | Saan Mermaid introduction and examples |
+| `/prototype/` | `prototype/` | Saan Prototype introduction and live example |
+| `/prototype/zh/` | `prototype/zh/index.html` | Explicit Chinese Prototype introduction |
 
 The overview page forwards old `/#anchor` links to `/diagram/#anchor`. Each new skill gets its own second-level directory and a row on the overview page.
 
@@ -56,6 +58,16 @@ Confirm both the reported finding and the rendered image before publishing.
 ## Maintaining Saan Mermaid examples
 
 `mermaid/index.html` embeds each file in `skills/saan-mermaid/assets/examples/`. After changing one, update the embedded code and `mermaid/img/`. `tests/saan-mermaid` fails if the page and an example differ.
+
+## Maintaining the Saan Prototype example
+
+`prototype/example.html` is the bundled example from `skills/saan-prototype/assets/example/`, shown in an iframe on both introductions. After changing the example or the runtime, rebuild it from the repository root:
+
+```bash
+python3 skills/saan-prototype/scripts/build.py skills/saan-prototype/assets/example/manifest.json -o page/prototype/example.html
+```
+
+`check_site.py` skips it as a site page and fails if it differs from a fresh build.
 
 ## Icons
 
