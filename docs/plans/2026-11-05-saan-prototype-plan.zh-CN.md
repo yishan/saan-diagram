@@ -427,6 +427,7 @@ body.p-review-off [data-proposal] { text-decoration: none; }
     });
   }
   function render() {
+    document.getElementById("p-pop").hidden = true;  // its badge is about to be replaced
     applyTheme();
     document.body.classList.toggle("p-review-off", !S.review);
     bar();
