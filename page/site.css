@@ -27,6 +27,8 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
 .preference-menu [aria-current="page"]::after,.preference-menu [aria-pressed="true"]::after{border-color:currentColor}
 .hero{display:grid;gap:24px;padding-block:0 32px}
 .hero h1{font-family:var(--f-display);font-weight:900;font-size:clamp(36px,6vw,58px);line-height:1.15}
+.skill-heading{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.skill-version{flex:none;padding:2px 8px;border:1px solid var(--line);border-radius:4px;background:var(--soft);color:var(--muted);font-family:var(--f-mono);font-size:12px;line-height:1.6;white-space:nowrap}
 .section-nav{gap:4px 24px}
 .copy-row{max-width:760px;display:flex;align-items:center;gap:8px;background:var(--soft,var(--code));border-radius:4px;padding:6px 6px 6px 14px;min-width:0}
 .copy-row pre{flex:1;min-width:0;margin:0;padding:6px 0;background:none;white-space:pre-wrap;overflow-wrap:anywhere;max-height:none}
@@ -68,9 +70,12 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
 .install-steps p{margin:0;font-size:14px;color:var(--muted)}
 .install-steps code{overflow-wrap:anywhere}
 .fig{cursor:zoom-in}
+.site-footer{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 24px;border-top:1px solid var(--node-hover,var(--line));padding-top:24px;color:var(--muted);font-size:13px;line-height:1.75}
+.site-footer a{color:inherit;white-space:nowrap}
 @media(max-width:560px){
  .wrap{padding-block:24px 48px}
  .site-nav,.section-nav{gap:4px 20px}
  .hero{gap:20px}
+ .site-footer>span:first-child{flex-basis:100%}
  .two,.grammar,.route{grid-template-columns:minmax(0,1fr)}
 }

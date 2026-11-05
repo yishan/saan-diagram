@@ -95,6 +95,7 @@ npx skills add yishan/saankits --skill saan-mermaid
 | `must_pass` | P1 控制点可被绕过 |
 | `separate` | P5 不相容的两步在同一泳道 |
 | `alias: 名称 = 节点文字` | 让控制点名称匹配措辞不同的节点 |
+| 同名节点 | CP4 提醒多个节点同名、检查把它们当作同一步；清单里改写节点 ID 可以分开查 |
 | `sequenceDiagram` | S3 块没有闭合、SQ1 参与者没用到、SQ2 激活不成对、SQ3 消息里有分号 |
 | `gantt` | GT1 `after` 引用不存在的 ID、GT2 依赖成环、GT3 缺 `todayMarker off` |
 | `erDiagram` | ER1 实体没有任何关系 |

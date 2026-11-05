@@ -343,6 +343,8 @@ class Diagram:
         w = max(NW, up4(text_w(label) + 24), up4(len(sub or "") * 9 * 0.62 + 16))
         if w > CW - 8:  # long label spans lanes (anchored on its first lane)
             span = math.ceil((w + 8) / CW)
+            if not self.vertical:  # never span past the column's last lane (1-lane swimlanes)
+                span = max(1, min(span, math.ceil(self.cols[col]["lanes"] - lane)))
             return Box(nid, label, kind, x0 + (span * CW - w) / 2, y0 + (RH - h) / 2, w, h, col=col, sub=sub, **kw)
         return Box(nid, label, kind, x0 + (CW - w) / 2, y0 + (RH - h) / 2, w, h, col=col, sub=sub, **kw)
 
@@ -1040,9 +1042,11 @@ class Diagram:
             it.append(("sys", t["sys_int"], None, tr(self.t, '系统') if t.get("sys_unified") else tr(self.t, '内部系统')))
         if "external" in used_n: it.append(("sys", t["sys_ext"], None, tr(self.t, '外部实体') if dfd else (tr(self.t, '系统') if t.get("sys_unified") else tr(self.t, '外部服务'))))
         if "flow" in used_e: it.append(("line", "flow", None, tr(self.t, '业务主流程')))
-        dl = [e for e in self.edges if e["kind"] in ("data", "return", "bidir")]
-        if dl:
-            it.append(("line", "link" if all(self.edge_style(e)[2] == "" for e in dl) else "data", None, tr(self.t, '数据 / 集成 / 推送')))
+        # return lines share the data glyph but mean "go back", so they get their own legend entry
+        for kinds, lab in ((("data", "bidir"), '数据 / 集成 / 推送'), (("return",), '退回')):
+            dl = [e for e in self.edges if e["kind"] in kinds]
+            if dl:
+                it.append(("line", "link" if all(self.edge_style(e)[2] == "" for e in dl) else "data", None, tr(self.t, lab)))
         if "meta" in used_e: it.append(("line", "meta", None, tr(self.t, '配置 / 委托关系')))
         if any(e.get("emphasis") for e in self.edges): it.append(("line", "accent", None, tr(self.t, '关键路径')))
         if "ai" in ovk or "ai" in used_n: it.append(("rect", t["ai_fill"], None, t["special_label"]))
@@ -1426,6 +1430,23 @@ def lint(d):
                 out.append(("AU2", tr(d.t, "[AU2] 单据 '{0}' 没有连线：审计流程里每张单据都要说明谁产生、流向谁", n.label)))
         if not d.controls():
             out.append(("AU1", tr(d.t, '[AU1] profile: audit 但没有标任何控制点：用 control: K1 + risk 标出关键控制')))
+    # G6 nothing may leave the canvas: the export crops it silently
+    if not d.vertical:
+        for n in nodes:
+            if n.x < 0 or n.r > d.width:
+                out.append(("G6", f"[G6] 节点 '{n.label}' 超出画布左右边界：给所在列加 lanes、改 lane，或缩短名称"))
+        for e, pts, _ in routes:
+            if min(p[0] for p in pts) < 0 or max(p[0] for p in pts) > d.width:
+                out.append(("G6", f"[G6] 连线 {e['a'].label}→{e['b'].label} 超出画布左右边界：减小 offset，或给最外侧列加 lanes"))
+    # G7 a swimlane node must stay inside its own lane (the lane says who does it)
+    if d.show_lanes:
+        lo, hi = ("y", "b") if d.vertical else ("x", "r")
+        for n in nodes:
+            c = d.cols.get(n.col)
+            if not c or n.kind == "label" or getattr(n, "path", None) or getattr(n, "container", None):
+                continue
+            if getattr(n, lo) < c["s"] - .5 or getattr(n, hi) > c["s"] + c["size"] + .5:
+                out.append(("G7", f"[G7] 节点 '{n.label}' 越出了泳道 '{c['label']}'：给该列加 lanes、改 lane，或缩短名称"))
     # D1 density
     for cid, c in d.cols.items():
         cnt = sum(1 for n in nodes if n.col == cid and not getattr(n, "path", None))
@@ -3667,6 +3688,8 @@ FIX = {
     "G2": "先改 mid_x / mid_row 让拐点走空白泳道或阶段缝隙，再试 port_a，最后才挪节点。",
     "G3": "给其中一条加 mid_x / mid_row 偏移 ≥12px；本该共用起点的用 bus: true。",
     "G4": "两个有框或有底色的分组拉开位置，或去掉其中一个的框（frame）。",
+    "G6": "最外侧列加 lanes，或减小 ll / rr 回线的 offset；导出时画布外的内容会被裁掉。",
+    "G7": "给该列加 lanes 并把节点放到 lane: 0.5，或缩短名称；判断菱形比普通节点宽，泳道图里最常见。",
     "B1": "改连分组里的主线节点，或确认这个框值得画后加 frame: true。",
     "R1": "process 分组里给主线条目标 main: true，跨组 flow 只连 main。",
     "R3": "把系统节点移出分组，在分组外用 data 点线接入。",
@@ -4084,6 +4107,8 @@ def _m_setup():
     M("G2", "连线穿过别的节点", "1-arch", lambda s: s["edges"].append({"from": "采购需求", "to": "合同签订", "kind": "data", "route": "h"}))
     M("G3", "两条连线叠在一起", "1-arch", lambda s: s["edges"].append({"from": "合同签订", "to": "CA 签章", "kind": "data", "route": "h"}))
     M("G5", "左右相接的两个节点高低差过半行，只能折两次", "bid-dfd", lambda s: _by_label(s["nodes"], "评分表").update(row=5.95))
+    M("G6", "右侧回线 offset 太大，伸出画布", "4-swim", lambda s: s["edges"].append({"from": "支付货款", "to": "签订合同", "kind": "return", "route": "rr", "offset": 400}))
+    M("G7", "判断菱形比一条泳道还宽", "4-swim", lambda s: s["nodes"][5].update(label="结果有效且无质疑？"))
     M("G4", "两个有框分组交叠", "1-arch", lambda s: next(x for x in s["groups"] if x["id"] == "source_d").update(frame=True, row=3.6, lane=1.0))
     M("L2", "连线标签压住节点", "1-arch", lambda s: s["edges"].append({"from": "采购需求", "to": "采购寻源", "kind": "data", "route": "v", "label": "标签"}))
     M("L3", "两个连线标签互相重叠", "1-arch", lambda s: s["edges"].append({"from": "财务系统", "to": "结算支付", "kind": "data", "route": "h", "label": "标签"}))
@@ -4139,7 +4164,7 @@ def _idef0_trim(s):
 
 
 ALL_CODES = {"A1", "AU1", "AU2", "B1", "C1", "D1", "D2", "DF1", "DF2", "DF3", "E3", "F1", "F2", "FB1",
-             "G1", "G2", "G3", "G4", "G5", "ID1", "ID2", "ID3", "ID5", "K1", "L1", "L2", "L3", "O1", "O2", "O3", "O4",
+             "G1", "G2", "G3", "G4", "G5", "G6", "G7", "ID1", "ID2", "ID3", "ID5", "K1", "L1", "L2", "L3", "O1", "O2", "O3", "O4",
              "Q1", "Q2", "Q3", "R1", "R3", "R5", "R6", "S1", "T1", "TL1", "TL2", "TL3", "V1", "W1",
              "P1", "P2", "P3", "P4", "P5", "CT1", "CT2"}
 

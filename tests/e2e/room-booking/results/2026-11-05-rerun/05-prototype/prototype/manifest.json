@@ -1,0 +1,19 @@
+{
+  "title": "会议室预约与改期 · 评审原型",
+  "source": "source.md",
+  "language": "zh-CN",
+  "timezone": "Asia/Shanghai",
+  "theme": "neutral",
+  "roles": [
+    {"id": "jia", "label": "员工甲"},
+    {"id": "yi", "label": "员工乙"},
+    {"id": "bing", "label": "员工丙"},
+    {"id": "m", "label": "管理员 M（负责会议室 A）"}
+  ],
+  "states": ["有效", "已取消"],
+  "confirmed_text": ["会议室", "我的预约", "已占用", "已取消"],
+  "rules": "rules.js",
+  "scenarios": "scenarios.json",
+  "pages": ["pages/common.js", "pages/rooms.js", "pages/book.js", "pages/mine.js", "pages/reschedule.js"],
+  "trace": "trace.md"
+}

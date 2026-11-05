@@ -15,15 +15,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="mermaid.css">
-<link rel="stylesheet" href="../site.css">
+<link rel="stylesheet" href="mermaid.css?v=87448d5621">
+<link rel="stylesheet" href="../site.css?v=85e8aacbdc">
 <script src="../site.js" defer></script>
 </head>
 <body>
 <main class="wrap">
 <header class="hero">
   <div class="hero-top">
-    <nav class="site-nav" aria-label="Skill navigation"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="./" aria-current="page">Mermaid</a><a href="../discovery/">Discovery</a><a href="../prd-writing/">PRD Writing</a></nav>
+    <nav class="site-nav" aria-label="Skill navigation"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="./" aria-current="page">Mermaid</a><a href="../discovery/">Discovery</a><a href="../prd-writing/">PRD Writing</a><a href="../prototype/">Prototype</a><a href="../inquiry/">Inquiry</a></nav>
     <div class="site-controls">
       <details class="preference-picker" data-preference="language" name="site-preferences">
         <summary class="preference-trigger" aria-label="Language" title="Language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
@@ -35,10 +35,11 @@
       </details>
     </div>
   </div>
-  <h1>Saan Mermaid</h1>
-  <p class="lead">Draw with Mermaid and review business workflows against an independent control checklist.</p>
-  <dl class="intro"><div><dt>Inputs</dt><dd>Process material, policies, or an existing workflow</dd></div><div><dt>Outputs</dt><dd>Mermaid source and review findings</dd></div><div><dt>Checks</dt><dd>Scripts flag unreachable paths, control bypasses, and missing returns</dd></div><div><dt>Not suited to</dt><dd>Precise presentation layouts, IDEF0, or organization/data-isolation diagrams</dd></div></dl>
-  <nav class="section-nav" aria-label="On this page"><a href="#install">Installation</a><a href="#pick">Diagram types</a><a href="#gallery">Examples</a><a href="#lint">Validation</a><a href="#limits">Compatibility</a></nav>
+  <div class="skill-heading"><h1>Saan Mermaid</h1><span class="skill-version">v1.1.0</span></div>
+  <p class="lead">Add a diagram you can update along with your document, and check for missing steps in the process.</p>
+  <p class="narrow">Mermaid describes a diagram in text, so it fits naturally into Markdown, READMEs, and design documents. Bring process notes, or ask for a diagram of system interactions, record states, or a schedule. For an approval review, add the requirements the process must follow to check for bypassed reviews and missing return paths.</p>
+  <dl class="intro"><div><dt>Bring</dt><dd>Process material, policies, or an existing workflow</dd></div><div><dt>Outputs</dt><dd>Editable Mermaid code and the issues found during checks</dd></div><div><dt>Checks</dt><dd>Scripts flag unreachable paths, control bypasses, and missing returns</dd></div><div><dt>Use another tool for</dt><dd>Precise presentation layouts, IDEF0, or organization/data-isolation diagrams</dd></div></dl>
+  <nav class="section-nav" aria-label="On this page"><a href="#install">Installation</a><a href="#pick">Diagram types</a><a href="#gallery">Examples</a><a href="#lint">Process checks</a><a href="#limits">Compatibility</a></nav>
 </header>
 
 <section aria-labelledby="install">
@@ -290,7 +291,7 @@ flowchart LR
 
 <section aria-labelledby="lint">
   <div class="narrow"><h2 id="lint">Process review</h2>
-  <p>Establish the control checklist before reviewing the flow. Prefer a checklist you supply. If extracted from the same source, the result identifies it as non-independent evidence.</p></div>
+  <p>List what the process must do, such as “finance must review every payment before it is made.” This is the control checklist. Use a checklist you supply where possible. If the checklist and diagram come from the same material, the review explains that both may share the same omissions.</p></div>
   <div class="pair demo">
     <div class="democol"><div class="codebox"><div class="bar"><span>controls.txt · policy requirements</span></div><pre><code>source: user
 control: 财务复核
@@ -335,9 +336,9 @@ swimlane-beta LR
   <div class="tbl-wrap"><table>
     <thead><tr><th></th><th>Saan Mermaid</th><th>Saan Diagram</th></tr></thead>
     <tbody>
-      <tr><th>Outputs</th><td>Mermaid source that can be diffed</td><td>Images, HTML, and Feishu/Lark whiteboards</td></tr>
+      <tr><th>Outputs</th><td>Text-based diagram code, so changes are easy to compare</td><td>Images, HTML, and Feishu/Lark whiteboards</td></tr>
       <tr><th>Best for</th><td>READMEs, Markdown, and design documents</td><td>Presentations, external delivery, and Feishu/Lark whiteboards</td></tr>
-      <tr><th>Layout</th><td>Automatic layout; lanes align, but routing cannot be controlled precisely</td><td>Precise engine-controlled layout</td></tr>
+      <tr><th>Layout</th><td>Automatic layout; lanes align, but routing cannot be controlled precisely</td><td>Finer control over placement, spacing, and lines</td></tr>
       <tr><th>Quality checks</th><td>Control checklist review, palette validation, actual rendering, and visual inspection</td><td>Geometry, contrast, and business-rule validation</td></tr>
       <tr><th>Distinctive types</th><td>Sequence, state, and Gantt diagrams</td><td>IDEF0 and organization/data-isolation diagrams</td></tr>
     </tbody>
@@ -380,7 +381,7 @@ swimlane-beta LR
     <div><i style="background:#FDEBD8;color:#1F2329;outline:1px solid #F5C99B;outline-offset:-1px">ai</i><span>AI capability</span></div>
   </div>
   <p>Uses the same palette as Saan Diagram. Custom colors, per-node overrides with <code>style</code>, and more than three core nodes fail validation.</p>
-  <div class="block"><div class="bar"><span>frontmatter</span><button type="button" class="copy" data-copy="theme" aria-label="Copy theme configuration" hidden>Copy</button></div><pre id="code-theme"><code>---
+  <div class="block"><div class="bar"><span>Theme settings at the top of the diagram</span><button type="button" class="copy" data-copy="theme" aria-label="Copy theme configuration" hidden>Copy</button></div><pre id="code-theme"><code>---
 config:
   theme: base
   look: classic
@@ -425,8 +426,8 @@ python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code><
   <div class="two">
     <div class="panel"><h3>Swimlanes require Mermaid 12</h3><p style="font-size:13.5px"><code>swimlane-beta</code> aligns lanes, but does not separate them visually, and edges may route outside. Older platforms fall back to groups whose columns do not align.</p></div>
     <div class="panel"><h3>Platform versions differ</h3><p style="font-size:13.5px">Each platform bundles a different Mermaid version. These images were rendered with Mermaid CLI 12.2 and have not been tested inside GitHub or Feishu documents.</p></div>
-    <div class="panel"><h3>Checks structure and checklist coverage</h3><p style="font-size:13.5px">Does not establish whether the business itself is correct or detect issues outside the checklist. A checklist and diagram by the same author offer weak independence. Types such as sequence diagrams receive palette checks only.</p></div>
-    <div class="panel"><h3>No claim of better drawings</h3><p style="font-size:13.5px">In a small blind comparison, drawings made with this skill did not outscore the baseline. Its demonstrated value was in review, not drawing quality.</p></div>
+    <div class="panel"><h3>Use the checks alongside business judgment</h3><p style="font-size:13.5px">Checks use the diagram structure, stated requirements, and built-in rules. They cannot establish whether the real business process is sound. A diagram and checklist based on the same understanding may share omissions. Each diagram type has different checks; passing them does not verify the business.</p></div>
+    <div class="panel"><h3>What the drawing comparison found</h3><p style="font-size:13.5px">In one small blind comparison, drawings made with the skill did not outscore those made without it. That comparison did not show better drawing quality. Process checks serve a separate purpose.</p></div>
     <div class="panel"><h3>Beta types carry the most compatibility risk</h3><p style="font-size:13.5px"><code>swimlane-beta</code>, <code>block-beta</code> and <code>ishikawa-beta</code> may not render in older versions. Prefer stable diagram types for documents that travel across platforms.</p></div>
   </div>
 </section>
@@ -439,7 +440,7 @@ python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code><
   </ul>
 </section>
 
-<footer><a href="https://github.com/yishan/saankits/blob/main/skills/saan-mermaid/SKILL.md">SKILL.md</a><span>Saan Mermaid v1.1.0 · Yishan · MIT</span><a href="../">Saan Kits</a><a href="../diagram/">Saan Diagram</a><a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid">Source</a></footer>
+<footer class="site-footer"><span>Saan Mermaid · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid">Skill source</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-mermaid/README.md">User guide</a><a href="../">Saan Kits</a></footer>
 </main>
 
 

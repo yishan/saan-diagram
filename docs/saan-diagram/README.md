@@ -13,7 +13,7 @@ Turn business descriptions, requirements documents, and whiteboard screenshots i
 Saan Diagram is an agent skill for Claude Code, Codex, and other compatible agents. The model writes a YAML spec using stages, lanes, and rows instead of pixel coordinates or colors. `render.py` calculates positions, routes, colors, typography, and legends. Diagrams must pass `--lint` before delivery.
 
 - **15 diagram types** sharing one visual language, with contrast checks on shapes and text.
-- **52 validation rules** implemented in code. `--selftest` checks that deliberately broken examples trigger every rule.
+- **54 validation rules** implemented in code. `--selftest` checks that deliberately broken examples trigger every rule.
 - **Preserve business findings:** missing controls, bypass paths, data sinks, and conflicting responsibilities are reported as findings. Once the user confirms the current situation, the findings appear in the diagram legend.
 - **Process path verification:** check reachability, control-point bypasses, separation of duties, and dead ends in the modeled process.
 - **Reserve color for systems and core functions:** business nodes use neutral gray, with at most three core highlights per diagram.
@@ -194,7 +194,13 @@ python3 scripts/render_smoke.py            # Validate 15 original + 3 English ex
 python3 scripts/render_smoke.py --png      # Also export PNGs with the local Chrome
 ```
 
-GitHub Actions runs a Python version matrix, behavioral regression tests, and browser export checks. The self-test's 50/50 count measures rule-trigger coverage, not complete branch coverage, visual correctness, or actual business permissions. Whiteboard publishing tests use mocked subprocesses and do not access user boards.
+GitHub Actions runs a Python version matrix, behavioral regression tests, and browser export checks. The self-test's 54/54 count measures rule-trigger coverage, not complete branch coverage, visual correctness, or actual business permissions. Whiteboard publishing tests use mocked subprocesses and do not access user boards.
+
+### Unreleased
+
+- New rules **G6** (a node or edge leaves the canvas) and **G7** (a swimlane node leaves its own lane). Exports used to crop such content silently. `--selftest` now checks 54 rules.
+- A label wider than one lane no longer spills into the next column; its span is limited to the lanes its column has. A 1-lane swimlane fits labels of up to 10 characters; wide decision diamonds still report G7.
+- The legend lists return lines (`kind: return`) as their own "Return" item instead of under "Data / integration". The 4 examples that contain return lines were re-exported.
 
 ### Upgrading from v1.2
 

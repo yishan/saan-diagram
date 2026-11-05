@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Saan Mermaid：用 Mermaid 画图，并按控制点清单审查业务流程。">
+<meta name="description" content="Saan Mermaid：为文档绘制可用文字修改的图，并对照审批要求检查流程中的遗漏和绕行。">
 <title>Saan Mermaid</title>
 <link rel="canonical" href="https://kits.yishan.app/mermaid/zh/">
 <link rel="alternate" hreflang="en" href="../">
@@ -15,15 +15,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="../mermaid.css">
-<link rel="stylesheet" href="../../site.css">
+<link rel="stylesheet" href="../mermaid.css?v=87448d5621">
+<link rel="stylesheet" href="../../site.css?v=85e8aacbdc">
 <script src="../../site.js" defer></script>
 </head>
 <body>
 <main class="wrap">
 <header class="hero">
   <div class="hero-top">
-    <nav class="site-nav" aria-label="技能导航"><a href="../../">Saan Kits</a><a href="../../diagram/">Diagram</a><a href="../" aria-current="page">Mermaid</a><a href="../../discovery/">Discovery</a><a href="../../prd-writing/">PRD Writing</a></nav>
+    <nav class="site-nav" aria-label="技能导航"><a href="../../zh/">Saan Kits</a><a href="../../diagram/zh/">Diagram</a><a href="./" aria-current="page">Mermaid</a><a href="../../discovery/zh/">Discovery</a><a href="../../prd-writing/zh/">PRD Writing</a><a href="../../prototype/zh/">Prototype</a><a href="../../inquiry/zh/">Inquiry</a></nav>
     <div class="site-controls">
       <details class="preference-picker" data-preference="language" name="site-preferences">
         <summary class="preference-trigger" aria-label="语言" title="语言"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
@@ -35,24 +35,25 @@
       </details>
     </div>
   </div>
-  <h1>Saan Mermaid</h1>
-  <p class="lead">用 Mermaid 画图，并拿一份独立的控制点清单审查业务流程。</p>
-  <dl class="intro"><div><dt>输入</dt><dd>流程资料、制度要求或现有流程</dd></div><div><dt>产出</dt><dd>Mermaid 代码和审查发现</dd></div><div><dt>把关</dt><dd>脚本查走不通、可绕过和缺退回，有问题就报告</dd></div><div><dt>不适合</dt><dd>汇报用的精确排版、IDEF0、数据隔离组织图</dd></div></dl>
-  <nav class="section-nav" aria-label="页内导航"><a href="#install">安装</a><a href="#pick">图示类型</a><a href="#gallery">示例</a><a href="#lint">校验</a><a href="#limits">兼容性</a></nav>
+  <div class="skill-heading"><h1>Saan Mermaid</h1><span class="skill-version">v1.1.0</span></div>
+  <p class="lead">给文档配一张能随文字一起修改的图，也帮你检查流程里有没有遗漏的步骤。</p>
+  <p class="narrow">Mermaid 用文字描述图中的步骤和关系，适合放在 Markdown、README 和设计文档里。你可以提供流程资料，也可以让它画出系统交互、单据状态或任务排期。检查审批流程时，再提供一份必须遵守的要求，核对有没有绕过复核或漏掉退回处理。</p>
+  <dl class="intro"><div><dt>准备材料</dt><dd>流程资料、制度要求或现有流程</dd></div><div><dt>得到什么</dt><dd>可修改的 Mermaid 图示代码，以及检查发现的问题</dd></div><div><dt>会检查</dt><dd>流程是否走得通、必要步骤是否可被跳过、退回后如何处理</dd></div><div><dt>需用其他工具</dt><dd>汇报用的精确排版、IDEF0、数据隔离组织图</dd></div></dl>
+  <nav class="section-nav" aria-label="页内导航"><a href="#install">安装</a><a href="#pick">图示类型</a><a href="#gallery">示例</a><a href="#lint">流程检查</a><a href="#limits">兼容性</a></nav>
 </header>
 
 <section aria-labelledby="install">
   <div class="narrow"><h2 id="install">安装</h2></div>
   <ol class="install-steps">
-    <li><h3>安装技能</h3><div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits <span class="nb">--skill saan-mermaid</span></code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Mermaid 安装命令" hidden></button></div><p>默认装到当前项目，并让你选择目标 Agent。加 <code>-g</code> 装到用户级目录，加 <code>-a claude-code</code> 或 <code>-a codex</code> 可直接指定。</p></li>
-    <li><h3>准备环境</h3><ul class="rules"><li>审查流程：Python 3，只用标准库</li><li>渲染图片：<code>npm install -g @mermaid-js/mermaid-cli</code>，需要 12 或更高版本</li></ul></li>
+    <li><h3>安装技能</h3><div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits <span class="nb">--skill saan-mermaid</span></code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Mermaid 安装命令" hidden></button></div><p>默认只在当前项目中安装，安装时选择使用它的 AI 助手。希望其他项目也能使用时，加 <code>-g</code>；加 <code>-a claude-code</code> 或 <code>-a codex</code> 可直接指定助手。</p></li>
+    <li><h3>需要的软件</h3><ul class="rules"><li>检查流程：Python 3，无需额外安装 Python 库</li><li>生成图片：<code>npm install -g @mermaid-js/mermaid-cli</code>，需要 12 或更高版本</li></ul></li>
     <li><h3>直接说要什么</h3><ul class="rules"><li>“这是付款流程和制度要求，帮我查有没有能绕过财务复核的路径。”</li><li>“画一张时序图，说明结算单怎么推送到财务系统。”</li></ul></li>
   </ol>
   <details class="alternatives"><summary>其他安装方式</summary><div class="tbl-wrap"><table class="inst">
     <thead><tr><th>平台</th><th>安装方式</th></tr></thead>
     <tbody>
       <tr><td>Claude Code 插件</td><td><code>/plugin marketplace add yishan/saankits</code><br><code>/plugin install saan-diagram@saan-diagram</code><br>插件会一起安装工具集里的全部技能。</td></tr>
-      <tr><td>手动复制</td><td>把 <a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid"><code>skills/saan-mermaid/</code></a> 整个目录复制到 Agent 的技能目录，例如 <code>~/.claude/skills/saan-mermaid/</code>。</td></tr>
+      <tr><td>手动复制</td><td>把 <a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid"><code>skills/saan-mermaid/</code></a> 整个目录复制到 AI 助手的技能目录，例如 <code>~/.claude/skills/saan-mermaid/</code>。</td></tr>
       <tr><td>Claude.ai</td><td>把这个目录打成 zip（顶层为 <code>saan-mermaid/</code>），在设置里上传。</td></tr>
     </tbody>
   </table></div></details>
@@ -60,14 +61,14 @@
 
 <section aria-labelledby="pick">
   <div class="narrow"><h2 id="pick">图示类型</h2>
-    <p>先分清要讲“有什么”还是“怎么走”，再按问题选图。一段文字能说清的，就不画。</p>
+    <p>按要说明的事情选图：系统有哪些部分、流程怎样处理、单据怎样变化，或任务何时完成。文字已经足够清楚时，也可以直接保留文字。</p>
   </div>
-  <div class="type-group"><h3 class="pick-h">架构图<small>讲“有什么”：节点是能力或功能</small></h3><ul class="pick"><li><a href="#arch"><span class="nm">架构图 · 按阶段</span><span class="q">每个阶段有哪些模块，接哪些系统。</span></a></li><li><a href="#layers"><span class="nm">架构图 · 按层</span><span class="q">平台由哪些层组成。</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">流程图<small>讲“怎么走”：节点是业务动作，泳道只是分列方式</small></h3><ul class="pick"><li><a href="#flow"><span class="nm">流程图</span><span class="q">一条流程怎么走，在哪里判断和退回。</span></a></li><li><a href="#swim"><span class="nm">流程图 · 泳道</span><span class="q">多个角色之间怎么交接。</span></a></li><li><a href="#overview"><span class="nm">流程图 · 总览</span><span class="q">跨系统看，业务从头到尾怎么走。</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">其他图示<small>时序、状态、对象、进度、优先级和原因</small></h3><ul class="pick"><li><a href="#seq"><span class="nm">时序图</span><span class="q">系统之间按什么顺序交互，失败时怎么走。</span></a></li><li><a href="#state"><span class="nm">状态图</span><span class="q">一张单据有哪些状态，什么动作触发流转。</span></a></li><li><a href="#er"><span class="nm">实体关系图</span><span class="q">有哪些业务对象，彼此几对几。</span></a></li><li><a href="#gantt"><span class="nm">甘特图</span><span class="q">任务排期和前后依赖。</span></a></li><li><a href="#timeline"><span class="nm">时间线</span><span class="q">关键节点什么时候到。</span></a></li><li><a href="#quad"><span class="nm">四象限图</span><span class="q">一组事项在两个维度上该先做哪个。</span></a></li><li><a href="#fish"><span class="nm">鱼骨图</span><span class="q">一个结果背后有哪些原因。</span></a></li></ul></div>
+  <div class="type-group"><h3 class="pick-h">架构图<small>说明有哪些功能，以及功能之间的关系</small></h3><ul class="pick"><li><a href="#arch"><span class="nm">架构图 · 按阶段</span><span class="q">每个阶段有哪些模块，接哪些系统。</span></a></li><li><a href="#layers"><span class="nm">架构图 · 按层</span><span class="q">平台由哪些层组成。</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">流程图<small>说明处理顺序；需要区分负责人时，用泳道分列</small></h3><ul class="pick"><li><a href="#flow"><span class="nm">流程图</span><span class="q">一条流程怎么走，在哪里判断和退回。</span></a></li><li><a href="#swim"><span class="nm">流程图 · 泳道</span><span class="q">多个角色之间怎么交接。</span></a></li><li><a href="#overview"><span class="nm">流程图 · 总览</span><span class="q">跨系统看，业务从头到尾怎么走。</span></a></li></ul></div><div class="type-group"><h3 class="pick-h">其他图示<small>时序、状态、对象、进度、优先级和原因</small></h3><ul class="pick"><li><a href="#seq"><span class="nm">时序图</span><span class="q">系统之间按什么顺序交互，失败时怎么走。</span></a></li><li><a href="#state"><span class="nm">状态图</span><span class="q">一张单据有哪些状态，什么动作触发流转。</span></a></li><li><a href="#er"><span class="nm">实体关系图</span><span class="q">有哪些业务对象，彼此几对几。</span></a></li><li><a href="#gantt"><span class="nm">甘特图</span><span class="q">任务排期和前后依赖。</span></a></li><li><a href="#timeline"><span class="nm">时间线</span><span class="q">关键节点什么时候到。</span></a></li><li><a href="#quad"><span class="nm">四象限图</span><span class="q">一组事项在两个维度上该先做哪个。</span></a></li><li><a href="#fish"><span class="nm">鱼骨图</span><span class="q">一个结果背后有哪些原因。</span></a></li></ul></div>
 </section>
 
 <section aria-labelledby="gallery">
   <div class="narrow"><h2 id="gallery">示例</h2>
-  <p>示例保留原始语言，内容均为虚构。复制代码包含<a href="#theme">主题配置</a>；<a href="#limits">Beta 语法需确认平台版本</a>。</p></div>
+  <p>示例保留原始语言，内容均为虚构。复制代码包含<a href="#theme">主题配置</a>；<a href="#limits">试验中的图型需先确认平台版本</a>。</p></div>
   <div class="gallery">
 <article class="ex" id="arch">
   <header class="ex-h"><h3>架构图 · 按阶段</h3></header>
@@ -108,7 +109,7 @@ flowchart LR
 </code></pre></div>
     <a class="fig" href="../img/layers.png" target="_blank" rel="noopener"><img src="../img/layers.png" loading="lazy" alt="架构图 · 按层示例：平台由哪些层组成。" style="width:315px"></a>
   </div>
-  <p class="example-note">Beta 语法，放不下侧栏。要标注对外接口或体系约束，改用 Saan Diagram。</p>
+  <p class="example-note">这种图型仍在试验中，不适合添加两侧说明栏。需要标注外部接口或制度约束时，可使用 Saan Diagram。</p>
 </article>
 <article class="ex" id="flow">
   <header class="ex-h"><h3>流程图</h3></header>
@@ -283,20 +284,20 @@ flowchart LR
 </code></pre></div>
     <a class="fig" href="../img/fish.png" target="_blank" rel="noopener"><img src="../img/fish.png" loading="lazy" alt="鱼骨图示例：一个结果背后有哪些原因。" style="width:400px"></a>
   </div>
-  <p class="example-note">Beta 语法，版本要求高。先确认文档平台能渲染。</p>
+  <p class="example-note">这种图型仍在试验中，需要较新的 Mermaid 版本。使用前先确认文档平台能显示。</p>
 </article>
   </div>
 </section>
 
 <section aria-labelledby="lint">
   <div class="narrow"><h2 id="lint">流程审查</h2>
-  <p>先确定控制点清单，再审查流程。优先使用你提供的清单；从同一份资料提取时，结果会标明“不是独立依据”。</p></div>
+  <p>先列出流程必须遵守的要求，例如“付款前要经过财务复核”，这就是控制点清单。优先使用你提供的清单；如果清单和图都来自同一份材料，会说明检查依据的局限，避免把材料本身的遗漏也带进结果。</p></div>
   <div class="pair demo">
-    <div class="democol"><div class="codebox"><div class="bar"><span>controls.txt，制度要求</span></div><pre><code>source: user
+    <div class="democol"><div class="codebox"><div class="bar"><span>必须遵守的要求 · controls.txt</span></div><pre><code>source: user
 control: 财务复核
 must_pass: 执行付款 through 审核单据
 separate: 提交付款申请 | 审核单据
-</code></pre></div><div class="codebox"><div class="bar"><span>一张能渲染的付款流程</span></div><pre><code>%% saan: approval
+</code></pre></div><div class="codebox"><div class="bar"><span>可以显示、但仍有问题的付款流程</span></div><pre><code>%% saan: approval
 swimlane-beta LR
   subgraph biz[业务部门]
     apply[提交付款申请]
@@ -309,15 +310,15 @@ swimlane-beta LR
   audit --&gt; pay
   apply --&gt;|小额| pay
 </code></pre></div></div>
-    <div class="codebox"><div class="bar"><span>check_mermaid.py 的实际输出</span></div><pre class="out"><code>必须修改 [CP1] 控制点清单里的『财务复核』不在图上。补上节点，或告诉用户它为什么不用画
+    <div class="codebox"><div class="bar"><span>流程检查结果</span></div><pre class="out"><code>必须修改 [CP1] 控制点清单里的『财务复核』不在图上。补上节点，或告诉用户它为什么不用画
 业务发现 [RT1] 1 个审批判断没有退回分支，资料或流程要写明未通过怎么走：审核单据
 业务发现 [P1] 可以绕过『审核单据』到达『执行付款』
 业务发现 [P5] 『提交付款申请』与『审核单据』都由『业务部门』执行，违反岗位分离</code></pre></div>
   </div>
   <div class="tbl-wrap"><table>
-    <thead><tr><th>图的声明或清单项</th><th>检查什么</th></tr></thead>
+    <thead><tr><th>图型标记或检查要求</th><th>检查什么</th></tr></thead>
     <tbody>
-      <tr><th><code>saan: flow</code></th><td>P2 走不到 · P3 死路 · P4 判断只有一个出口</td></tr>
+      <tr><th><code>saan: flow</code></th><td>P2 无法到达的步骤 · P3 无法继续的路径 · P4 只有一个出口的判断</td></tr>
       <tr><th><code>saan: approval / audit</code></th><td>再加 AP1 没有判断节点 · RT1 审批判断没有退回</td></tr>
       <tr><th><code>saan: overview</code></th><td>再加 OV1 总览出现回路</td></tr>
       <tr><th><code>saan: arch</code></th><td>AR1 架构图里混入判断节点</td></tr>
@@ -326,19 +327,19 @@ swimlane-beta LR
       <tr><th><code>separate</code></th><td>P5 不相容的两步由同一泳道执行</td></tr>
     </tbody>
   </table></div>
-  <p>业务发现要报告给你，不会为了通过校验而删线。确认属实又确实要保留的，写 <code>%% accept P1: 原因</code>，脚本会标为已确认。</p>
+  <p>检查发现的业务问题会先列出来，由你核对实际情况。确认属实且需要保留时，可以用 <code>%% accept P1: 原因</code> 记录说明，检查结果会标为已确认。</p>
 </section>
 
 <section aria-labelledby="which">
-  <div class="narrow"><h2 id="which">工具对比</h2>
+  <div class="narrow"><h2 id="which">Mermaid 和 Diagram 怎么选</h2>
   </div>
   <div class="tbl-wrap"><table>
     <thead><tr><th></th><th>Saan Mermaid</th><th>Saan Diagram</th></tr></thead>
     <tbody>
-      <tr><th>产出</th><td>Mermaid 代码，可做 diff</td><td>图片、HTML、飞书画板</td></tr>
+      <tr><th>产出</th><td>文字形式的图示代码，方便比较每次改动</td><td>图片、HTML、飞书画板</td></tr>
       <tr><th>适合</th><td>README、Markdown、设计文档</td><td>汇报、对外交付、飞书画板</td></tr>
-      <tr><th>排版</th><td>自动布局，泳道能对齐，线路控制不了</td><td>引擎精确控制</td></tr>
-      <tr><th>质量保证</th><td>按控制点清单审查、配色校验、真实渲染、人工看图</td><td>几何、对比度和业务规则校验</td></tr>
+      <tr><th>排版</th><td>自动布局，泳道能对齐，线路控制不了</td><td>可更细致地控制位置、间距和连线</td></tr>
+      <tr><th>检查方式</th><td>按控制点清单审查、配色校验、真实渲染、人工看图</td><td>检查位置与间距、文字对比度和业务规则</td></tr>
       <tr><th>独有的图</th><td>时序图、状态图、甘特图</td><td>IDEF0、组织架构与数据隔离</td></tr>
     </tbody>
   </table></div>
@@ -370,7 +371,7 @@ swimlane-beta LR
 
 <section aria-labelledby="theme">
   <div class="narrow"><h2 id="theme">主题配置</h2>
-  <p>放在每张图最顶部，换一个平台也不用重新配。页面有深色模式时，要再看一眼效果。</p></div>
+  <p>把这段设置放在图示代码的开头，颜色和字体就能随代码一起保存。换到其他平台或深色页面后，仍需检查实际显示效果。</p></div>
   <div class="sw">
     <div><i style="background:#E3E5EA;color:#1F2329">业务节点</i><span>默认，不用写</span></div>
     <div><i style="background:#D0D3D9;color:#1F2329">hub</i><span>汇聚枢纽</span></div>
@@ -379,8 +380,8 @@ swimlane-beta LR
     <div><i style="background:#8FB0FF;color:#1F2329">external</i><span>外部系统</span></div>
     <div><i style="background:#FDEBD8;color:#1F2329;outline:1px solid #F5C99B;outline-offset:-1px">ai</i><span>AI 能力</span></div>
   </div>
-  <p>和 Saan Diagram 同一套色值。自造颜色、用 <code>style</code> 单独改色、核心节点超过 3 个，校验都不放行。</p>
-  <div class="block"><div class="bar"><span>frontmatter</span><button type="button" class="copy" data-copy="theme" aria-label="复制主题配置" hidden>复制</button></div><pre id="code-theme"><code>---
+  <p>默认配色与 Saan Diagram 一致。使用额外颜色、用 <code>style</code> 单独改色，或高亮超过 3 个核心节点时，检查会提示修改。</p>
+  <div class="block"><div class="bar"><span>图示开头的主题设置</span><button type="button" class="copy" data-copy="theme" aria-label="复制主题配置" hidden>复制</button></div><pre id="code-theme"><code>---
 config:
   theme: base
   look: classic
@@ -408,14 +409,14 @@ config:
 
 <section aria-labelledby="check">
   <div class="narrow"><h2 id="check">交付检查</h2>
-  <p>脚本会一起检查错误占位图和图宽，宽度超过 1200 就提醒。自动布局可能挤成一团，所以每张图还要看一眼。</p></div>
+  <p>检查程序会识别绘图失败时生成的错误图片，并在图宽超过 1200px 时提醒。还要打开生成的图片，确认文字和连线没有挤在一起。</p></div>
   <div class="block"><pre><code>mmdc -i diagram.mmd -o diagram.svg -b white -q
 python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code></pre></div>
   <ol class="steps">
-    <li><b>能读</b><span>每个标签都看得清，没有重叠。</span></li>
-    <li><b>顺向</b><span>主线朝一个方向走，避开能避免的交叉。</span></li>
-    <li><b>不漏</b><span>流程要求的判断和退回都在。</span></li>
-    <li><b>不编</b><span>每个节点和连线都来自来源或写明的假设。</span></li>
+    <li><b>文字清楚</b><span>每个标签都看得清，没有重叠。</span></li>
+    <li><b>顺序明确</b><span>主线朝一个方向走，避开能避免的交叉。</span></li>
+    <li><b>步骤完整</b><span>流程要求的判断和退回都在。</span></li>
+    <li><b>内容有依据</b><span>每个节点和连线都来自来源或写明的假设。</span></li>
   </ol>
   <p>调一两次仍然缠在一起，就拆图。需要精确摆放，就换 Saan Diagram。</p>
 </section>
@@ -425,9 +426,9 @@ python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code><
   <div class="two">
     <div class="panel"><h3>泳道依赖 Mermaid 12</h3><p style="font-size:13.5px"><code>swimlane-beta</code> 能对齐泳道，但泳道之间没有分隔，线路也可能绕到外侧。低版本平台只能退回分组框，各列对不齐。</p></div>
     <div class="panel"><h3>平台版本不同</h3><p style="font-size:13.5px">每个平台内置的 Mermaid 版本不同。本页的图用 Mermaid CLI 12.2 渲染，还没在 GitHub 或飞书文档里测过。</p></div>
-    <div class="panel"><h3>只查结构和清单</h3><p style="font-size:13.5px">它不判断业务本身对不对，清单之外的问题也查不出。清单如果和图出自同一个人，独立性就很弱。时序图等类型只查配色。</p></div>
-    <div class="panel"><h3>不保证画得更好</h3><p style="font-size:13.5px">一次小样本匿名对比中，用它画图的总分没有超过不用它。它的价值在审查，不在画图本身。</p></div>
-    <div class="panel"><h3>Beta 类型风险最大</h3><p style="font-size:13.5px"><code>swimlane-beta</code>、<code>block-beta</code> 和 <code>ishikawa-beta</code> 在旧版本上可能无法显示。要跨平台的文档，优先用稳定类型。</p></div>
+    <div class="panel"><h3>检查结果需要结合业务判断</h3><p style="font-size:13.5px">检查按图中的结构、声明的要求和内置规则进行，无法判断实际业务是否合理。若图和清单出自同一份理解，两者可能有同样的遗漏。不同图型检查的项目也不同，不能把“通过检查”当作业务已经核实。</p></div>
+    <div class="panel"><h3>绘图效果的已有观察</h3><p style="font-size:13.5px">已有一次小样本匿名对比，用技能画图的总分没有超过未使用技能的结果。这次对比尚未显示绘图质量有所提高，流程检查的作用需要单独看。</p></div>
+    <div class="panel"><h3>试验中的图型要先确认版本</h3><p style="font-size:13.5px"><code>swimlane-beta</code>、<code>block-beta</code> 和 <code>ishikawa-beta</code> 在旧版本上可能无法显示。要跨平台的文档，优先用稳定类型。</p></div>
   </div>
 </section>
 
@@ -439,7 +440,7 @@ python3 check_mermaid.py --controls controls.txt diagram.mmd diagram.svg</code><
   </ul>
 </section>
 
-<footer><a href="https://github.com/yishan/saankits/blob/main/skills/saan-mermaid/SKILL.md">SKILL.md</a><span>Saan Mermaid v1.1.0，作者 Yishan，MIT</span><a href="../../">Saan Kits</a><a href="../../diagram/">Saan Diagram</a><a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid">源码</a></footer>
+<footer class="site-footer"><span>Saan Mermaid · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-mermaid">技能源码</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-mermaid/README.zh-CN.md">使用指南</a><a href="../../zh/">Saan Kits</a></footer>
 </main>
 
 

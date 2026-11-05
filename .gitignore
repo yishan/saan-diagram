@@ -5,6 +5,8 @@ __pycache__/
 *.html
 !docs/**/*.html
 !page/**/*.html
+!skills/saan-prototype/runtime/*.html
+!tests/**/results/**/*.html
 *.wb.json
 *.openapi.json
 *.board.png

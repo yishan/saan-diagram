@@ -1,0 +1,14 @@
+{
+  "title": "设备借用 · 评审原型（示例）",
+  "source": "source.md",
+  "language": "zh-CN",
+  "timezone": "Asia/Shanghai",
+  "theme": "neutral",
+  "roles": [{"id": "jia", "label": "员工甲"}, {"id": "yi", "label": "员工乙"}],
+  "states": ["可借", "已借出"],
+  "confirmed_text": ["设备", "可借", "已借出"],
+  "rules": "rules.js",
+  "scenarios": "scenarios.json",
+  "pages": ["pages/devices.js"],
+  "trace": "trace.md"
+}

@@ -1,0 +1,79 @@
+---
+config:
+  theme: base
+  look: classic
+  themeVariables:
+    fontFamily: "PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif"
+    primaryColor: "#E3E5EA"
+    primaryTextColor: "#1F2329"
+    primaryBorderColor: "#E3E5EA"
+    secondaryColor: "#E9ECF1"
+    tertiaryColor: "#F5F6F8"
+    lineColor: "#4E5563"
+    textColor: "#1F2329"
+    clusterBkg: "#F5F6F8"
+    clusterBorder: "#D5D8DE"
+    edgeLabelBackground: "#FFFFFF"
+    dropShadow: "none"
+    cScale0: "#E3E5EA"
+    cScale1: "#E2EBFF"
+    cScale2: "#E9ECF1"
+    cScale3: "#F5F6F8"
+  quadrantChart:
+    pointTextPadding: 14
+---
+%% 依据 input/room-booking-swim.yaml 原样转写：节点、标签、连线与泳道不变；lane/row/route/offset 为布局参数，未转写。
+%% saan: approval
+swimlane-beta TB
+  subgraph emp[员工（预约人）]
+    a1[选时段填主题并提交]
+    b1[在我的预约提交改期]
+    c1[在我的预约提交取消]
+    d_emp[我的预约显示已取消]
+  end
+  subgraph sys[预约系统]
+    a_chk{时段主题会议室合规？}
+    a_conf{与有效预约冲突？}
+    a_ok[创建有效预约]
+    b_own{本人有效且未开始？}
+    b_chk{目标时段会议室合规？}
+    b_conf{与其他预约冲突？}
+    b_ok[释放原占用更新时段]
+    c_chk{本人有效且未开始？}
+    c_ok[置已取消并释放占用]
+    c_rec[保存操作人与时间]
+    d_chk{所管有效且未开始？}
+    d_reason{取消原因已填写？}
+    d_ok[置已取消并释放占用]
+    d_rec[保存操作人时间原因]
+  end
+  subgraph admin[会议室管理员]
+    d1[在占用记录选择预约]
+    d2[填写原因并确认取消]
+  end
+  a1 --> a_chk
+  a_chk -->|是| a_conf
+  a_conf -->|否| a_ok
+  a_chk -.->|否·不创建| a1
+  a_conf -.->|是·冲突反馈| a1
+  b1 --> b_own
+  b_own -->|是| b_chk
+  b_chk -->|是| b_conf
+  b_conf -->|否| b_ok
+  b_own -.->|否·原预约不变| b1
+  b_chk -.->|否·原预约不变| b1
+  b_conf -.->|是·原预约不变| b1
+  c1 --> c_chk
+  c_chk -->|是| c_ok
+  c_ok --> c_rec
+  c_chk -.->|否·预约不变| c1
+  d1 --> d2
+  d2 --> d_chk
+  d_chk -->|是| d_reason
+  d_reason -->|是| d_ok
+  d_ok --> d_rec
+  d_rec --> d_emp
+  d_chk -.->|否·预约不变| d2
+  d_reason -.->|否·预约不变| d2
+  classDef hub fill:#D0D3D9,stroke:#D0D3D9,color:#1F2329
+  class a_ok,b_ok,c_ok,d_ok hub

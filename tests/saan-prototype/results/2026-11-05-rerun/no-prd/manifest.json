@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-05",
+  "skill": "saan-prototype",
+  "skill_version": "0.1.0",
+  "skill_commit": "6ac7627",
+  "mode": "independent agent, fresh context, isolated temporary workspace containing only the skill copy and inputs",
+  "note": "",
+  "criteria_withheld": true,
+  "outputs_unedited": true,
+  "skill_hashes": {
+    "SKILL.md": "98811c4a4ed21f59e0bac26132c42d0728aa8eb084f3c2b8fceb92feeb843b28",
+    "agents/openai.yaml": "85b1673e26fae01088ed8aa669967c9e5f7da8f754ed69e4ace7807a1c71c365",
+    "assets/example/manifest.json": "38c97f8641abe24914a414454bdd93057b3ce2ffd2c7dbbcc6cb3c1b55903e61",
+    "assets/example/pages/devices.js": "c64cd0ef9a3180e3872c828ceac4a522e35b92ede28dda4a05bcd182b55ec995",
+    "assets/example/rules.js": "c5aa0c16d8946801cc2aaf6cb8340e9c4524ee026bad80ef8cc48eca608be096",
+    "assets/example/scenarios.json": "80ad1fc194775e2fa3aa1f3a2587f8900ece6d1fe9f7beec6dd8c8f128b35a66",
+    "assets/example/source.md": "ff56c9a36265ae669d1bb9ee4d2dd55eacc8c7032a13261ec09ff537b02fe1be",
+    "assets/example/trace.md": "75cb524a2487eee63c3f41e6e395d3f305e963a07a67ea128a1f82c2e83721bb",
+    "patterns/detail.md": "b78c92f1059907272a90e2d5bd95c7cc5b3b20c9042b61c720c8fc79621e4d42",
+    "patterns/dialog.md": "ff8175645ec3c2a4ef914ae33f518c7dfddacd52c3bd49d7aad911301bffd0d1",
+    "patterns/form.md": "9a92d4dd939b5717080f412e0364011cafd729217e52cdafc9067b88b066dd28",
+    "patterns/list.md": "6bee4d8d932230777661ba68b23b41dd1c45b102978cd9b55ccc432f53c2f7a9",
+    "patterns/states.md": "a75f48e615325b57a5eefd5b5d3b84c3fb4bbaafcd88dd24d0a3195e8d8f5c96",
+    "patterns/timeline.md": "385ac6d0bc8a9e2ff259af9738d74f9d57b944f39706ffbd03aaeffbc604b351",
+    "references/annotations.md": "22fbe04a5a81cfc83364cccba3f6f3dd45ddb64323e2373a5aeb047291b5c69c",
+    "references/scenarios.md": "4f24a66d3f83afe90d0c769e855ae2cfc12400e1ed97e004550ecac791298d7a",
+    "references/source-handling.md": "09f8e94a1805d43bdb3c9959bdbd8976cdf3cb285427785fa4f3b8f5f48ae869",
+    "runtime/runtime.css": "141536539b9987942119d56bd615ef8977b3346add1b78947306751e3052eee9",
+    "runtime/runtime.js": "7f049040d6ab916b4f668f2c1e7afdbe3979dc3c7a2d5a19b882109bb24b3a22",
+    "runtime/shell.html": "b7ae3554ba53d7aafec9f7e70f2a15275cab33ebeafc8e022b6194e6306f7c86",
+    "scripts/build.py": "e6c87689aefdf2a7a966cc48f4bf87a347b094c03adcbb8943c75d8348f43e62",
+    "scripts/check.py": "0170c1243117580e09e7182bc98fdab068690b3ba861be517d383896047783ad",
+    "scripts/contrast.py": "e13eddd574f2b2c09948a87cdc6d21c233e20a429ea76dec78d79a6e6f27fd72",
+    "scripts/source_index.py": "80ac1757f40ac9b59df6b2625bec800b0892d474460ee3a42fbe3681702b7499",
+    "themes/blue.json": "91cc2297ab029908d4a31c47988cf7023b7b509f7390f253f1f081fb871284db",
+    "themes/dark.json": "70dd74005ce7240f03d5063da08803fed672283b9fcd262737879f727b3f76d4",
+    "themes/neutral.json": "0a92b34dacf038164932123619277059664af97cb029828007db85f04ecad73a"
+  },
+  "input_hashes": {
+    "request.md": "15f48d66b6777940814deebf33f1f2dc32f793a44ee275aeab35fa57a7ebc34b"
+  },
+  "output_hashes": {
+    "prototype/manifest.json": "6972cbc5ac16b20a423039c48945a13178022c2c2c520f8a3c700d6c641a374f",
+    "prototype/pages/mine.js": "f977c784b2c08b8e43701f9e93642c50f1e116d9f32501d5cc3049b980bbc367",
+    "prototype/pages/spots.js": "f2ff29ed2d4353e4f65311d42581bf23673ca7b4058110a238cbf57cd25f9777",
+    "prototype/rules.js": "25f1527e3960c03774256a6ec6f44577af2b69117ecd59805fb967a8e1f437f8",
+    "prototype/scenarios.json": "f002fc90602c45d3606285f804172ab3592c561f5b372ae87accef719c62482d",
+    "prototype/source.md": "0d102bd191653bb8960485645f98b4cc09513f3a9baf3d166f6e64e88a3d5cc7",
+    "prototype/trace.md": "ea84f05d2521efa46599969f0f95a2cdd55c2de7e8a48ace8233d5f842510835",
+    "prototype.html": "fdd38d1e45fed4f3c868c791e5b57c2af0422889d82fefe2f7ee894d7b4b0f15"
+  },
+  "browser_review": "click-through by the reviewing session in the in-app browser, 2026-11-05"
+}

@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>共享车位 · 评审原型</title>
+<style>
+:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: var(--font_size)/1.6 "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+#p-bar { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 6px 16px; background: var(--surface); border-bottom: 1px dashed var(--border); font-size: 12px; color: var(--muted); }
+#p-bar label { display: flex; gap: 6px; align-items: center; }
+#p-bar select { padding: 2px 4px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+#p-bar .p-tag-review { margin-right: auto; font-weight: 600; }
+#p-nav { display: flex; gap: 4px; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+#p-nav button { padding: 10px 14px; border: 0; border-bottom: 2px solid transparent; background: none; cursor: pointer; color: var(--muted); }
+#p-nav button[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+#p-main { max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; }
+.p-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.p-h { margin: 0 0 12px; font-size: 1.15em; }
+.p-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.p-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; }
+.p-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent_text); }
+.p-btn.danger { color: var(--danger); }
+.p-btn:disabled { opacity: .5; cursor: not-allowed; }
+.p-field { display: grid; gap: 4px; margin-bottom: 12px; }
+.p-field > span { color: var(--muted); font-size: .9em; }
+.p-field input, .p-field select, .p-field textarea { padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.p-table { width: 100%; border-collapse: collapse; }
+.p-table th, .p-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.p-table th { color: var(--muted); font-weight: 500; }
+.p-tag { display: inline-block; padding: 0 8px; border: 1px solid var(--border); border-radius: 999px; font-size: .85em; }
+.p-timeline { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(28px, 1fr); gap: 2px; }
+.p-slot { min-height: 34px; border: 1px solid var(--border); border-radius: 3px; background: var(--bg); font-size: 12px; padding: 2px 4px; overflow: hidden; }
+.p-slot.busy { background: var(--accent); color: var(--accent_text); border-color: var(--accent); }
+button.p-slot { cursor: pointer; text-align: left; }
+.p-empty { padding: 32px; text-align: center; color: var(--muted); }
+.p-flash { padding: 10px 12px; margin-bottom: 16px; border: 1px solid currentColor; border-radius: var(--radius); background: var(--surface); }
+.p-flash.error { color: var(--danger); }
+.p-flash.ok { color: var(--text); }
+.p-dialog { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(0, 0, 0, .35); }
+.p-dialog > div { width: min(440px, 92vw); background: var(--surface); border-radius: var(--radius); padding: 20px; }
+.p-pending { padding: 10px 12px; border: 1px dashed var(--notice); border-radius: var(--radius); color: var(--notice); }
+/* review annotations */
+.p-badge { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 3px; font-size: 11px; line-height: 16px; vertical-align: middle; cursor: help; border: 1px solid; background: var(--surface); }
+.p-badge.proposal { color: var(--notice); }
+.p-badge.open { color: var(--danger); cursor: pointer; }
+.p-badge.rule { color: var(--muted); }
+[data-proposal] { text-decoration: underline dotted var(--notice); text-underline-offset: 3px; }
+body.p-review-off .p-badge, body.p-review-off .p-review-only { display: none; }
+body.p-review-off [data-proposal] { text-decoration: none; }
+#p-pop { position: fixed; z-index: 30; max-width: 360px; padding: 10px 12px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 6px 20px rgba(0, 0, 0, .18); font-size: 12px; }
+
+</style>
+</head>
+<body>
+<div id="p-bar"></div>
+<nav id="p-nav"></nav>
+<main id="p-main"></main>
+<div id="p-pop" hidden></div>
+<script type="application/json" id="p-data">{"title": "共享车位 · 评审原型", "language": "zh-CN", "timezone": "Asia/Shanghai", "roles": [{"id": "jia", "label": "员工甲"}, {"id": "yi", "label": "员工乙"}], "states": ["已登记", "已取消"], "theme": "neutral", "themes": {"blue": {"label": "品牌蓝", "bg": "#F4F7FC", "surface": "#FFFFFF", "border": "#D3DCEB", "text": "#1B2333", "muted": "#566176", "accent": "#2B5FD8", "accent_text": "#FFFFFF", "danger": "#B42318", "notice": "#8A5A00", "radius": "6px", "font_size": "14px"}, "dark": {"label": "暗色", "bg": "#16181D", "surface": "#1F232A", "border": "#363C47", "text": "#E8EAED", "muted": "#A3AAB5", "accent": "#7EA6F7", "accent_text": "#10131A", "danger": "#F27A6E", "notice": "#E7B65C", "radius": "6px", "font_size": "14px"}, "neutral": {"label": "中性灰", "bg": "#F5F6F8", "surface": "#FFFFFF", "border": "#D5D8DE", "text": "#1F2329", "muted": "#5C6370", "accent": "#3A4250", "accent_text": "#FFFFFF", "danger": "#B42318", "notice": "#8A5A00", "radius": "6px", "font_size": "14px"}}, "scenarios": [{"id": "s1", "label": "甲登记明天空闲的车位", "acceptance": ["AC-1"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "page": "register", "data": {"spots": [{"id": "a01", "name": "A-01"}, {"id": "a02", "name": "A-02"}, {"id": "b01", "name": "B-01"}], "registrations": []}}, {"id": "s2", "label": "A-01 明天已被乙登记", "acceptance": ["AC-2"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "page": "register", "data": {"spots": [{"id": "a01", "name": "A-01"}, {"id": "a02", "name": "A-02"}, {"id": "b01", "name": "B-01"}], "registrations": [{"id": "r1", "spot": "a01", "date": "2026-11-11", "by": "yi", "createdOn": "2026-11-10", "status": "已登记"}]}}, {"id": "s3", "label": "甲当天取消自己的登记", "acceptance": ["AC-3"], "role": "jia", "now": "2026-11-10T16:00:00+08:00", "page": "mine", "data": {"spots": [{"id": "a01", "name": "A-01"}, {"id": "a02", "name": "A-02"}, {"id": "b01", "name": "B-01"}], "registrations": [{"id": "r1", "spot": "a01", "date": "2026-11-11", "by": "jia", "createdOn": "2026-11-10", "status": "已登记"}]}}, {"id": "s4", "label": "甲隔天不能取消昨天的登记", "acceptance": ["AC-4"], "role": "jia", "now": "2026-11-10T08:30:00+08:00", "page": "mine", "data": {"spots": [{"id": "a01", "name": "A-01"}, {"id": "a02", "name": "A-02"}, {"id": "b01", "name": "B-01"}], "registrations": [{"id": "r1", "spot": "a01", "date": "2026-11-10", "by": "jia", "createdOn": "2026-11-09", "status": "已登记"}]}}], "defs": {"Q-1": "Q-1 | 「当天取消」指登记当天，还是车位使用当天？原型按“登记当天”理解 | 取消按钮何时出现（AC-4）", "Q-2": "Q-2 | 一名员工同一天能否登记多个车位？ | 登记页是否限制每人一个", "Q-3": "Q-3 | 每天登记明天的车位有没有截止时间（例如 18:00 前）？ | 登记按钮在晚间是否可用", "Q-4": "Q-4 | 车位清单由谁维护，是否需要管理员角色？ | 是否需要车位管理页与管理员角色", "Q-5": "Q-5 | 周末、节假日能否登记？ | 可登记日期范围", "Q-6": "Q-6 | 车位被别人登记后，其他员工能否看到登记人是谁？ | 登记页的车位状态显示", "AC-1": "AC-1 | FR-1 | 车位 A-01 明天无人登记 | 甲登记 A-01 | 登记成功，A-01 明天显示已登记，甲的登记列表出现该记录", "AC-2": "AC-2 | FR-2 | 车位 A-01 明天已被乙登记 | 甲登记 A-01 | 登记失败，乙的登记不变", "AC-3": "AC-3 | FR-3 | 甲今天登记了明天的 A-01 | 甲今天取消 | 记录变为已取消，A-01 明天恢复可登记", "AC-4": "AC-4 | FR-3 | 甲昨天登记了今天的 A-01 | 甲今天尝试取消 | 不能取消，记录保持已登记", "FR-1": "FR-1 | 员工登记车位 | 只能登记明天（按 Asia/Shanghai 日期）的车位；登记成功后生成一条「已登记」记录，登记人为当前员工 | 提示登记成功〔建议〕", "FR-2": "FR-2 | 该车位明天已有一条「已登记」记录 | 拒绝登记，原记录不变（同一车位一天只能给一个人） | 提示该车位已被登记〔建议〕", "FR-3": "FR-3 | 登记人取消自己的「已登记」记录，且当前日期与登记日期是同一天 | 记录变为「已取消」，该车位当天恢复可登记 | 提示已取消〔建议〕"}}</script>
+<script>
+/* Saan Prototype runtime: review bar, annotations, roles, scenarios, themes. */
+(function () {
+  "use strict";
+  var D = JSON.parse(document.getElementById("p-data").textContent);
+  var pages = [], actions = {};
+  var S = { scenario: null, role: null, now: null, data: null, page: null, flash: null, dialog: null,
+            review: true, theme: D.theme };
+  var KIND = { proposal: "建议", open: "待确认", rule: "规则" };
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function role() { return D.roles.filter(function (r) { return r.id === S.role; })[0] || D.roles[0]; }
+  function visible() {
+    return pages.filter(function (p) { return !p.roles || p.roles.indexOf(S.role) >= 0; });
+  }
+  function ctx() {
+    return {
+      data: S.data, role: role(), now: S.now, rules: Proto.rules, scenario: S.scenario, esc: esc,
+      go: function (id) { S.page = id; S.flash = null; },
+      flash: function (text, opt) { S.flash = Object.assign({ text: text, kind: "ok" }, opt || {}); },
+      dialog: function (html) { S.dialog = html; },
+      close: function () { S.dialog = null; }
+    };
+  }
+  function attrs(opt) {
+    var out = "";
+    ["proposal", "open", "rule"].forEach(function (k) { if (opt && opt[k]) out += " data-" + k + '="' + esc(opt[k]) + '"'; });
+    return out;
+  }
+  function applyTheme() {
+    var t = D.themes[S.theme] || D.themes[Object.keys(D.themes)[0]];
+    Object.keys(t).forEach(function (k) { if (k !== "label") document.documentElement.style.setProperty("--" + k, t[k]); });
+  }
+  function option(value, label, current) {
+    return '<option value="' + esc(value) + '"' + (value === current ? " selected" : "") + ">" + esc(label) + "</option>";
+  }
+  function bar() {
+    var sc = D.scenarios.map(function (s) {
+      return option(s.id, s.label + (s.acceptance && s.acceptance.length ? "（" + s.acceptance.join("、") + "）" : ""), S.scenario.id);
+    }).join("");
+    var ro = D.roles.map(function (r) { return option(r.id, r.label, S.role); }).join("");
+    var th = Object.keys(D.themes).map(function (k) { return option(k, D.themes[k].label || k, S.theme); }).join("");
+    document.getElementById("p-bar").innerHTML =
+      '<span class="p-tag-review">评审原型 · 示例数据为虚构</span>' +
+      '<label>场景 <select data-bar="scenario">' + sc + "</select></label>" +
+      '<label>角色 <select data-bar="role">' + ro + "</select></label>" +
+      '<label>主题 <select data-bar="theme">' + th + "</select></label>" +
+      '<label><input type="checkbox" data-bar="review"' + (S.review ? " checked" : "") + "> 标注</label>" +
+      "<span>当前时间 " + esc(new Intl.DateTimeFormat(D.language, { timeZone: D.timezone, dateStyle: "medium", timeStyle: "short" }).format(S.now)) +
+      "（" + esc(D.timezone) + "）</span>";
+  }
+  function decorate(root) {
+    ["proposal", "open", "rule"].forEach(function (k) {
+      root.querySelectorAll("[data-" + k + "]").forEach(function (el) {
+        el.getAttribute("data-" + k).split(/\s+/).filter(Boolean).forEach(function (id) {
+          var b = document.createElement("span");
+          b.className = "p-badge " + k;
+          b.textContent = (k === "proposal" ? "建议 " : "") + id;
+          b.setAttribute("data-def", id);
+          b.title = KIND[k] + " · " + id + "\n" + (D.defs[id] || "来源中未找到该编号");
+          el.appendChild(b);
+        });
+      });
+    });
+  }
+  function render() {
+    document.getElementById("p-pop").hidden = true;  // its badge is about to be replaced
+    applyTheme();
+    document.body.classList.toggle("p-review-off", !S.review);
+    bar();
+    var vis = visible();
+    if (!vis.some(function (p) { return p.id === S.page; })) S.page = vis.length ? vis[0].id : null;
+    document.getElementById("p-nav").innerHTML = vis.map(function (p) {
+      return '<button data-go="' + esc(p.id) + '"' + (p.id === S.page ? ' aria-current="page"' : "") + attrs(p) + ">" + esc(p.label) + "</button>";
+    }).join("");
+    var page = vis.filter(function (p) { return p.id === S.page; })[0];
+    var html = S.flash ? '<div class="p-flash ' + esc(S.flash.kind) + '"' + attrs(S.flash) + ">" + esc(S.flash.text) + "</div>" : "";
+    html += page ? page.render(ctx()) : '<div class="p-empty">当前角色没有可见页面</div>';
+    if (S.dialog) html += '<div class="p-dialog"><div>' + S.dialog + "</div></div>";
+    var main = document.getElementById("p-main");
+    main.innerHTML = html;
+    decorate(document.getElementById("p-nav"));
+    decorate(main);
+  }
+  function load(id) {
+    var sc = D.scenarios.filter(function (s) { return s.id === id; })[0] || D.scenarios[0];
+    S.scenario = sc; S.role = sc.role || D.roles[0].id; S.now = new Date(sc.now || Date.now());
+    S.data = JSON.parse(JSON.stringify(sc.data || {})); S.flash = null; S.dialog = null;
+    if (sc.page) S.page = sc.page;
+    render();
+  }
+  function popover(badge) {
+    var pop = document.getElementById("p-pop"), r = badge.getBoundingClientRect(), id = badge.getAttribute("data-def");
+    pop.innerHTML = "<strong>" + esc(id) + "</strong><br>" + esc(D.defs[id] || "来源中未找到该编号");
+    pop.style.left = Math.min(r.left, innerWidth - 380) + "px";
+    pop.style.top = (r.bottom + 6) + "px";
+    pop.hidden = false;
+  }
+  function run(name, el, extra) {
+    var fn = actions[name];
+    if (!fn) { S.flash = { text: "原型未实现动作：" + name, kind: "error" }; return render(); }
+    fn(ctx(), Object.assign({}, el.dataset, extra || {}), el);
+    render();
+  }
+
+  document.addEventListener("click", function (e) {
+    var pop = document.getElementById("p-pop");
+    var badge = e.target.closest(".p-badge.open");
+    if (badge) { e.preventDefault(); e.stopPropagation(); return popover(badge); }
+    pop.hidden = true;
+    var go = e.target.closest("[data-go]");
+    if (go) { S.page = go.getAttribute("data-go"); S.flash = null; S.dialog = null; return render(); }
+    var act = e.target.closest("button[data-action], a[data-action]");
+    if (act && !act.disabled) { e.preventDefault(); run(act.getAttribute("data-action"), act); }
+  });
+  document.addEventListener("submit", function (e) {
+    var form = e.target.closest("form[data-action]");
+    if (!form) return;
+    e.preventDefault();
+    var fields = {};
+    new FormData(form).forEach(function (v, k) { fields[k] = v; });
+    run(form.getAttribute("data-action"), form, { fields: fields });
+  });
+  document.addEventListener("change", function (e) {
+    var k = e.target.getAttribute("data-bar");
+    if (!k) return;
+    if (k === "scenario") return load(e.target.value);
+    if (k === "role") { S.role = e.target.value; S.flash = null; S.dialog = null; }
+    if (k === "theme") S.theme = e.target.value;
+    if (k === "review") S.review = e.target.checked;
+    render();
+  });
+
+  window.Proto = {
+    rules: {},
+    page: function (id, def) { pages.push(Object.assign({ id: id }, def)); },
+    action: function (name, fn) { actions[name] = fn; },
+    start: function () { load(D.scenarios[0] && D.scenarios[0].id); },
+    esc: esc
+  };
+})();
+
+</script>
+<script>
+/* Confirmed rules only (from the author's restatement in source.md). Each function is pure and names its rule. */
+Proto.rules.dateKey = function (d) {                        // FR-1, FR-3: dates are Asia/Shanghai calendar days
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+};
+Proto.rules.tomorrow = function (now) {                     // FR-1: only tomorrow can be registered
+  return Proto.rules.dateKey(new Date(now.getTime() + 24 * 3600 * 1000));
+};
+Proto.rules.activeFor = function (regs, spotId, date) {     // FR-2: one active registration per spot per day
+  return regs.filter(function (r) { return r.spot === spotId && r.date === date && r.status === "已登记"; })[0] || null;
+};
+Proto.rules.canRegister = function (regs, spotId, date, now) {  // FR-1, FR-2
+  return date === Proto.rules.tomorrow(now) && !Proto.rules.activeFor(regs, spotId, date);
+};
+Proto.rules.canCancel = function (reg, roleId, now) {       // FR-3: own, active, cancelled on the day it was made
+  return reg.by === roleId && reg.status === "已登记" && reg.createdOn === Proto.rules.dateKey(now);
+};
+
+</script>
+<script>
+/* pages/register.js */
+Proto.page("register", {
+  label: "登记车位",
+  proposal: "FR-1",
+  render: function (c) {
+    var day = c.rules.tomorrow(c.now);
+    var regs = c.data.registrations;
+    var rows = c.data.spots.map(function (s) {
+      var r = c.rules.activeFor(regs, s.id, day);
+      var status = !r
+        ? '<span class="p-tag" data-proposal="FR-2">空闲</span>'
+        : r.by === c.role.id
+          ? '<span class="p-tag" data-proposal="FR-2">已登记（我）</span>'
+          : '<span class="p-tag" data-rule="FR-2">已登记</span>';
+      var act = !r
+        ? '<button class="p-btn primary" data-action="register" data-id="' + c.esc(s.id) + '" data-rule="FR-1 FR-2"><span data-proposal="FR-1">登记</span></button>'
+        : r.by === c.role.id
+          ? '<button class="p-btn" data-go="mine"><span data-proposal="FR-3">去我的登记</span></button>'
+          : '<button class="p-btn" data-action="register" data-id="' + c.esc(s.id) + '" data-rule="FR-2"><span data-proposal="FR-1">登记</span></button>';
+      return "<tr><td>" + c.esc(s.name) + "</td><td>" + status + "</td><td>" + act + "</td></tr>";
+    }).join("");
+    return '<section class="p-card"><h2 class="p-h" data-proposal="FR-1">登记明天的车位：' + c.esc(day) + "</h2>" +
+      '<table class="p-table"><thead><tr><th>车位</th><th>明天状态</th><th>操作</th></tr></thead><tbody>' + rows + "</tbody></table>" +
+      '<p class="p-pending p-review-only" data-open="Q-6">已被他人登记的车位是否显示登记人待定，原型只显示「已登记」</p>' +
+      '<p class="p-pending p-review-only" data-open="Q-2">每人每天能登记几个车位待定，原型不做限制</p>' +
+      '<p class="p-pending p-review-only" data-open="Q-3">登记截止时间待定，原型全天可登记</p>' +
+      "</section>";
+  }
+});
+Proto.action("register", function (c, a) {
+  var day = c.rules.tomorrow(c.now);
+  var spot = c.data.spots.filter(function (s) { return s.id === a.id; })[0];
+  if (!c.rules.canRegister(c.data.registrations, a.id, day, c.now))
+    return c.flash("该车位明天已被登记，请选择其他车位", { kind: "error", proposal: "FR-2" });
+  c.data.registrations.push({ id: "r" + (c.data.registrations.length + 1), spot: a.id, date: day, by: c.role.id,
+    createdOn: c.rules.dateKey(c.now), status: "已登记" });
+  c.flash("登记成功：" + spot.name + "，" + day, { proposal: "FR-1" });
+});
+
+/* pages/mine.js */
+Proto.page("mine", {
+  label: "我的登记",
+  proposal: "FR-3",
+  render: function (c) {
+    var names = {};
+    c.data.spots.forEach(function (s) { names[s.id] = s.name; });
+    var mine = c.data.registrations.filter(function (r) { return r.by === c.role.id; });
+    var rows = mine.map(function (r) {
+      var act = c.rules.canCancel(r, c.role.id, c.now)
+        ? '<button class="p-btn danger" data-action="askCancel" data-id="' + c.esc(r.id) + '" data-rule="FR-3"><span data-proposal="FR-3">取消登记</span></button>'
+        : r.status === "已登记"
+          ? '<span data-rule="FR-3"><span data-proposal="FR-3">仅可在登记当天取消</span></span>'
+          : "";
+      return "<tr><td>" + c.esc(names[r.spot] || r.spot) + "</td><td>" + c.esc(r.date) + "</td><td>" + c.esc(r.createdOn) +
+        '</td><td><span class="p-tag">' + c.esc(r.status) + "</span></td><td>" + act + "</td></tr>";
+    }).join("");
+    return '<section class="p-card"><h2 class="p-h" data-proposal="FR-3">我的登记</h2>' +
+      (mine.length
+        ? '<table class="p-table"><thead><tr><th>车位</th><th>使用日期</th><th>登记日期</th><th>状态</th><th>操作</th></tr></thead><tbody>' + rows + "</tbody></table>"
+        : '<div class="p-empty" data-proposal="FR-1">暂无登记</div>') +
+      '<p class="p-pending p-review-only" data-open="Q-1">「当天取消」的“当天”待定：原型按登记当天理解，若指使用当天，取消按钮的出现时间会变</p>' +
+      "</section>";
+  }
+});
+Proto.action("askCancel", function (c, a) {
+  c.dialog('<h2 class="p-h" data-proposal="FR-3">取消这条车位登记？</h2>' +
+    '<p data-proposal="FR-3">取消后该车位当天可被其他人登记。</p>' +
+    '<div class="p-row"><button class="p-btn danger" data-action="cancel" data-id="' + c.esc(a.id) + '">确认取消</button>' +
+    '<button type="button" class="p-btn" data-action="closeDialog">返回</button></div>');
+});
+Proto.action("closeDialog", function (c) { c.close(); });
+Proto.action("cancel", function (c, a) {
+  var r = c.data.registrations.filter(function (x) { return x.id === a.id; })[0];
+  c.close();
+  if (!r || !c.rules.canCancel(r, c.role.id, c.now))
+    return c.flash("只能在登记当天取消自己的登记", { kind: "error", proposal: "FR-3" });
+  r.status = "已取消";
+  c.flash("已取消登记", { proposal: "FR-3" });
+});
+
+</script>
+<script>Proto.start();</script>
+</body>
+</html>

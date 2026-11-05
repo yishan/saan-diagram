@@ -15,15 +15,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
-<link rel="stylesheet" href="discovery.css">
-<link rel="stylesheet" href="../site.css">
+<link rel="stylesheet" href="discovery.css?v=71cfdd3369">
+<link rel="stylesheet" href="../site.css?v=85e8aacbdc">
 <script src="../site.js" defer></script>
 </head>
 <body>
 <main class="wrap">
   <header class="hero">
     <div class="hero-top">
-      <nav class="site-nav" aria-label="Skill navigation"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="../mermaid/">Mermaid</a><a href="./" aria-current="page">Discovery</a><a href="../prd-writing/">PRD Writing</a></nav>
+      <nav class="site-nav" aria-label="Skill navigation"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="../mermaid/">Mermaid</a><a href="./" aria-current="page">Discovery</a><a href="../prd-writing/">PRD Writing</a><a href="../prototype/">Prototype</a><a href="../inquiry/">Inquiry</a></nav>
       <div class="site-controls">
       <details class="preference-picker" data-preference="language" name="site-preferences">
         <summary class="preference-trigger" aria-label="Language" title="Language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
@@ -35,12 +35,13 @@
       </details>
     </div>
     </div>
-    <h1>Saan Discovery</h1>
-    <p class="lead">Agree who and what to study, then explore real behavior, business workflows, and product fit one topic at a time.</p>
+    <div class="skill-heading"><h1>Saan Discovery</h1><span class="skill-version">v0.2.0</span></div>
+    <p class="lead">Work out what to ask before an interview, then make sense of what you heard and what still needs checking.</p>
+    <p>Start with customer context, product information, or interview notes. The skill helps you prepare questions, organize concrete experiences, and decide what to ask next. If you have an existing product, compare how it works with what people need.</p>
     <dl class="intro">
       <div><dt>For</dt><dd>Consumer, enterprise, and public-sector research</dd></div>
       <div><dt>Outputs</dt><dd>Interview guides, research briefs, follow-ups, and fit assessments</dd></div>
-      <div><dt>Dependencies</dt><dd>Text-only skill; no external service required</dd></div>
+      <div><dt>To get started</dt><dd>Use the material you have; no external service required</dd></div>
     </dl>
   </header>
 
@@ -49,21 +50,21 @@
     <div class="tbl-wrap"><table>
       <thead><tr><th>Context</th><th>What to explore</th><th>How to organize the findings</th></tr></thead>
       <tbody>
-        <tr><td>Consumer · ToC</td><td>Context, motivation, recent behavior, alternatives, and reasons for stopping</td><td>User journeys, behavioral differences, friction, and opportunity hypotheses</td></tr>
-        <tr><td>Enterprise and public sector · ToB/G</td><td>Roles, handoffs, applicable approval rules, data, systems, and implementation constraints</td><td>Business topics, organization differences, fit conditions, and open decisions</td></tr>
+        <tr><td>Consumer · ToC</td><td>Context, motivation, recent behavior, alternatives, and reasons for stopping</td><td>Steps people take, differences in behavior, difficulties, and ideas to test</td></tr>
+        <tr><td>Enterprise and public sector · ToB/G</td><td>Roles, handoffs, applicable approval rules, data, systems, and implementation constraints</td><td>Notes by business topic, differences between organizations, product suitability, and open decisions</td></tr>
         <tr><td>Mixed</td><td>The consumer or resident experience and how the organization delivers the service</td><td>Separate but connected user journeys and organizational processes</td></tr>
       </tbody>
     </table></div>
     <p>Preserve enterprise and public-sector distinctions. Public-service research may need service-recipient outcomes, policy sources, and accountability. State ownership alone does not make a business ToG.</p>
-    <p>Confirm unresolved scope first, then develop one topic and one main question at a time. Correct, skip, or request an interim brief whenever needed. An explicit request for direct synthesis produces a complete response from the available evidence.</p>
+    <p>Agree what you need to learn, then work through one topic, usually with one main question at a time. You can correct an answer, skip a question, or ask for a summary so far. You can also ask for a complete draft based on the material already available.</p>
   </section>
 
   <section aria-labelledby="workflow">
-    <h2 id="workflow">Support the full discovery cycle</h2>
+    <h2 id="workflow">Before and after the interview</h2>
     <ol class="stages">
-      <li><h3>Prepare the interview</h3><p>Read the product material. Prepare essential questions and conditional probes for the participants and available time.</p></li>
-      <li><h3>Synthesize the evidence</h3><p>Organize current behavior, friction, and expectations by journey or business topic. Preserve sources and conflicting accounts.</p></li>
-      <li><h3>Close consequential gaps</h3><p>Route unanswered questions to suitable people. Update the existing brief with new answers and retain resolved questions.</p></li>
+      <li><h3>Prepare the interview</h3><p>Use the product material, participant roles, and available time to choose essential questions. Add follow-up questions for answers that need more detail.</p></li>
+      <li><h3>Organize the notes</h3><p>Organize current behavior, friction, and expectations by journey or business topic. Preserve sources and conflicting accounts.</p></li>
+      <li><h3>Decide what to ask next</h3><p>List what is still unknown and who could help. Update the existing notes when answers arrive, keeping track of what has been resolved.</p></li>
     </ol>
   </section>
 
@@ -77,14 +78,14 @@
         <li>Use the answer to decide whether to probe a waiting point and its causes.</li>
       </ol>
       <p>The answer determines the next question. Missing documents, queues, unclear responsibilities, and system effort call for different evidence.</p>
-      <p class="note">Fictional example. Interview methods are bundled inside the skill; no separate user-interview installation is required.</p>
+      <p class="note">This is a fictional interview example. The skill includes interview preparation and follow-up methods; no separate interview skill is needed.</p>
     </div>
   </section>
 
   <section aria-labelledby="fit">
-    <h2 id="fit">Use product logic to identify essential questions</h2>
+    <h2 id="fit">What to check against an existing product</h2>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Product logic</th><th>Customer conditions to establish</th><th>Decision affected</th></tr></thead>
+      <thead><tr><th>How the product works</th><th>What to ask the customer</th><th>What this helps decide</th></tr></thead>
       <tbody>
         <tr><td>Approval routing by amount and organization</td><td>Amount definitions, boundaries, organization meaning, and exception authority</td><td>Whether configuration can express the actual rules</td></tr>
         <tr><td>A defined business state flow</td><td>When changes take effect and what happens after returns or amendments</td><td>Whether states and actions map to the business</td></tr>
@@ -115,7 +116,7 @@
     <p class="note">Fictional simulations cover interview preparation, synthesis, follow-up evidence, and missing product material. Effectiveness in real customer interviews still needs field validation.</p>
   </section>
 
-  <footer><span>Saan Discovery v0.2.0 · Yishan · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-discovery">Skill source</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-discovery/README.md">User guide</a><a href="../">Saan Kits</a></footer>
+  <footer class="site-footer"><span>Saan Discovery · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-discovery">Skill source</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-discovery/README.md">User guide</a><a href="../">Saan Kits</a></footer>
 </main>
 </body>
 </html>

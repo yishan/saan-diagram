@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Saan Kits: agent skills for turning requirements into diagrams, documents, and prototypes.">
+<meta name="description" content="Saan Kits: skills for thinking through problems, preparing research, writing requirements, building review prototypes, and drawing business diagrams.">
 <title>Saan Kits</title>
 <link rel="canonical" href="https://kits.yishan.app/">
 <link rel="alternate" hreflang="en" href="./">
@@ -15,8 +15,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
-<link rel="stylesheet" href="home.css">
-<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="home.css?v=e049af6389">
+<link rel="stylesheet" href="site.css?v=85e8aacbdc">
 <script src="site.js" defer></script>
 </head>
 <body>
@@ -34,56 +34,62 @@
     </div>
   </div>
   <h1>Saan Kits</h1>
-  <p class="lead">Agent skills for turning requirements into diagrams, documents, and prototypes. Install each skill independently.</p>
-  <p class="skill-count">5 skills</p>
+  <p class="lead">Skills for everyday work: think through a problem, prepare research, write requirements, build a review prototype, or draw a business diagram. Choose what you need and install it in your AI assistant.</p>
+  <p class="skill-count">6 skills</p>
   <ul class="skill-list" role="list">
     <li class="skill">
       <h2><a href="diagram/">Saan Diagram</a></h2>
-      <p>Turn business descriptions, requirements, and whiteboard screenshots into consistent diagrams in English or Chinese.</p>
-      <p class="fit">For presentations, external delivery, and Feishu/Lark whiteboards. Export HTML, SVG, and PNG.</p>
+      <p>Use documents or whiteboard screenshots to explain a business, system, or process with architecture diagrams, flowcharts, and swimlanes.</p>
+      <p class="fit">Keep functions, roles, and systems distinct, with consistent layout and colors. Save a web page or image, or write to a Feishu/Lark whiteboard. Keep the source for later edits.</p>
       <div class="copy-row"><pre id="code-diagram"><code>npx skills add yishan/saankits <span class="nb">--skill saan-diagram</span></code></pre><button type="button" class="copy" data-copy="diagram" aria-label="Copy the Saan Diagram install command" hidden></button></div>
-      <a class="more" href="diagram/">Explore diagram types, examples, and dependencies</a>
+      <a class="more" href="diagram/">See diagram examples and how to use them</a>
     </li>
     <li class="skill">
       <h2><a href="mermaid/">Saan Mermaid</a></h2>
-      <p>Draw with Mermaid and review business workflows against an independent control checklist.</p>
-      <p class="fit">For diagrams in Markdown and design documents, and for approval-process reviews.</p>
+      <p>Add diagrams to Markdown, READMEs, or design documents, then update them by editing text. Draw workflows, system interactions, record states, and schedules.</p>
+      <p class="fit">With an approval checklist, check for missing steps, paths that bypass a required review, and decisions with no return path.</p>
       <div class="copy-row"><pre id="code-mermaid"><code>npx skills add yishan/saankits <span class="nb">--skill saan-mermaid</span></code></pre><button type="button" class="copy" data-copy="mermaid" aria-label="Copy the Saan Mermaid install command" hidden></button></div>
-      <a class="more" href="mermaid/">Explore review rules, examples, and dependencies</a>
+      <a class="more" href="mermaid/">See diagrams and workflow checks</a>
     </li>
     <li class="skill">
       <h2><a href="discovery/">Saan Discovery</a></h2>
-      <p>Agree the consumer, enterprise, public-sector, or mixed research scope, then explore evidence and product fit one topic at a time.</p>
-      <p class="fit">Interview guides, topic-based briefs, and follow-up questions. Interaction and outputs follow your requested language.</p>
+      <p>Prepare questions before an interview, then organize what people do, where they struggle, and what still needs asking. Use it for consumer, business, or public-service research.</p>
+      <p class="fit">If you have an existing product, compare it with customer needs and identify what still needs checking. Save the work as an interview guide, research notes, or follow-up questions.</p>
       <div class="copy-row"><pre id="code-discovery"><code>npx skills add yishan/saankits <span class="nb">--skill saan-discovery</span></code></pre><button type="button" class="copy" data-copy="discovery" aria-label="Copy the Saan Discovery install command" hidden></button></div>
-      <a class="more" href="discovery/">Explore discovery workflows, examples, and installation</a>
+      <a class="more" href="discovery/">See how to prepare and organize research</a>
     </li>
     <li class="skill">
       <h2><a href="prd-writing/">Saan PRD Writing</a></h2>
-      <p>Turn requirements and prototypes into full specifications or scoped changes with concrete conditions, fields, states, and outcomes.</p>
-      <p class="fit">PRDs, acceptance scenarios, and open decisions, with English and Chinese templates and a worked example.</p>
+      <p>Bring requirements, review notes, and prototypes together in a document your team can discuss. Start with a whole project or describe just the feature being changed.</p>
+      <p class="fit">Explain who can act, what they enter, what changes, and what happens on failure. Include acceptance scenarios and list decisions that are still open.</p>
       <div class="copy-row"><pre id="code-prd-writing"><code>npx skills add yishan/saankits <span class="nb">--skill saan-prd-writing</span></code></pre><button type="button" class="copy" data-copy="prd-writing" aria-label="Copy the Saan PRD Writing install command" hidden></button></div>
-      <a class="more" href="prd-writing/">Explore document structure, examples, and installation</a>
+      <a class="more" href="prd-writing/">See the document structure and a worked example</a>
+    </li>
+    <li class="skill">
+      <h2><a href="prototype/">Saan Prototype</a></h2>
+      <p>Turn a requirements specification into a clickable prototype for review. Switch roles and scenarios to see what each person can do and what happens on success or failure.</p>
+      <p class="fit">Only confirmed rules are simulated. Proposed wording and open questions are marked where they appear, and the result is one HTML file that opens offline.</p>
+      <div class="copy-row"><pre id="code-prototype"><code>npx skills add yishan/saankits <span class="nb">--skill saan-prototype</span></code></pre><button type="button" class="copy" data-copy="prototype" aria-label="Copy the Saan Prototype install command" hidden></button></div>
+      <a class="more" href="prototype/">Try the example prototype</a>
     </li>
     <li class="skill">
       <h2><a href="inquiry/">Saan Inquiry</a></h2>
-      <p>Think through unclear problems, examine possible explanations and blind spots, and choose a useful next step.</p>
-      <p class="fit">Adaptive dialogue with room to pause, synthesize, try an action, and review its results. Local v0.1.0 addition.</p>
+      <p>Start a conversation when a problem is hard to describe or a choice is hard to make. Separate what you know from what you suspect, and consider other explanations.</p>
+      <p class="fit">Once you have enough to decide, bring the discussion together and choose a next step. Return with the results to see what changed.</p>
       <div class="copy-row"><pre id="code-inquiry"><code>npx skills add . <span class="nb">--skill saan-inquiry</span></code></pre><button type="button" class="copy" data-copy="inquiry" aria-label="Copy the local Saan Inquiry install command" hidden></button></div>
-      <a class="more" href="inquiry/">Explore examples and installation from this checkout</a>
+      <a class="more" href="inquiry/">See conversation examples and local installation</a>
     </li>
   </ul>
-  <p class="planned">Planned: prototyping.</p>
   <section class="install" aria-labelledby="collection-install">
     <h2 id="collection-install">Install the collection</h2>
     <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits</code></pre><button type="button" class="copy" data-copy="install" aria-label="Copy the Saan Kits install command" hidden></button></div>
-    <p>Choose skills and target agents during installation. Install again to add skills released later. Each introduction lists its dependencies.</p>
+    <p>Choose the skills and the AI assistant that will use them, such as Codex or Claude Code. Run the installer again for skills added later. Each drawing skill lists the software it needs.</p>
     <details><summary>Use the Claude Code plugin</summary>
       <div class="copy-row"><pre id="code-plugin"><code>/plugin marketplace add yishan/saankits
 /plugin install saan-diagram@saan-diagram</code></pre><button type="button" class="copy" data-copy="plugin" aria-label="Copy the Claude Code plugin install command" hidden></button></div>
     </details>
   </section>
-  <footer><a href="https://github.com/yishan/saankits">GitHub</a><span>MIT</span><span>By Yishan</span></footer>
+  <footer class="site-footer"><span>Saan Kits · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits">Source</a><a href="https://github.com/yishan/saankits/blob/main/README.md">User guide</a><a href="./">Saan Kits</a></footer>
 </main>
 </body>
 </html>

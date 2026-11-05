@@ -2,7 +2,7 @@
   "name": "saan-diagram",
   "displayName": "Saan Kits",
   "version": "1.1.0",
-  "description": "Saan Kits: independently usable agent skills for product work. Includes Saan Diagram for business diagrams, Saan Mermaid for Mermaid diagrams and process reviews, Saan Discovery for consumer, enterprise, and public-sector research and product-fit assessment, Saan PRD Writing for requirements specifications and scoped changes, and Saan Inquiry for adaptive problem clarification and reflection.",
+  "description": "Saan Kits: independently usable agent skills for product work. Includes Saan Diagram for business diagrams, Saan Mermaid for Mermaid diagrams and process reviews, Saan Discovery for consumer, enterprise, and public-sector research and product-fit assessment, Saan PRD Writing for requirements specifications and scoped changes, Saan Prototype for offline review prototypes from requirements specifications, and Saan Inquiry for adaptive problem clarification and reflection.",
   "author": {
     "name": "Yishan"
   },
@@ -25,6 +25,7 @@
     "business-diagrams",
     "business-discovery",
     "prd",
-    "requirements-specification"
+    "requirements-specification",
+    "prototype"
   ]
 }

@@ -1,6 +1,6 @@
 # Site
 
-Static pages for the collection, published at [kits.yishan.app](https://kits.yishan.app/). All six pages include English and Chinese, selected from browser preferences on first visit.
+Static pages for the collection, published at [kits.yishan.app](https://kits.yishan.app/). All seven pages include English and Chinese, selected from browser preferences on first visit.
 
 | Path | Source | Content |
 |---|---|---|
@@ -14,6 +14,8 @@ Static pages for the collection, published at [kits.yishan.app](https://kits.yis
 | `/discovery/zh/` | `discovery/zh/index.html` | Explicit Chinese introduction |
 | `/prd-writing/` | `prd-writing/index.html` | PRD Writing automatic language entry (English HTML fallback) |
 | `/prd-writing/zh/` | `prd-writing/zh/index.html` | Explicit Chinese introduction |
+| `/prototype/` | `prototype/` | Saan Prototype introduction and live example |
+| `/prototype/zh/` | `prototype/zh/index.html` | Explicit Chinese Prototype introduction |
 | `/inquiry/` | `inquiry/index.html` | Inquiry introduction (local addition) |
 | `/inquiry/zh/` | `inquiry/zh/index.html` | Explicit Chinese Inquiry introduction |
 
@@ -71,6 +73,16 @@ Confirm both the reported finding and the rendered image before publishing.
 ## Maintaining Saan Mermaid examples
 
 `mermaid/index.html` and `mermaid/zh/index.html` embed each file in `skills/saan-mermaid/assets/examples/`. After changing one, update both pages and `mermaid/img/`. `check_site.py` checks both languages against the sources; `tests/saan-mermaid` also checks the main page.
+
+## Maintaining the Saan Prototype example
+
+`prototype/example.html` is the bundled example from `skills/saan-prototype/assets/example/`, shown in an iframe on both introductions. After changing the example or the runtime, rebuild it from the repository root:
+
+```bash
+python3 skills/saan-prototype/scripts/build.py skills/saan-prototype/assets/example/manifest.json -o page/prototype/example.html
+```
+
+`check_site.py` skips it as a site page and fails if it differs from a fresh build.
 
 ## Icons
 

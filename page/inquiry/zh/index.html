@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="通过自适应对话澄清问题、探索盲点，形成有用的下一步并回看结果。">
+<meta name="description" content="Saan Inquiry：通过对话把问题想清楚，比较可能的解释，决定下一步，并根据结果调整判断。">
 <title>Saan Inquiry</title>
 <link rel="canonical" href="https://kits.yishan.app/inquiry/zh/">
 <link rel="alternate" hreflang="en" href="../">
@@ -15,15 +15,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
-<link rel="stylesheet" href="../inquiry.css">
-<link rel="stylesheet" href="../../site.css">
+<link rel="stylesheet" href="../inquiry.css?v=e813618a5c">
+<link rel="stylesheet" href="../../site.css?v=85e8aacbdc">
 <script src="../../site.js" defer></script>
 </head>
 <body>
 <main class="wrap">
   <header class="hero">
     <div class="hero-top">
-      <nav class="site-nav" aria-label="技能导航"><a href="../../">Saan Kits</a><a href="../../diagram/">Diagram</a><a href="../../mermaid/">Mermaid</a><a href="../../discovery/">Discovery</a><a href="../../prd-writing/zh/">PRD Writing</a><a href="./" aria-current="page">Inquiry</a></nav>
+      <nav class="site-nav" aria-label="技能导航"><a href="../../zh/">Saan Kits</a><a href="../../diagram/zh/">Diagram</a><a href="../../mermaid/zh/">Mermaid</a><a href="../../discovery/zh/">Discovery</a><a href="../../prd-writing/zh/">PRD Writing</a><a href="../../prototype/zh/">Prototype</a><a href="./" aria-current="page">Inquiry</a></nav>
       <div class="site-controls">
       <details class="preference-picker" data-preference="language" name="site-preferences">
         <summary class="preference-trigger" aria-label="语言" title="语言"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
@@ -35,55 +35,57 @@
       </details>
     </div>
     </div>
-    <h1>Saan Inquiry</h1>
-    <p class="lead">一起把模糊问题想清楚，看看遗漏了什么，再决定有用的下一步。</p>
+    <div class="skill-heading"><h1>Saan Inquiry</h1><span class="skill-version">v0.1.0</span></div>
+    <p class="lead">问题还说不清，或几个选择都拿不定主意时，可以从这里开始聊。</p>
+    <p>不必先整理好一整套背景。说说发生了什么、哪里让你困惑，它会跟着你的回答追问，或提出一种解释供你修正。信息足够时，就整理已有判断；如果需要先试一试，也会说明之后看什么结果。</p>
     <dl class="intro">
-      <div><dt>适用任务</dt><dd>澄清问题、探索可能原因、梳理难做的选择</dd></div>
-      <div><dt>交付结果</dt><dd>更清晰的理解、暂定判断，或带回看条件的行动</dd></div>
-      <div><dt>依赖</dt><dd>文本对话，无需外部服务或其他技能</dd></div>
+      <div><dt>适合用在</dt><dd>澄清问题、探索可能原因、梳理难做的选择</dd></div>
+      <div><dt>得到什么</dt><dd>说清楚的问题、当前判断，以及下一步怎么做、怎么看结果</dd></div>
+      <div><dt>使用准备</dt><dd>直接开始对话，无需连接外部服务或安装其他技能</dd></div>
     </dl>
+    <nav class="section-nav" aria-label="页内导航"><a href="#moves">对话方式</a><a href="#example">示例</a><a href="#closure">下一步</a><a href="#scope">适用场景</a><a href="#install">开始使用</a></nav>
   </header>
   <section aria-labelledby="moves">
-    <h2 id="moves">选择此刻最有帮助的一步</h2>
+    <h2 id="moves">对话会跟着你的问题走</h2>
     <ul class="rules">
-      <li>答案会改变判断或行动时，聚焦一个关键问题。</li>
-      <li>难以表达时，先给一个具体解释或替代视角，供你修正。</li>
-      <li>发现值得关注的遗漏时，作为可能性提出，并说明它为什么重要。</li>
-      <li>信息足够、你希望推进，或小实验更有价值时，整理判断并向前走。</li>
+      <li>缺少的信息会影响判断时，一次问清一个关键问题。</li>
+      <li>一时说不清时，先给一个具体例子或另一种解释，你可以指出哪里不对。</li>
+      <li>遇到可能漏掉的因素，会说明它可能影响什么，再和你一起核对。</li>
+      <li>已经足够做决定，或你想先试试时，就整理当前结论和下一步。</li>
     </ul>
     <p class="note">可以随时纠正、跳过、说“不知道”，或要求先给暂定建议，无须填完一份问卷。</p>
   </section>
   <section aria-labelledby="example">
-    <h2 id="example">解释要能随着证据改变</h2>
+    <h2 id="example">有了新结果，就重新看原来的判断</h2>
     <div class="example">
       <p class="label">虚构示例 · 团队交付</p>
       <blockquote>“评审已经变快了，但交付还是一样慢。”</blockquote>
-      <p>这次尝试改善了评审等待，却还没有解决原来的交付延误。返工、工作量变化或其他交接环节可能有关，目前仍不能确认是哪一种。</p>
-      <p>有用的下一步是看看剩余时间花在哪里，再修正解释。重复最初的问题，已经不能带来多少新信息。</p>
+      <p>现在知道评审等待缩短了，但整体交付时间没变。可能还有返工、工作量变化或其他交接环节的影响，目前还分不清。</p>
+      <p>接下来可以看一笔近期任务：除了评审，时间还花在了哪里？用新结果检查原来的解释，再决定要调整哪一步。</p>
     </div>
   </section>
   <section aria-labelledby="closure">
-    <h2 id="closure">让下一步值得去做</h2>
+    <h2 id="closure">聊到哪里，可以先停下来</h2>
     <div class="structure">
-      <div><h3>讨论可以收束时</h3><p>整理目前理解、关键未知，以及可行的行动或观察。简单的表达澄清，交付一句话就够了。</p></div>
-      <div><h3>拿到结果之后</h3><p>对照原来的预期，看哪些已经解决、哪些需要调整、哪些仍不确定。形成验证计划不等于完成验证。</p></div>
+      <div><h3>已经有了当前判断</h3><p>整理目前想清楚的事、仍影响决定的疑问，以及接下来能做什么。如果只是想把一句话说清楚，改好这句话就可以结束。</p></div>
+      <div><h3>拿到结果之后</h3><p>把实际结果和原先的预期放在一起看：问题解决了多少，原来的解释是否还成立，下一步是否要改。计划中的尝试，要等做过后再判断效果。</p></div>
     </div>
     <p class="note">原因可能相互作用。技能不保证找到唯一根因或所有盲点，也不会在证据不足时制造确定性。</p>
   </section>
   <section aria-labelledby="scope">
-    <h2 id="scope">从客户访谈延伸到日常思考</h2>
+    <h2 id="scope">什么时候选它，什么时候用其他技能</h2>
     <p>可以讨论产品想法、团队问题、学习计划和日常选择。客户调研提纲适合用 <a href="../../discovery/zh/">Saan Discovery</a>，需求文档适合用 <a href="../../prd-writing/zh/">Saan PRD Writing</a>；它们都不是必需依赖。</p>
-    <p>构想原名为 Questinoare。Saan Inquiry 表达开放探究，避免被理解为固定问卷。创业访谈中对真实客户、使用、付费和交付的追问可作为示例，无须每次逐一问完。</p>
+    <p>例如，产品有人试用却少有人继续使用，可以一起梳理可能原因；学习计划总是中断，也可以从最近一次中断的经历聊起。问题会随具体情况变化，无需按固定问卷逐项回答。</p>
   </section>
   <section aria-labelledby="install">
-    <h2 id="install">试用本地初版</h2>
+    <h2 id="install">开始使用</h2>
     <p>在包含此技能的 Saan Kits 仓库根目录执行：</p>
     <div class="copy-row"><pre id="code-install"><code>npx skills add . --skill saan-inquiry</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Inquiry 本地安装命令" hidden></button></div>
     <p>用自己的话说出眼前的问题：</p>
     <div class="copy-row"><pre id="code-request"><code>用 saan-inquiry 帮我把这个问题想清楚，看看遗漏了什么，并决定有用的下一步。只追问会影响理解或行动的内容。</code></pre><button type="button" class="copy" data-copy="request" aria-label="复制追问请求" hidden></button></div>
-    <p class="note">v0.1.0 为本地新增，远程安装与线上站点以实际发布为准。包检查与模拟对话不能证明长期使用效果。</p>
+    <p class="note">已有包检查和模拟对话记录，长期使用效果仍需观察。</p>
   </section>
-  <footer><span>Saan Inquiry v0.1.0 · Yishan · MIT</span><a href="../../zh/">Saan Kits</a></footer>
+  <footer class="site-footer"><span>Saan Inquiry · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-inquiry">技能源码</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-inquiry/README.zh-CN.md">使用指南</a><a href="../../zh/">Saan Kits</a></footer>
 </main>
 </body>
 </html>

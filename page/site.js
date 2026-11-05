@@ -4,8 +4,8 @@ const ICONS = {
   done: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8.5 3.2 3.2L13 4.8"/></svg>',
 };
 const copyText = document.documentElement.lang.toLowerCase().startsWith('en')
-  ? { copy: 'Copy', code: 'Copy code', done: 'Copied', separator: ': ', manual: 'Copy the full text manually', selected: 'Selected; copy manually', failed: 'Automatic copying failed. The full text is selected; use your system copy shortcut.' }
-  : { copy: '复制', code: '复制代码', done: '已复制', separator: '：', manual: '手动复制完整内容', selected: '已选中，请手动复制', failed: '自动复制未成功，完整内容已选中，请按系统复制快捷键。' };
+  ? { copy: 'Copy', code: 'Copy code', done: 'Copied', separator: ': ', manual: 'Copy the full text manually', selected: 'Selected; copy manually', failed: 'Could not copy automatically. The full text is selected; use the Copy menu, ⌘C, or Ctrl+C.' }
+  : { copy: '复制', code: '复制代码', done: '已复制', separator: '：', manual: '手动复制完整内容', selected: '已选中，请手动复制', failed: '未能自动复制。完整内容已选中，可用复制菜单或 ⌘C / Ctrl+C 复制。' };
 const show = (button, name, title) => {
   button.innerHTML = ICONS[name];
   button.title = title;

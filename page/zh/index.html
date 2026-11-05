@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Saan Kits：把需求变成图示、文档和原型的 Agent 技能集。">
+<meta name="description" content="Saan Kits：用于梳理问题、准备调研、编写需求、制作评审原型和绘制业务图的技能。">
 <title>Saan Kits</title>
 <link rel="canonical" href="https://kits.yishan.app/zh/">
 <link rel="alternate" hreflang="en" href="../">
@@ -15,8 +15,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
-<link rel="stylesheet" href="../home.css">
-<link rel="stylesheet" href="../site.css">
+<link rel="stylesheet" href="../home.css?v=e049af6389">
+<link rel="stylesheet" href="../site.css?v=85e8aacbdc">
 <script src="../site.js" defer></script>
 </head>
 <body>
@@ -34,56 +34,62 @@
     </div>
   </div>
   <h1>Saan Kits</h1>
-  <p class="lead">把需求变成图示、文档和原型的 Agent 技能集。每个技能都能单独安装。</p>
-  <p class="skill-count">5 个技能</p>
+  <p class="lead">整理日常工作中用得上的技能：梳理问题、准备调研、编写需求、制作评审原型、绘制业务图。按眼前的任务选一个，装到你使用的 AI 助手里。</p>
+  <p class="skill-count">6 个技能</p>
   <ul class="skill-list" role="list">
     <li class="skill">
       <h2><a href="../diagram/">Saan Diagram</a></h2>
-      <p>把业务描述、需求文档和白板截图，转成同一套规范下的中英文业务图。</p>
-      <p class="fit">适合汇报、对外交付和飞书画板，可导出 HTML、SVG 和 PNG。</p>
+      <p>需要讲清一套业务、一个系统或一段流程时，把文字材料或白板截图交给它，整理成架构图、流程图、泳道图等业务图。</p>
+      <p class="fit">图中会区分功能、角色和系统，统一排版与配色。可保存为网页或图片，也可写入飞书画板，保留源文件方便后续修改。</p>
       <div class="copy-row"><pre id="code-diagram"><code>npx skills add yishan/saankits <span class="nb">--skill saan-diagram</span></code></pre><button type="button" class="copy" data-copy="diagram" aria-label="复制 Saan Diagram 安装命令" hidden></button></div>
-      <a class="more" href="../diagram/">查看图示类型、示例和依赖</a>
+      <a class="more" href="../diagram/">查看图示示例与使用方法</a>
     </li>
     <li class="skill">
       <h2><a href="../mermaid/">Saan Mermaid</a></h2>
-      <p>用 Mermaid 画图，并拿一份独立的控制点清单审查业务流程。</p>
-      <p class="fit">适合放进 Markdown 和设计文档的图，以及审批流程审查。</p>
+      <p>给 Markdown、README 或设计文档配图，修改文字就能更新图。除了流程图，也能画系统交互、单据状态和任务排期。</p>
+      <p class="fit">有审批要求时，可以一起检查流程是否遗漏必要步骤、能否绕过复核，以及退回后有没有后续处理。</p>
       <div class="copy-row"><pre id="code-mermaid"><code>npx skills add yishan/saankits <span class="nb">--skill saan-mermaid</span></code></pre><button type="button" class="copy" data-copy="mermaid" aria-label="复制 Saan Mermaid 安装命令" hidden></button></div>
-      <a class="more" href="../mermaid/">查看审查规则、示例和依赖</a>
+      <a class="more" href="../mermaid/">查看图示示例与流程检查</a>
     </li>
     <li class="skill">
       <h2><a href="../discovery/">Saan Discovery</a></h2>
-      <p>先确定 ToC、ToB/G 或混合调研范围，再结合已有产品逐项追问、整理证据和判断适配。</p>
-      <p class="fit">交付访谈提纲、专题纪要和补问清单。中文请求默认使用中文交互与产出。</p>
+      <p>准备访谈时，帮你确定该问什么；拿到记录后，整理实际做法、遇到的困难和还没问清的事。适用于消费者、企业和公共服务调研。</p>
+      <p class="fit">如果已有产品，还会对照客户的做法，梳理哪些需求可以满足、哪些需要进一步核实。结果可整理为访谈提纲、调研纪要和补问清单。</p>
       <div class="copy-row"><pre id="code-discovery"><code>npx skills add yishan/saankits <span class="nb">--skill saan-discovery</span></code></pre><button type="button" class="copy" data-copy="discovery" aria-label="复制 Saan Discovery 安装命令" hidden></button></div>
-      <a class="more" href="../discovery/">查看调研方式、示例和安装方式</a>
+      <a class="more" href="../discovery/">查看如何准备和整理调研</a>
     </li>
     <li class="skill">
       <h2><a href="../prd-writing/">Saan PRD Writing</a></h2>
-      <p>根据需求与原型编写完整规格或局部变更，写清条件、字段、状态与处理结果。</p>
-      <p class="fit">交付 PRD、验收场景和待确认事项，附带中英文模板及写作示例。</p>
+      <p>把需求说明、评审记录和原型整理成团队能一起讨论的需求文档。新项目可以从整体写起，已有项目也可以只写这次要改的功能。</p>
+      <p class="fit">逐项说明谁能操作、要填什么、操作后怎样变化，以及失败时怎么处理。附上验收场景，把尚未决定的事项单独列出。</p>
       <div class="copy-row"><pre id="code-prd-writing"><code>npx skills add yishan/saankits <span class="nb">--skill saan-prd-writing</span></code></pre><button type="button" class="copy" data-copy="prd-writing" aria-label="复制 Saan PRD Writing 安装命令" hidden></button></div>
-      <a class="more" href="../prd-writing/">查看文档结构、示例和安装方式</a>
+      <a class="more" href="../prd-writing/">查看文档结构与写作示例</a>
+    </li>
+    <li class="skill">
+      <h2><a href="../prototype/zh/">Saan Prototype</a></h2>
+      <p>把需求规格做成能点的评审原型。切换角色和场景，看每个人能做什么，成功和失败时界面怎么反馈。</p>
+      <p class="fit">只模拟已确认的规则，建议文案和待确认事项直接标在界面上。结果是一个离线就能打开的 HTML 文件。</p>
+      <div class="copy-row"><pre id="code-prototype"><code>npx skills add yishan/saankits <span class="nb">--skill saan-prototype</span></code></pre><button type="button" class="copy" data-copy="prototype" aria-label="复制 Saan Prototype 安装命令" hidden></button></div>
+      <a class="more" href="../prototype/zh/">试一试示例原型</a>
     </li>
     <li class="skill">
       <h2><a href="../inquiry/zh/">Saan Inquiry</a></h2>
-      <p>通过交流把模糊问题想清楚，探索可能的解释与盲点，形成有依据的下一步。</p>
-      <p class="fit">按需追问、整理判断、尝试行动并回看结果。v0.1.0 为本地新增。</p>
+      <p>遇到一个说不清的问题，或在几个选择之间拿不定主意时，从一段对话开始。它会帮你拆开事实和猜测，看看是否漏掉了别的解释。</p>
+      <p class="fit">聊到足以做决定时，整理当前判断和下一步；有了新结果，再一起回头看。</p>
       <div class="copy-row"><pre id="code-inquiry"><code>npx skills add . <span class="nb">--skill saan-inquiry</span></code></pre><button type="button" class="copy" data-copy="inquiry" aria-label="复制 Saan Inquiry 本地安装命令" hidden></button></div>
-      <a class="more" href="../inquiry/zh/">查看示例与当前仓库安装方式</a>
+      <a class="more" href="../inquiry/zh/">查看对话示例与本地安装方法</a>
     </li>
   </ul>
-  <p class="planned">计划中：原型。</p>
   <section class="install" aria-labelledby="collection-install">
     <h2 id="collection-install">全部安装</h2>
     <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan Kits 安装命令" hidden></button></div>
-    <p>安装时可以选择技能和目标 Agent。之后新增的技能需要再次安装。各技能的依赖见它们的介绍页。</p>
+    <p>安装时选择需要的技能，以及使用它们的 AI 助手，例如 Codex 或 Claude Code。之后有新技能，需要再安装一次。绘图所需的软件见各技能的使用说明。</p>
     <details><summary>使用 Claude Code 插件</summary>
       <div class="copy-row"><pre id="code-plugin"><code>/plugin marketplace add yishan/saankits
 /plugin install saan-diagram@saan-diagram</code></pre><button type="button" class="copy" data-copy="plugin" aria-label="复制 Claude Code 插件安装命令" hidden></button></div>
     </details>
   </section>
-  <footer><a href="https://github.com/yishan/saankits">GitHub</a><span>MIT</span><span>作者 Yishan</span></footer>
+  <footer class="site-footer"><span>Saan Kits · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits">源码</a><a href="https://github.com/yishan/saankits/blob/main/README.zh-CN.md">使用指南</a><a href="./">Saan Kits</a></footer>
 </main>
 </body>
 </html>

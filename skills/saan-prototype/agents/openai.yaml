@@ -1,0 +1,4 @@
+interface:
+  display_name: "Saan Prototype"
+  short_description: "Turn a specification into an annotated review prototype"
+  default_prompt: "Use $saan-prototype to build a one-file review prototype from the specification, with scenarios for the acceptance cases and annotations for proposed wording and open questions."

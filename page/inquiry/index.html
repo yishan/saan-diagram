@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Adaptive dialogue to clarify problems, examine blind spots, and choose and review next steps.">
+<meta name="description" content="Saan Inquiry: talk through an unclear problem, compare possible explanations, and decide what to try and review next.">
 <title>Saan Inquiry</title>
 <link rel="canonical" href="https://kits.yishan.app/inquiry/">
 <link rel="alternate" hreflang="en" href="./">
@@ -15,15 +15,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
-<link rel="stylesheet" href="inquiry.css">
-<link rel="stylesheet" href="../site.css">
+<link rel="stylesheet" href="inquiry.css?v=e813618a5c">
+<link rel="stylesheet" href="../site.css?v=85e8aacbdc">
 <script src="../site.js" defer></script>
 </head>
 <body>
 <main class="wrap">
   <header class="hero">
     <div class="hero-top">
-      <nav class="site-nav" aria-label="Skill navigation"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="../mermaid/">Mermaid</a><a href="../discovery/">Discovery</a><a href="../prd-writing/">PRD Writing</a><a href="./" aria-current="page">Inquiry</a></nav>
+      <nav class="site-nav" aria-label="Skill navigation"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="../mermaid/">Mermaid</a><a href="../discovery/">Discovery</a><a href="../prd-writing/">PRD Writing</a><a href="../prototype/">Prototype</a><a href="./" aria-current="page">Inquiry</a></nav>
       <div class="site-controls">
       <details class="preference-picker" data-preference="language" name="site-preferences">
         <summary class="preference-trigger" aria-label="Language" title="Language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
@@ -35,16 +35,18 @@
       </details>
     </div>
     </div>
-    <h1>Saan Inquiry</h1>
-    <p class="lead">Think through an unclear problem, examine what you may be missing, and decide a useful next step.</p>
+    <div class="skill-heading"><h1>Saan Inquiry</h1><span class="skill-version">v0.1.0</span></div>
+    <p class="lead">Start here when a problem is hard to put into words, or you are unsure which option to choose.</p>
+    <p>You do not need a complete brief. Describe what happened and what puzzles you. The skill follows your answers with a question or an explanation you can correct. When you know enough, bring the discussion together; if you need to try something first, agree what result to look for.</p>
     <dl class="intro">
       <div><dt>Use for</dt><dd>Problem clarification, possible causes, and difficult choices</dd></div>
-      <div><dt>Outputs</dt><dd>A clearer understanding, provisional judgment, or action with a review condition</dd></div>
-      <div><dt>Dependencies</dt><dd>Text-only dialogue; no external service or peer skill required</dd></div>
+      <div><dt>Outputs</dt><dd>A clearer problem, a current judgment, and what to do and look for next</dd></div>
+      <div><dt>To get started</dt><dd>Start a conversation; no external service or other skill required</dd></div>
     </dl>
+    <nav class="section-nav" aria-label="On this page"><a href="#moves">Conversation</a><a href="#example">Example</a><a href="#closure">Next steps</a><a href="#scope">When to use it</a><a href="#install">Get started</a></nav>
   </header>
   <section aria-labelledby="moves">
-    <h2 id="moves">Choose what helps the conversation move forward</h2>
+    <h2 id="moves">The conversation follows your problem</h2>
     <ul class="rules">
       <li>Ask a focused question when its answer would change the judgment or next action.</li>
       <li>Offer a concrete interpretation or an alternative when that is easier to work with.</li>
@@ -58,8 +60,8 @@
     <div class="example">
       <p class="label">Fictional example · Team delivery</p>
       <blockquote>“Reviews are faster now, but delivery still takes just as long.”</blockquote>
-      <p>The intervention improved review waiting. That alone did not resolve the original delay. Rework, changed workload, or another handoff may matter; the result does not yet establish which.</p>
-      <p>A useful next move is to inspect where the remaining time goes, then revise the explanation. Repeating the original questions would add little.</p>
+      <p>The wait for review is shorter, but total delivery time has not changed. Rework, a different workload, or another handoff could explain it. We do not yet know which.</p>
+      <p>Look at a recent task: apart from review, where did the time go? Use the new result to check the earlier explanation before deciding what to change next.</p>
     </div>
   </section>
   <section aria-labelledby="closure">
@@ -71,19 +73,19 @@
     <p class="note">Causes can interact. The skill does not promise one ultimate root cause, every blind spot, or certainty where evidence is missing.</p>
   </section>
   <section aria-labelledby="scope">
-    <h2 id="scope">Useful beyond customer interviews</h2>
+    <h2 id="scope">When to use this skill or another one</h2>
     <p>Use it for product ideas, team problems, learning, and everyday choices. For a customer research guide, see <a href="../discovery/">Saan Discovery</a>; for a requirements document, see <a href="../prd-writing/">Saan PRD Writing</a>. Neither is a dependency.</p>
-    <p>The working name was Questinoare. Saan Inquiry describes open exploration without implying a fixed questionnaire. Startup interview prompts about real customers, use, payments, and delivery are examples, not a compulsory checklist.</p>
+    <p>For example, talk through why people try a product but rarely return, or why a learning plan keeps stalling. Start with a recent experience. The questions change with the situation; there is no fixed questionnaire to finish.</p>
   </section>
   <section aria-labelledby="install">
-    <h2 id="install">Try the local draft</h2>
+    <h2 id="install">Get started</h2>
     <p>From a Saan Kits checkout containing this skill:</p>
     <div class="copy-row"><pre id="code-install"><code>npx skills add . --skill saan-inquiry</code></pre><button type="button" class="copy" data-copy="install" aria-label="Copy the local Saan Inquiry install command" hidden></button></div>
     <p>Start with the problem in your own words:</p>
     <div class="copy-row"><pre id="code-request"><code>Use saan-inquiry to help me clarify this problem, examine what I may be missing, and decide a useful next step. Ask only what would change our understanding or action.</code></pre><button type="button" class="copy" data-copy="request" aria-label="Copy the inquiry request" hidden></button></div>
-    <p class="note">v0.1.0 is a local addition. Remote installation and the live site depend on publication. Package checks and simulated conversations do not establish long-term user effectiveness.</p>
+    <p class="note">Package checks and simulated conversations do not establish long-term user effectiveness.</p>
   </section>
-  <footer><span>Saan Inquiry v0.1.0 · Yishan · MIT</span><a href="../">Saan Kits</a></footer>
+  <footer class="site-footer"><span>Saan Inquiry · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-inquiry">Skill source</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-inquiry/README.md">User guide</a><a href="../">Saan Kits</a></footer>
 </main>
 </body>
 </html>

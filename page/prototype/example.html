@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设备借用 · 评审原型（示例）</title>
+<style>
+:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: var(--font_size)/1.6 "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+#p-bar { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 6px 16px; background: var(--surface); border-bottom: 1px dashed var(--border); font-size: 12px; color: var(--muted); }
+#p-bar label { display: flex; gap: 6px; align-items: center; }
+#p-bar select { padding: 2px 4px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+#p-bar .p-tag-review { margin-right: auto; font-weight: 600; }
+#p-nav { display: flex; gap: 4px; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+#p-nav button { padding: 10px 14px; border: 0; border-bottom: 2px solid transparent; background: none; cursor: pointer; color: var(--muted); }
+#p-nav button[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+#p-main { max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; }
+.p-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.p-h { margin: 0 0 12px; font-size: 1.15em; }
+.p-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.p-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; }
+.p-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent_text); }
+.p-btn.danger { color: var(--danger); }
+.p-btn:disabled { opacity: .5; cursor: not-allowed; }
+.p-field { display: grid; gap: 4px; margin-bottom: 12px; }
+.p-field > span { color: var(--muted); font-size: .9em; }
+.p-field input, .p-field select, .p-field textarea { padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.p-table { width: 100%; border-collapse: collapse; }
+.p-table th, .p-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.p-table th { color: var(--muted); font-weight: 500; }
+.p-tag { display: inline-block; padding: 0 8px; border: 1px solid var(--border); border-radius: 999px; font-size: .85em; }
+.p-timeline { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(28px, 1fr); gap: 2px; }
+.p-slot { min-height: 34px; border: 1px solid var(--border); border-radius: 3px; background: var(--bg); font-size: 12px; padding: 2px 4px; overflow: hidden; }
+.p-slot.busy { background: var(--accent); color: var(--accent_text); border-color: var(--accent); }
+button.p-slot { cursor: pointer; text-align: left; }
+.p-empty { padding: 32px; text-align: center; color: var(--muted); }
+.p-flash { padding: 10px 12px; margin-bottom: 16px; border: 1px solid currentColor; border-radius: var(--radius); background: var(--surface); }
+.p-flash.error { color: var(--danger); }
+.p-flash.ok { color: var(--text); }
+.p-dialog { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(0, 0, 0, .35); }
+.p-dialog > div { width: min(440px, 92vw); background: var(--surface); border-radius: var(--radius); padding: 20px; }
+.p-pending { padding: 10px 12px; border: 1px dashed var(--notice); border-radius: var(--radius); color: var(--notice); }
+/* review annotations */
+.p-badge { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 3px; font-size: 11px; line-height: 16px; vertical-align: middle; cursor: help; border: 1px solid; background: var(--surface); }
+.p-badge.proposal { color: var(--notice); }
+.p-badge.open { color: var(--danger); cursor: pointer; }
+.p-badge.rule { color: var(--muted); }
+[data-proposal] { text-decoration: underline dotted var(--notice); text-underline-offset: 3px; }
+body.p-review-off .p-badge, body.p-review-off .p-review-only { display: none; }
+body.p-review-off [data-proposal] { text-decoration: none; }
+#p-pop { position: fixed; z-index: 30; max-width: 360px; padding: 10px 12px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 6px 20px rgba(0, 0, 0, .18); font-size: 12px; }
+
+</style>
+</head>
+<body>
+<div id="p-bar"></div>
+<nav id="p-nav"></nav>
+<main id="p-main"></main>
+<div id="p-pop" hidden></div>
+<script type="application/json" id="p-data">{"title": "设备借用 · 评审原型（示例）", "language": "zh-CN", "timezone": "Asia/Shanghai", "roles": [{"id": "jia", "label": "员工甲"}, {"id": "yi", "label": "员工乙"}], "states": ["可借", "已借出"], "theme": "neutral", "themes": {"blue": {"label": "品牌蓝", "bg": "#F4F7FC", "surface": "#FFFFFF", "border": "#D3DCEB", "text": "#1B2333", "muted": "#566176", "accent": "#2B5FD8", "accent_text": "#FFFFFF", "danger": "#B42318", "notice": "#8A5A00", "radius": "6px", "font_size": "14px"}, "dark": {"label": "暗色", "bg": "#16181D", "surface": "#1F232A", "border": "#363C47", "text": "#E8EAED", "muted": "#A3AAB5", "accent": "#7EA6F7", "accent_text": "#10131A", "danger": "#F27A6E", "notice": "#E7B65C", "radius": "6px", "font_size": "14px"}, "neutral": {"label": "中性灰", "bg": "#F5F6F8", "surface": "#FFFFFF", "border": "#D5D8DE", "text": "#1F2329", "muted": "#5C6370", "accent": "#3A4250", "accent_text": "#FFFFFF", "danger": "#B42318", "notice": "#8A5A00", "radius": "6px", "font_size": "14px"}}, "scenarios": [{"id": "s1", "label": "投影仪可借", "acceptance": ["AC-01"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "data": {"devices": [{"id": "d1", "name": "投影仪", "status": "可借", "holder": null}]}}, {"id": "s2", "label": "投影仪已被乙借出", "acceptance": ["AC-02"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "data": {"devices": [{"id": "d1", "name": "投影仪", "status": "已借出", "holder": "yi"}]}}, {"id": "s3", "label": "甲归还投影仪", "acceptance": ["AC-03"], "role": "jia", "now": "2026-11-10T09:00:00+08:00", "data": {"devices": [{"id": "d1", "name": "投影仪", "status": "已借出", "holder": "jia"}]}}], "defs": {"Q-01": "Q-01 | 借用期限多长，超期怎么处理？ | 借用表单、提醒", "Q-02": "Q-02 | 管理员能否替员工归还？ | 归还权限", "AC-01": "AC-01 | FR-B01 | 投影仪可借 | 甲借用投影仪 | 投影仪已借出，借用人为甲", "AC-02": "AC-02 | FR-B02 | 投影仪已被乙借出 | 甲借用投影仪 | 借用失败，投影仪不变", "AC-03": "AC-03 | FR-R01 | 甲借出投影仪 | 甲归还 | 投影仪可借", "FR-B01": "FR-B01 | 员工借用「可借」状态的设备 | 设备变为「已借出」，借用人为当前员工 | 提示借用成功〔建议〕", "FR-B02": "FR-B02 | 设备已是「已借出」 | 拒绝借用，设备不变 | 提示设备已被借出〔建议〕", "FR-R01": "FR-R01 | 借用人归还自己借出的设备 | 设备变为「可借」 | —"}}</script>
+<script>
+/* Saan Prototype runtime: review bar, annotations, roles, scenarios, themes. */
+(function () {
+  "use strict";
+  var D = JSON.parse(document.getElementById("p-data").textContent);
+  var pages = [], actions = {};
+  var S = { scenario: null, role: null, now: null, data: null, page: null, flash: null, dialog: null,
+            review: true, theme: D.theme };
+  var KIND = { proposal: "建议", open: "待确认", rule: "规则" };
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function role() { return D.roles.filter(function (r) { return r.id === S.role; })[0] || D.roles[0]; }
+  function visible() {
+    return pages.filter(function (p) { return !p.roles || p.roles.indexOf(S.role) >= 0; });
+  }
+  function inNav(p) { return p.nav !== false; }
+  function ctx() {
+    return {
+      data: S.data, role: role(), now: S.now, rules: Proto.rules, scenario: S.scenario, esc: esc,
+      go: function (id) { S.page = id; },  // keeps a message set in the same action; run() clears old ones
+      flash: function (text, opt) { S.flash = Object.assign({ text: text, kind: "ok" }, opt || {}); },
+      dialog: function (html) { S.dialog = html; },
+      close: function () { S.dialog = null; }
+    };
+  }
+  function attrs(opt) {
+    var out = "";
+    ["proposal", "open", "rule"].forEach(function (k) { if (opt && opt[k]) out += " data-" + k + '="' + esc(opt[k]) + '"'; });
+    return out;
+  }
+  function applyTheme() {
+    var t = D.themes[S.theme] || D.themes[Object.keys(D.themes)[0]];
+    Object.keys(t).forEach(function (k) { if (k !== "label") document.documentElement.style.setProperty("--" + k, t[k]); });
+  }
+  function option(value, label, current) {
+    return '<option value="' + esc(value) + '"' + (value === current ? " selected" : "") + ">" + esc(label) + "</option>";
+  }
+  function bar() {
+    var sc = D.scenarios.map(function (s) {
+      return option(s.id, s.label + (s.acceptance && s.acceptance.length ? "（" + s.acceptance.join("、") + "）" : ""), S.scenario.id);
+    }).join("");
+    var ro = D.roles.map(function (r) { return option(r.id, r.label, S.role); }).join("");
+    var th = Object.keys(D.themes).map(function (k) { return option(k, D.themes[k].label || k, S.theme); }).join("");
+    document.getElementById("p-bar").innerHTML =
+      '<span class="p-tag-review">评审原型 · 示例数据为虚构</span>' +
+      '<label>场景 <select data-bar="scenario">' + sc + "</select></label>" +
+      '<label>角色 <select data-bar="role">' + ro + "</select></label>" +
+      '<label>主题 <select data-bar="theme">' + th + "</select></label>" +
+      '<label><input type="checkbox" data-bar="review"' + (S.review ? " checked" : "") + "> 标注</label>" +
+      "<span>当前时间 " + esc(new Intl.DateTimeFormat(D.language, { timeZone: D.timezone, dateStyle: "medium", timeStyle: "short" }).format(S.now)) +
+      "（" + esc(D.timezone) + "）</span>";
+  }
+  function decorate(root) {
+    ["proposal", "open", "rule"].forEach(function (k) {
+      root.querySelectorAll("[data-" + k + "]").forEach(function (el) {
+        var done = el.__badged || (el.__badged = {});
+        el.getAttribute("data-" + k).split(/\s+/).filter(Boolean).forEach(function (id) {
+          if (done[id]) return;  // the same ID as proposal and rule gets one badge
+          done[id] = true;
+          var b = document.createElement("span");
+          b.className = "p-badge " + k;
+          b.textContent = (k === "proposal" ? "建议 " : "") + id;
+          b.setAttribute("data-def", id);
+          b.title = KIND[k] + " · " + id + "\n" + (D.defs[id] || "来源中未找到该编号");
+          el.appendChild(b);
+        });
+      });
+    });
+  }
+  function render() {
+    document.getElementById("p-pop").hidden = true;  // its badge is about to be replaced
+    applyTheme();
+    document.body.classList.toggle("p-review-off", !S.review);
+    bar();
+    var vis = visible();
+    if (!vis.some(function (p) { return p.id === S.page; })) {
+      var first = vis.filter(inNav)[0] || vis[0];
+      S.page = first ? first.id : null;
+    }
+    document.getElementById("p-nav").innerHTML = vis.filter(inNav).map(function (p) {
+      return '<button data-go="' + esc(p.id) + '"' + (p.id === S.page ? ' aria-current="page"' : "") + attrs(p) + ">" + esc(p.label) + "</button>";
+    }).join("");
+    var page = vis.filter(function (p) { return p.id === S.page; })[0];
+    var flash = S.flash ? '<div class="p-flash ' + esc(S.flash.kind) + '"' + attrs(S.flash) + ">" + esc(S.flash.text) + "</div>" : "";
+    var html = (S.dialog ? "" : flash) + (page ? page.render(ctx()) : '<div class="p-empty">当前角色没有可见页面</div>');
+    if (S.dialog) html += '<div class="p-dialog"><div>' + flash + S.dialog + "</div></div>";  // keep the message visible above the overlay
+    var main = document.getElementById("p-main");
+    main.innerHTML = html;
+    decorate(document.getElementById("p-nav"));
+    decorate(main);
+  }
+  function load(id) {
+    var sc = D.scenarios.filter(function (s) { return s.id === id; })[0] || D.scenarios[0];
+    S.scenario = sc; S.role = sc.role || D.roles[0].id; S.now = new Date(sc.now || Date.now());
+    S.data = JSON.parse(JSON.stringify(sc.data || {})); S.flash = null; S.dialog = null;
+    if (sc.page) S.page = sc.page;
+    render();
+  }
+  function popover(badge) {
+    var pop = document.getElementById("p-pop"), r = badge.getBoundingClientRect(), id = badge.getAttribute("data-def");
+    pop.innerHTML = "<strong>" + esc(id) + "</strong><br>" + esc(D.defs[id] || "来源中未找到该编号");
+    pop.style.left = Math.min(r.left, innerWidth - 380) + "px";
+    pop.style.top = (r.bottom + 6) + "px";
+    pop.hidden = false;
+  }
+  function run(name, el, extra) {
+    var fn = actions[name];
+    if (!fn) { S.flash = { text: "原型未实现动作：" + name, kind: "error" }; return render(); }
+    S.flash = null;  // a new action replaces the previous message
+    fn(ctx(), Object.assign({}, el.dataset, extra || {}), el);
+    render();
+  }
+
+  document.addEventListener("click", function (e) {
+    var pop = document.getElementById("p-pop");
+    var badge = e.target.closest(".p-badge.open");
+    if (badge) { e.preventDefault(); e.stopPropagation(); return popover(badge); }
+    pop.hidden = true;
+    var go = e.target.closest("[data-go]");
+    if (go) { S.page = go.getAttribute("data-go"); S.flash = null; S.dialog = null; return render(); }
+    var act = e.target.closest("button[data-action], a[data-action]");
+    if (act && !act.disabled) { e.preventDefault(); run(act.getAttribute("data-action"), act); }
+  });
+  document.addEventListener("submit", function (e) {
+    var form = e.target.closest("form[data-action]");
+    if (!form) return;
+    e.preventDefault();
+    var fields = {};
+    new FormData(form).forEach(function (v, k) { fields[k] = v; });
+    run(form.getAttribute("data-action"), form, { fields: fields });
+  });
+  document.addEventListener("change", function (e) {
+    var k = e.target.getAttribute("data-bar");
+    if (!k) {
+      var field = e.target.closest("input[data-action], select[data-action]");
+      if (field) run(field.getAttribute("data-action"), field, { value: field.type === "checkbox" ? field.checked : field.value });
+      return;
+    }
+    if (k === "scenario") return load(e.target.value);
+    if (k === "role") { S.role = e.target.value; S.flash = null; S.dialog = null; }
+    if (k === "theme") S.theme = e.target.value;
+    if (k === "review") S.review = e.target.checked;
+    render();
+  });
+
+  window.Proto = {
+    rules: {},
+    page: function (id, def) { pages.push(Object.assign({ id: id }, def)); },
+    action: function (name, fn) { actions[name] = fn; },
+    start: function () { load(D.scenarios[0] && D.scenarios[0].id); },
+    esc: esc
+  };
+})();
+
+</script>
+<script>
+/* Confirmed rules only. Each function is pure and names the rule it implements. */
+Proto.rules.canBorrow = function (device) {            // FR-B01, FR-B02
+  return device.status === "可借";
+};
+Proto.rules.canReturn = function (device, roleId) {    // FR-R01
+  return device.status === "已借出" && device.holder === roleId;
+};
+
+</script>
+<script>
+/* pages/devices.js */
+Proto.page("devices", {
+  label: "设备",
+  render: function (c) {
+    var rows = c.data.devices.map(function (d) {
+      var act = c.rules.canBorrow(d)
+        ? '<button class="p-btn primary" data-action="borrow" data-id="' + c.esc(d.id) + '" data-rule="FR-B01">借用</button>'
+        : c.rules.canReturn(d, c.role.id)
+          ? '<button class="p-btn" data-action="return" data-id="' + c.esc(d.id) + '" data-rule="FR-R01">归还</button>'
+          : '<button class="p-btn" data-action="borrow" data-id="' + c.esc(d.id) + '" data-rule="FR-B02">借用</button>';
+      return "<tr><td>" + c.esc(d.name) + '</td><td><span class="p-tag">' + c.esc(d.status) + "</span></td><td>" + act + "</td></tr>";
+    }).join("");
+    return '<section class="p-card"><h2 class="p-h">设备</h2>' +
+      '<table class="p-table"><thead><tr><th>名称</th><th>状态</th><th>操作</th></tr></thead><tbody>' + rows + "</tbody></table>" +
+      '<p class="p-pending p-review-only" data-open="Q-01">借用期限待定，表单暂不收集期限</p></section>';
+  }
+});
+Proto.action("borrow", function (c, a) {
+  var d = c.data.devices.filter(function (x) { return x.id === a.id; })[0];
+  if (!c.rules.canBorrow(d)) return c.flash("该设备已被借出", { kind: "error", proposal: "FR-B02" });
+  d.status = "已借出"; d.holder = c.role.id;
+  c.flash("借用成功", { proposal: "FR-B01" });
+});
+Proto.action("return", function (c, a) {
+  var d = c.data.devices.filter(function (x) { return x.id === a.id; })[0];
+  if (!c.rules.canReturn(d, c.role.id)) return c.flash("只能归还自己借出的设备", { kind: "error", proposal: "FR-R01" });
+  d.status = "可借"; d.holder = null;
+  c.flash("已归还", { proposal: "FR-R01" });
+});
+
+</script>
+<script>Proto.start();</script>
+</body>
+</html>

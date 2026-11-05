@@ -1,0 +1,8 @@
+[
+  {"id": "s1", "label": "投影仪可借", "acceptance": ["AC-01"], "role": "jia", "now": "2026-11-10T09:00:00+08:00",
+   "data": {"devices": [{"id": "d1", "name": "投影仪", "status": "可借", "holder": null}]}},
+  {"id": "s2", "label": "投影仪已被乙借出", "acceptance": ["AC-02"], "role": "jia", "now": "2026-11-10T09:00:00+08:00",
+   "data": {"devices": [{"id": "d1", "name": "投影仪", "status": "已借出", "holder": "yi"}]}},
+  {"id": "s3", "label": "甲归还投影仪", "acceptance": ["AC-03"], "role": "jia", "now": "2026-11-10T09:00:00+08:00",
+   "data": {"devices": [{"id": "d1", "name": "投影仪", "status": "已借出", "holder": "jia"}]}}
+]

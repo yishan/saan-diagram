@@ -15,15 +15,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
-<link rel="stylesheet" href="prd-writing.css">
-<link rel="stylesheet" href="../site.css">
+<link rel="stylesheet" href="prd-writing.css?v=e813618a5c">
+<link rel="stylesheet" href="../site.css?v=85e8aacbdc">
 <script src="../site.js" defer></script>
 </head>
 <body>
 <main class="wrap">
   <header class="hero">
     <div class="hero-top">
-      <nav class="site-nav" aria-label="Skill navigation"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="../mermaid/">Mermaid</a><a href="../discovery/">Discovery</a><a href="./" aria-current="page">PRD Writing</a></nav>
+      <nav class="site-nav" aria-label="Skill navigation"><a href="../">Saan Kits</a><a href="../diagram/">Diagram</a><a href="../mermaid/">Mermaid</a><a href="../discovery/">Discovery</a><a href="./" aria-current="page">PRD Writing</a><a href="../prototype/">Prototype</a><a href="../inquiry/">Inquiry</a></nav>
       <div class="site-controls">
       <details class="preference-picker" data-preference="language" name="site-preferences">
         <summary class="preference-trigger" aria-label="Language" title="Language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
@@ -35,12 +35,13 @@
       </details>
     </div>
     </div>
-    <h1>Saan PRD Writing</h1>
-    <p class="lead">Turn requirements and prototypes into reviewable specifications: who does what, under which conditions, and how the data changes.</p>
+    <div class="skill-heading"><h1>Saan PRD Writing</h1><span class="skill-version">v1.0.0</span></div>
+    <p class="lead">Bring scattered requirements and prototypes into a document your team can discuss, build from, and check against.</p>
+    <p>Start with a brief, review comments, an existing document, or a prototype the assistant can read. Describe each function: who uses it, what must be true first, what changes, and what happens on failure. For a single feature change, write only the affected parts.</p>
     <dl class="intro">
       <div><dt>Use for</dt><dd>Full PRDs, scoped changes, and document revisions</dd></div>
       <div><dt>Outputs</dt><dd>Functional rules, business fields, acceptance scenarios, and open decisions</dd></div>
-      <div><dt>Dependencies</dt><dd>Text-only skill with bundled templates and examples</dd></div>
+      <div><dt>To get started</dt><dd>Bring your requirements; templates and examples are included</dd></div>
     </dl>
   </header>
 
@@ -58,9 +59,9 @@
       <div><h3>A consistent structure for each function</h3><ol>
         <li>Business description: roles, context, and outcomes</li>
         <li>Interface design: entry points, regions, and interactions</li>
-        <li>Business fields: types, formats, requiredness, and use</li>
+        <li>Business fields: type, format, whether each is required, and its purpose</li>
         <li>Functional constraints: conditions, processing, states, and feedback</li>
-      </ol><p class="note">For a scoped change, keep relevant content and reference the project baseline. Add other information only when needed.</p></div>
+      </ol><p class="note">For a feature change, keep the relevant sections and name the existing requirements version you are working from. Add an “Other” section only if there is more to explain.</p></div>
     </div>
   </section>
 
@@ -75,7 +76,7 @@
         <li>Result: if any request is ineligible, reject the entire batch and leave all records unchanged.</li>
         <li>Acceptance: include a request created by another user and verify that no selected record changes.</li>
       </ol>
-      <p class="note">Rollback after a processing error remains a separate decision. The validation-failure rule does not define that outcome.</p>
+      <p class="note">If a system error occurs halfway through, whether to restore already processed records still needs a decision. The requirement above only covers records that are ineligible for archiving.</p>
     </div>
   </section>
 
@@ -95,13 +96,13 @@
     <div class="tbl-wrap"><table>
       <thead><tr><th>Resource</th><th>When to use it</th><th>Contents</th></tr></thead>
       <tbody>
-        <tr><td>Full specification · English and Chinese</td><td>New projects or a full review</td><td>Six chapters, document control, acceptance scenarios, and open decisions</td></tr>
-        <tr><td>Scoped change · English and Chinese</td><td>One requirement within an existing project</td><td>Change scope, functional details, baseline impacts, and acceptance scenarios</td></tr>
+        <tr><td>Full specification · English and Chinese</td><td>New projects or a full review</td><td>Six chapters, version and revision records, acceptance scenarios, and open decisions</td></tr>
+        <tr><td>Scoped change · English and Chinese</td><td>One requirement within an existing project</td><td>What changes, functional details, effects on existing requirements, and acceptance scenarios</td></tr>
         <tr><td>Bulk archive example · Chinese</td><td>A reference for writing detail</td><td>Fictional input, rules, state changes, and explicit unknowns</td></tr>
       </tbody>
     </table></div>
     <p>An independent writing trial used a new room-booking requirement. It checked adjacent time slots, concurrent conflicts, preservation of the original booking after a failed reschedule, and unresolved rules. The evaluation materials are kept in the repository.</p>
-    <p class="note">Reading prototypes depends on available parsers or exports. The skill does not include a general .rp parser. Use suitable tools for Word or PDF formatting when required.</p>
+    <p class="note">Provide a prototype the available tools can read, such as exported pages or files. The skill does not include a general reader for Axure .rp files. Word or PDF formatting needs a suitable document tool.</p>
   </section>
 
   <section aria-labelledby="install">
@@ -110,10 +111,10 @@
     <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-prd-writing</code></pre><button type="button" class="copy" data-copy="install" aria-label="Copy the Saan PRD Writing install command" hidden></button></div>
     <p>Give your agent the brief, review notes, or an accessible prototype:</p>
     <div class="copy-row"><pre id="code-request"><code>Use saan-prd-writing to turn these materials into a requirements specification. Deliver a draft with concrete functions, fields, state changes, and acceptance scenarios. Collect unresolved decisions in one place.</code></pre><button type="button" class="copy" data-copy="request" aria-label="Copy the PRD writing request example" hidden></button></div>
-    <p class="note">Document checks and simulated writing trials do not establish business acceptance. Remote installation and the live site reflect the published version.</p>
+    <p class="note">Document checks and simulated writing trials do not establish business acceptance.</p>
   </section>
 
-  <footer><span>Saan PRD Writing v1.0.0 · Yishan · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-prd-writing">Skill source</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-prd-writing/README.md">User guide</a><a href="../">Saan Kits</a></footer>
+  <footer class="site-footer"><span>Saan PRD Writing · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-prd-writing">Skill source</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-prd-writing/README.md">User guide</a><a href="../">Saan Kits</a></footer>
 </main>
 </body>
 </html>

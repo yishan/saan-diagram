@@ -37,11 +37,11 @@ h1{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(44px,9v
 .install summary{cursor:pointer;font-size:14.5px;color:var(--muted)}
 .install details .copy-row{margin-top:12px}
 pre{font-family:var(--f-mono);font-size:13px;line-height:1.7}
-footer{margin-top:24px;font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 20px}
-footer a{color:inherit}
 .hero-top{margin-bottom:32px}
 @media(max-width:560px){
  body{padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
  main{padding-top:24px}
  .skill-list{--marker-offset:24px}
 }
+
+.site-footer{margin-top:24px}
