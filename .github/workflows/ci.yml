@@ -9,7 +9,8 @@ permissions:
 
 jobs:
   regression:
-    runs-on: ubuntu-latest
+    # Python 3.9 has setup-python builds for 24.04, but not Ubuntu 26.04.
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python-version: ['3.9', '3.12']
@@ -23,6 +24,7 @@ jobs:
       - run: python -m unittest discover -s tests -v
       - run: python scripts/render_smoke.py
       - run: python scripts/check_site.py
+      - run: node --check page/site.js && node --check page/site-preferences.js
       - run: python skills/saan-mermaid/scripts/check_mermaid.py --selftest
       - run: python -m unittest discover -s tests/saan-mermaid -v
       - run: python skills/saan-prototype/scripts/check.py --selftest

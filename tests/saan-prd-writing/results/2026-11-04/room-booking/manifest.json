@@ -1,0 +1,32 @@
+{
+  "skill_version": "1.0.0",
+  "skill_hashes": {
+    "SKILL.md": "67d2d58d5a05e304ae232535277278dfbd57fb19892fb341a1451918b43b0707",
+    "references/source-handling.md": "043e1eea7099df2937eb923b5667876ebcbc6ca121923d951ab82d0b7c0d9574",
+    "agents/openai.yaml": "46d10a2da2e7f58a6b8a4a53ab28922bc1544e92434d91906793689f04516b0f",
+    "templates/specification.en.md": "f9383a5222e5cd2384fbc01f8ec26c9f76ebe3c2dc0b89eb8cf94fed57931a04",
+    "templates/change.en.md": "ec373cd2e536aadbadc8d8f77fb9c194ea50c6e2a4482915b799cc7e16099adf",
+    "templates/specification.zh-CN.md": "566fabc1c70f5c5703171fd6b4a412d67435ca09809b27f026756b3eadf46237",
+    "templates/change.zh-CN.md": "910375876321952bdb45257f4e16a55cfcded598c3822ec28bdda69e96dbf64b",
+    "examples/bulk-archive/prd.zh-CN.md": "a684115674a81cca395d9c8790d3451d2f98115d47330f557bccbb78447cc72c",
+    "examples/bulk-archive/input.zh-CN.md": "5d311c44eebca6807f1cc512c47c8196451ca596397622f3c5306fa8e00ae51b"
+  },
+  "input_hashes": {
+    "review-notes.md": "d90d2ce254a80fbd8bd64e613fb87b0b64ed248705592610c067974fe5a4360c",
+    "brief.md": "d6cbbce01afa9633c223904fd4d36e3257415aa3c58656f2781d22724c99e3bd",
+    "request.md": "e1300846b2b6bd1e79c418ccbfbfd8a22ba4afa34a74e0333eed4800a17c4ae0"
+  },
+  "date": "2026-11-04",
+  "mode": "independent agent, fresh context, isolated temporary workspace",
+  "scope": "read bundled skill and raw input; write output only; no external services",
+  "criteria_withheld": true,
+  "input_files": [
+    "input/request.md",
+    "input/brief.md",
+    "input/review-notes.md"
+  ],
+  "output": "prd.md",
+  "output_sha256": "2cd7852776051bd4392d640fb52cb6f6afafe590c03403d68db8cc30e32b5391",
+  "output_unedited": true,
+  "baseline_comparison": false
+}

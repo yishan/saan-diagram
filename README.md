@@ -6,7 +6,7 @@
 
 An expanding collection of agent skills for turning requirements into diagrams, documents, and prototypes. Install the skills you need, or select the whole collection.
 
-**Available today: `saan-diagram`, `saan-mermaid`, and `saan-prototype`.** PRD writing is planned and is not yet included.
+**Available today: `saan-diagram`, `saan-mermaid`, `saan-discovery`, `saan-prd-writing`, `saan-prototype`, and `saan-inquiry`.**
 
 The GitHub repository is [`yishan/saankits`](https://github.com/yishan/saankits), renamed from `yishan/saan-diagram`. Use the new source in installation commands. The existing `saan-diagram` skill and plugin identifiers are unchanged.
 
@@ -16,9 +16,14 @@ The GitHub repository is [`yishan/saankits`](https://github.com/yishan/saankits)
 |---|---|---|---|
 | [`saan-diagram`](skills/saan-diagram/SKILL.md) | Business architecture, process flows, role handoffs, data relationships, and milestones in English or Chinese | Editable YAML/JSON specs, HTML, SVG, PNG, and Feishu/Lark whiteboard DSL | [Guide](docs/saan-diagram/README.md) · [中文指南](docs/saan-diagram/README.zh-CN.md) · [Gallery](https://kits.yishan.app/diagram/) |
 | [`saan-mermaid`](skills/saan-mermaid/SKILL.md) | Diagrams kept in Markdown and design documents, sequence, state, and Gantt charts, and process reviews against a control list | Mermaid source, an optional rendered image, and review findings | [Guide](docs/saan-mermaid/README.md) · [中文指南](docs/saan-mermaid/README.zh-CN.md) · [Introduction](https://kits.yishan.app/mermaid/) |
+| [`saan-discovery`](skills/saan-discovery/SKILL.md) | Interactive consumer, enterprise, public-sector, and mixed discovery, interview preparation, and product-fit assessment | Topic-based research briefs, interview guides, gap queues, and fit assessments | [Guide](docs/saan-discovery/README.md) · [中文指南](docs/saan-discovery/README.zh-CN.md) · [Introduction](https://kits.yishan.app/discovery/) · [中文介绍](https://kits.yishan.app/discovery/zh/) |
+| [`saan-prd-writing`](skills/saan-prd-writing/SKILL.md) | Full PRDs, requirements specifications, scoped feature changes, and document revisions | Concrete rules, business fields, state effects, acceptance scenarios, and open decisions | [Guide](docs/saan-prd-writing/README.md) · [中文指南](docs/saan-prd-writing/README.zh-CN.md) · [Introduction](https://kits.yishan.app/prd-writing/) |
 | [`saan-prototype`](skills/saan-prototype/SKILL.md) | Review prototypes from a requirements specification, with role and scenario switching and open questions marked in place | One offline HTML file, editable sources, a trace table, and check results | [Guide](docs/saan-prototype/README.md) · [中文指南](docs/saan-prototype/README.zh-CN.md) · [Introduction](https://kits.yishan.app/prototype/) |
+| [`saan-inquiry`](skills/saan-inquiry/SKILL.md) | Adaptive dialogue to clarify problems, examine blind spots, and choose and review next steps | Clearer problem framing, provisional judgments, actions, and review conditions | [Guide](docs/saan-inquiry/README.md) · [中文指南](docs/saan-inquiry/README.zh-CN.md) · [Local introduction](page/inquiry/index.html) |
 
 Each skill has its own `SKILL.md` and carries the resources needed for its core workflow. Installing one skill does not require installing the whole collection.
+
+Saan Inquiry v0.1.0 is a local addition. From a checkout containing it, use `npx skills add . --skill saan-inquiry`; remote commands include it only after publication.
 
 ## Installation
 
@@ -39,6 +44,12 @@ npx skills add yishan/saankits --skill saan-diagram
 # Install just Saan Mermaid
 npx skills add yishan/saankits --skill saan-mermaid
 
+# Install just Saan Discovery
+npx skills add yishan/saankits --skill saan-discovery
+
+# Install just Saan PRD Writing
+npx skills add yishan/saankits --skill saan-prd-writing
+
 # Install just Saan Prototype
 npx skills add yishan/saankits --skill saan-prototype
 
@@ -46,9 +57,9 @@ npx skills add yishan/saankits --skill saan-prototype
 npx skills add yishan/saankits --skill '*' -a codex
 ```
 
-Installation is project-level by default; add `-g` for user-level installation. The whole-collection command currently selects `saan-diagram`, `saan-mermaid`, and `saan-prototype`. Skills added later require a subsequent installation; this is not a subscription to future skills.
+Installation is project-level by default; add `-g` for user-level installation. The local catalog contains six skills; remote commands select the skills in the published repository. Skills added later require a subsequent installation; this is not a subscription to future skills.
 
-Runtime dependencies belong to each skill. See [Saan Diagram dependencies](docs/saan-diagram/README.md#dependencies), [Saan Mermaid dependencies](docs/saan-mermaid/README.md#dependencies), and [Saan Prototype dependencies](docs/saan-prototype/README.md#dependencies).
+Saan Discovery, Saan PRD Writing, and Saan Inquiry are text-only and need no external runtime or service for their core workflows. Accessing source files may require additional tools. Runtime dependencies belong to each skill. See [Saan Diagram dependencies](docs/saan-diagram/README.md#dependencies), [Saan Mermaid dependencies](docs/saan-mermaid/README.md#dependencies), and [Saan Prototype dependencies](docs/saan-prototype/README.md#dependencies).
 
 ### Claude Code plugin
 
@@ -63,11 +74,7 @@ For manual installation, copy the complete `skills/<skill-name>/` directory into
 
 ## Planned skills
 
-These are planned scopes, not installable entries. Names and boundaries may change during development.
-
-| Planned skill | Intended scope |
-|---|---|
-| `saan-prd-writing` | Requirements, business rules, acceptance criteria, and unresolved questions in a PRD |
+No skills are planned at the moment. Record future scopes here as a table of planned entries, not as installable placeholders.
 
 A shared workflow skill can be added when a repeatable workflow across these skills has been validated. Each skill should first be useful on its own.
 
@@ -77,18 +84,24 @@ A shared workflow skill can be added when a repeatable workflow across these ski
 skills/                  Installable skill packages
   saan-diagram/          Existing diagram skill and runtime resources
   saan-mermaid/          Mermaid drawing and process review skill
+  saan-discovery/        Business discovery and internal interview methods
+  saan-prd-writing/      Requirements writing, templates, and a worked example
   saan-prototype/        Review prototype runtime, themes, page patterns, and checks
+  saan-inquiry/          Adaptive problem clarification and reflection
 docs/                    User documentation and preview images
   saan-diagram/          English and Chinese diagram guides
   saan-mermaid/          English and Chinese Mermaid guides
+  saan-discovery/        English and Chinese Discovery guides and validation records
+  saan-prd-writing/      English and Chinese PRD guides and validation records
   saan-prototype/        English and Chinese Prototype guides and validation record
+  saan-inquiry/          English and Chinese Inquiry guides and validation records
 scripts/                 Repository maintenance and validation helpers
 tests/                   Saan Diagram regression tests; saan-mermaid/ holds Mermaid tests
 page/                    Collection overview, with one second-level page per skill
 .claude-plugin/          Collection packaging; legacy identifiers retained
 ```
 
-Agent instructions live in `skills/<skill-name>/SKILL.md`. Root READMEs provide the collection catalog; detailed user guides live in `docs/<skill-name>/`. The site overview is at `/`, with `/diagram/`, `/mermaid/`, and `/prototype/` below it.
+Agent instructions live in `skills/<skill-name>/SKILL.md`. Root READMEs provide the collection catalog; detailed user guides live in `docs/<skill-name>/`. The site overview is at `/`, with `/diagram/`, `/mermaid/`, `/discovery/`, `/prd-writing/`, `/prototype/`, and `/inquiry/` below it. All seven pages have English and Chinese versions. Top-right controls initially follow the browser language and system theme; manual choices are remembered across the site. Diagram and Mermaid examples retain their source language.
 
 ## Development
 

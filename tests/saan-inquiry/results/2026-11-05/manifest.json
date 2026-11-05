@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-05",
+  "skill": "saan-inquiry",
+  "version": "0.1.0",
+  "evaluation": "two independent agent contexts; volunteer conversation in three sequential turns; two direct tasks",
+  "review_criteria": "tests/saan-inquiry/review-criteria.md",
+  "limits": [
+    "fictional inputs",
+    "no baseline comparison",
+    "no real-world efficacy claim",
+    "no installation or publication"
+  ],
+  "sha256": {
+    "skills/saan-inquiry/SKILL.md": "3508428421f67787201cc3f7d476ba567552e63d97e00198b417527211d7a9b9",
+    "skills/saan-inquiry/agents/openai.yaml": "e5026696898675baf6d3f0f9c62c4a9ebd436192c2a30b6ab7642048bf0df906",
+    "skills/saan-inquiry/references/dialogue-examples.md": "aa10e3338b1fd08eb4ad3ecc87703a86e2983cf8a44e102dfae8329573a7a7f3",
+    "tests/saan-inquiry/fixtures/direct/requests.md": "032e4ea5cffb5bec67cb0c6e7ca0ea574ad646e6bb46955d16079d39bf0d591c",
+    "tests/saan-inquiry/fixtures/volunteer/turn-1.md": "67ad7564975d73ff871da677c409db1662e2f4a71e0fea40d18a89c810b14bcb",
+    "tests/saan-inquiry/fixtures/volunteer/turn-2.md": "829e1a9355e73df84a32e84b6dc67b49c20bd280fa4db1a019cef19a7b683e47",
+    "tests/saan-inquiry/fixtures/volunteer/turn-3.md": "fb6141b5454bcc0b463e117e743b9d1733a678a0ae16eb1eb65b5884ff38d9d3",
+    "tests/saan-inquiry/results/2026-11-05/direct/input.md": "cde0358ac59d4b05c7d7ce157898703fa339a467b0b62b6cede3e35741ec83e5",
+    "tests/saan-inquiry/results/2026-11-05/direct/output.md": "acfcfcbee893979aec30fa44b4a59f43b5f42f96cbda1c210d458ea94abdfe22",
+    "tests/saan-inquiry/results/2026-11-05/volunteer/turn-1-input.md": "67ad7564975d73ff871da677c409db1662e2f4a71e0fea40d18a89c810b14bcb",
+    "tests/saan-inquiry/results/2026-11-05/volunteer/turn-1-output.md": "c436689c2d8b299666c337326e58a203fab6250dcf9da199a2126bf97ed0fab0",
+    "tests/saan-inquiry/results/2026-11-05/volunteer/turn-2-input.md": "829e1a9355e73df84a32e84b6dc67b49c20bd280fa4db1a019cef19a7b683e47",
+    "tests/saan-inquiry/results/2026-11-05/volunteer/turn-2-output.md": "0fd101f0bf0e6e0fa08069f39541aaea90b0d698a80abb1ddc9b4e73a4dc23d6",
+    "tests/saan-inquiry/results/2026-11-05/volunteer/turn-3-input.md": "fb6141b5454bcc0b463e117e743b9d1733a678a0ae16eb1eb65b5884ff38d9d3",
+    "tests/saan-inquiry/results/2026-11-05/volunteer/turn-3-output.md": "20374454069a9b6f1f15d16de642e3a6640ad55cb1d919f780b08f53c8cea816"
+  }
+}
