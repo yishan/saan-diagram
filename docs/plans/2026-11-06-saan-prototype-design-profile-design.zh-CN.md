@@ -84,7 +84,7 @@ v0.2 让用户指定一个**设计规范包**。原型按它的令牌配色，�
 |---|---|---|
 | `status` | `<span class="p-status" data-tone="success">已审核</span>` | 颜色、图标和文字同时显示；`tone` 取 neutral、success、notice、danger |
 | `actions` | `<button data-action="submit" data-disabled-reason="…">` | 不可用的按钮保留显示，原因直接显示在按钮旁，不只靠悬停 |
-| `confirm` | `c.confirm({title, changes, effects, confirmText}, "action")` | 列出每项“原值 → 新值”和后果，确认后才执行动作 |
+| `confirm` | `c.confirm({title, changes, effects, confirm: {text, proposal}}, "action")` | 列出每项“原值 → 新值”和后果，确认后才执行动作 |
 | `field` | `<div class="p-field read" data-changed-from="…">` | 查看态显示文字；编辑时标出修改前的值 |
 | `filter` | `<details class="p-filter">` | 常用条件外露，其余收起，并显示已生效的隐藏条件数 |
 | `table` | `.p-table` 加 `.p-cell-sub` | 一格内两行信息（主信息和说明） |
