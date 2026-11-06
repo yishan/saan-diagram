@@ -19,11 +19,9 @@ GitHub 仓库已由 `yishan/saan-diagram` 更名为 [`yishan/saankits`](https://
 | [`saan-discovery`](skills/saan-discovery/SKILL.md) | ToC、ToB/G 与混合场景的交互调研、访谈准备和产品适配评估 | 按专题展开的调研底稿、访谈提纲、缺口清单和适配判断 | [中文指南](docs/saan-discovery/README.zh-CN.md) · [English guide](docs/saan-discovery/README.md) · [English introduction](https://kits.yishan.app/discovery/) · [中文介绍](https://kits.yishan.app/discovery/zh/) |
 | [`saan-prd-writing`](skills/saan-prd-writing/SKILL.md) | 完整 PRD、需求规格说明书、局部功能变更与既有文档修订 | 具体规则、业务字段、状态变化、验收场景和待确认事项 | [中文指南](docs/saan-prd-writing/README.zh-CN.md) · [English guide](docs/saan-prd-writing/README.md) · [介绍页](https://kits.yishan.app/prd-writing/) |
 | [`saan-prototype`](skills/saan-prototype/SKILL.md) | 根据需求规格生成评审原型，可切换角色和场景，在界面上标出待确认事项 | 单个离线 HTML、可修改的源码、追溯表和检查结果 | [中文指南](docs/saan-prototype/README.zh-CN.md) · [English guide](docs/saan-prototype/README.md) · [介绍页](https://kits.yishan.app/prototype/zh/) |
-| [`saan-inquiry`](skills/saan-inquiry/SKILL.md) | 通过自适应对话澄清问题、探索盲点、形成下一步并回看结果 | 清晰的问题表述、暂定判断、行动和回看条件 | [中文指南](docs/saan-inquiry/README.zh-CN.md) · [English guide](docs/saan-inquiry/README.md) · [本地介绍页](page/inquiry/zh/index.html) |
+| [`saan-inquiry`](skills/saan-inquiry/SKILL.md) | 通过自适应对话澄清问题、探索盲点、形成下一步并回看结果 | 清晰的问题表述、暂定判断、行动和回看条件 | [中文指南](docs/saan-inquiry/README.zh-CN.md) · [English guide](docs/saan-inquiry/README.md) · [介绍页](https://kits.yishan.app/inquiry/zh/) |
 
 每个技能有独立的 `SKILL.md`，并携带核心流程需要的资源。安装单个技能不要求安装整个工具集。
-
-Saan Inquiry v0.1.0 为本地新增。在包含它的仓库中可运行 `npx skills add . --skill saan-inquiry`；远程命令需待发布后才包含此技能。
 
 ## 安装
 
@@ -53,11 +51,14 @@ npx skills add yishan/saankits --skill saan-prd-writing
 # 只安装 Saan Prototype
 npx skills add yishan/saankits --skill saan-prototype
 
+# 只安装 Saan Inquiry
+npx skills add yishan/saankits --skill saan-inquiry
+
 # 把当前全部可用技能安装到 Codex
 npx skills add yishan/saankits --skill '*' -a codex
 ```
 
-默认安装到当前项目；加 `-g` 可安装到用户级目录。本地目录包含以上六个技能；远程命令选择已发布仓库中的技能。以后新增的技能需要再次安装，整套安装不会自动订阅未来技能。
+默认安装到当前项目；加 `-g` 可安装到用户级目录。工具集目前包含以上六个技能。以后新增的技能需要再次安装，整套安装不会自动订阅未来技能。
 
 Saan Discovery、Saan PRD Writing 和 Saan Inquiry 是文本技能，核心流程无需外部运行环境或服务。读取来源文件可能需要额外工具。运行依赖由各技能分别说明。见 [Saan Diagram 依赖说明](docs/saan-diagram/README.zh-CN.md#依赖)、[Saan Mermaid 依赖说明](docs/saan-mermaid/README.zh-CN.md#依赖)和 [Saan Prototype 依赖说明](docs/saan-prototype/README.zh-CN.md#依赖)。
 

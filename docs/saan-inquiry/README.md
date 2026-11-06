@@ -2,7 +2,9 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-Think through an unclear problem with an adaptive dialogue. Clarify the situation, examine possible explanations and overlooked perspectives, and reach a useful decision or next step. Skill version: **0.1.0**, prepared locally; remote installation and the live site depend on publication.
+Think through an unclear problem with an adaptive dialogue. Clarify the situation, examine possible explanations and overlooked perspectives, and reach a useful decision or next step. The [introduction](https://kits.yishan.app/inquiry/) includes English and Chinese.
+
+Skill version: **0.1.0**.
 
 ## When to use it
 
@@ -10,15 +12,15 @@ Start with an incomplete idea, a broad judgment, a difficult choice, or results 
 
 `saan-discovery` focuses on customer research, interview preparation, and product fit. `saan-prd-writing` produces requirements documents. Inquiry focuses on thinking with the user; those other skills are optional when a specific deliverable is needed. A clear execution request should proceed without an imposed interview.
 
-## Use the local package
+## Installation
 
-From a checkout containing this version:
+Install just Saan Inquiry from Saan Kits:
 
 ```bash
-npx skills add . --skill saan-inquiry
+npx skills add yishan/saankits --skill saan-inquiry
 ```
 
-Or copy the complete `skills/saan-inquiry/` directory into your agent's skills directory. The core workflow is text-only and requires no service, script runtime, or other skill. Reading external sources may require available tools. This task does not install the package globally.
+Installation is project-level by default. For manual installation, copy the complete `skills/saan-inquiry/` directory into your agent's skills directory. The core workflow is text-only and requires no service, script runtime, or other skill. Reading external sources may require available tools.
 
 The canonical instruction entry point is English. Responses follow the requested language, otherwise the language of the request.
 
@@ -60,7 +62,7 @@ The user's original working name was **Questinoare**. **Saan Inquiry** follows t
 
 [Fictional dialogue examples](../../skills/saan-inquiry/references/dialogue-examples.md) show how to select the next move. Startup questions about a concrete customer, actual use, payments, differentiation, sales, delivery effort, team capacity, and recent progress are one source of inspiration. They are not a mandatory interview sequence or evidence of a particular methodology's provenance.
 
-See the [behavioral scenarios](../../tests/saan-inquiry/README.md), [validation record](validation.zh-CN.md), and [local introduction page](../../page/inquiry/index.html). Simulated conversations and package checks do not establish long-term user effectiveness.
+See the [behavioral scenarios](../../tests/saan-inquiry/README.md), [validation record](validation.zh-CN.md), and [introduction page](https://kits.yishan.app/inquiry/). Simulated conversations and package checks do not establish long-term user effectiveness.
 
 ## Package
 

@@ -16,7 +16,7 @@ Static pages for the collection, published at [kits.yishan.app](https://kits.yis
 | `/prd-writing/zh/` | `prd-writing/zh/index.html` | Explicit Chinese introduction |
 | `/prototype/` | `prototype/` | Saan Prototype introduction and live example |
 | `/prototype/zh/` | `prototype/zh/index.html` | Explicit Chinese Prototype introduction |
-| `/inquiry/` | `inquiry/index.html` | Inquiry introduction (local addition) |
+| `/inquiry/` | `inquiry/index.html` | Inquiry introduction |
 | `/inquiry/zh/` | `inquiry/zh/index.html` | Explicit Chinese Inquiry introduction |
 
 The overview page forwards old `/#anchor` links to `/diagram/#anchor`, except its own `#collection-install` section. Each new skill gets its own second-level directory and a row on the overview page. Keep the localized skill count in sync with that list. Skill text aligns with the main heading; decorative circles and a connecting line sit in the left gutter.

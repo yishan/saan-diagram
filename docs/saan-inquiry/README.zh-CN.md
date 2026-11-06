@@ -2,7 +2,9 @@
 
 [English](README.md) | **简体中文**
 
-通过自适应对话把模糊问题想清楚，探索可能的解释和遗漏视角，形成有依据的判断与下一步。技能版本 **0.1.0**，本地初版；远程安装与线上站点以实际发布为准。
+通过自适应对话把模糊问题想清楚，探索可能的解释和遗漏视角，形成有依据的判断与下一步。[介绍页](https://kits.yishan.app/inquiry/zh/)提供中英文版本。
+
+技能版本 **0.1.0**。
 
 ## 适合什么任务
 
@@ -10,15 +12,15 @@
 
 `saan-discovery` 侧重客户调研、访谈准备和产品适配，`saan-prd-writing` 负责需求文档；Inquiry 侧重与用户共同思考。有明确交付物时可以选用其他技能，但均非必需依赖。已经说清楚的执行任务不应被强行改成访谈。
 
-## 使用本地技能包
+## 安装
 
-在包含本版本的仓库根目录执行：
+从 Saan Kits 单独安装 Saan Inquiry：
 
 ```bash
-npx skills add . --skill saan-inquiry
+npx skills add yishan/saankits --skill saan-inquiry
 ```
 
-也可以把完整的 `skills/saan-inquiry/` 复制到目标 Agent 的技能目录。核心为文本对话，无外部服务、脚本运行环境或其他技能依赖；读取外部资料需要相应工具。本次编写不会自动安装到用户全局目录。
+默认安装到当前项目。手动安装时，把完整的 `skills/saan-inquiry/` 复制到目标 Agent 的技能目录。核心为文本对话，无外部服务、脚本运行环境或其他技能依赖；读取外部资料需要相应工具。
 
 统一指令入口使用英文，实际对话优先采用用户指定语言，否则沿用请求语言。
 
@@ -60,7 +62,7 @@ npx skills add . --skill saan-inquiry
 
 [虚构对话示例](../../skills/saan-inquiry/references/dialogue-examples.md)说明怎样选择下一步。创业访谈里对具体客户、实际使用、付费、替代方案、定制交付、销售、团队和近期进展的追问是灵感之一，不是必答清单，也不据此宣称源于某个特定方法。
 
-[行为场景](../../tests/saan-inquiry/README.md)、[验证记录](validation.zh-CN.md)和[本地中文介绍页](../../page/inquiry/zh/index.html)保留可检查的依据。模拟对话和包结构检查不能证明长期使用效果。
+[行为场景](../../tests/saan-inquiry/README.md)、[验证记录](validation.zh-CN.md)和[中文介绍页](https://kits.yishan.app/inquiry/zh/)保留可检查的依据。模拟对话和包结构检查不能证明长期使用效果。
 
 ## 包目录
 
