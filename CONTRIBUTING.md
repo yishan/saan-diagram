@@ -36,6 +36,11 @@ Each skill keeps its own `metadata.version`. `.claude-plugin/plugin.json` carrie
 
 Use namespaced tags from now on: `saankits/vX.Y.Z` for the collection and `saan-<name>/vX.Y.Z` for a skill. The existing `v1.0.0` tag and its GitHub release mark Saan Diagram from before the collection existed. Keep them as they are, and do not create new bare `v*` tags.
 
+- A change that reaches a skill's users bumps that skill's `metadata.version` in the same PR, and its guide records the change under a version heading. Do not leave an "Unreleased" section on `main`.
+- Bump the collection version when any skill's version changes: minor when a skill is added or a skill has a minor or major release, patch for fixes and docs only, and major when a skill is removed or a plugin or skill identifier changes.
+- Update the version label on the skill's site page with the version. `scripts/sync_page.py` does this for Saan Diagram; edit the other pages by hand.
+- Tag a release on the merge commit that carries the new version. Publish a GitHub Release for the latest version of each skill, with that skill's directory attached as `saan-<name>-vX.Y.Z.zip` for Claude.ai upload.
+
 ## Check a change
 
 - Validate each changed skill's frontmatter, referenced files, and standalone directory contents.

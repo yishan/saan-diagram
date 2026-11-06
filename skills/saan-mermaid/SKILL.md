@@ -3,7 +3,7 @@ name: "saan-mermaid"
 description: "Draw diagrams as Mermaid code for Markdown, READMEs, and design docs, and review business processes against an independent control list. Use for Mermaid requests, process reviews, and sequence, state, or Gantt diagrams (流程审查、时序图、状态图、甘特图、用 Mermaid 画)."
 metadata:
   author: "Yishan"
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Saan Mermaid

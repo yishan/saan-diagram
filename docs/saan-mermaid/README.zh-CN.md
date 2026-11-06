@@ -117,3 +117,17 @@ npx skills add yishan/saankits --skill saan-mermaid
 python skills/saan-mermaid/scripts/check_mermaid.py --selftest
 python -m unittest discover -s tests/saan-mermaid -v
 ```
+
+## 更新记录
+
+### v1.2.0
+
+- DS1 不再统计回到前面步骤的虚线；虚线本来就用于退回。
+- 控制点名称对应多个节点时，CP4 会提醒，检查会把这些节点当作同一步。清单里可以写节点 ID（`must_pass: c_ok through c_chk`）只查其中一个；`separate` 会检查所有同名节点。
+
+### v1.1.0
+
+- 发现会标出 `文件:行号`（包括 `.md` 文件内），支持 `--json` 输出。
+- `--target <版本>` 标出平台的 Mermaid 版本显示不了的语法（V2）。
+- 配色集中在 `assets/themes/`，带对比度检查；`--theme` 可以使用品牌主题。
+- 新增时序图、甘特图、ER 图和 SVG 重叠规则，可选的 Claude Code hook（`scripts/hook.py`），以及每种图一篇参考说明。

@@ -1,6 +1,6 @@
 # Saan Diagram（saan-diagram）
 
-> 作者：Yishan · 版本 v1.0.0
+> 作者：Yishan · 版本 v1.5.0
 > 本文为中文阅读版；Agent 的统一执行入口是 [SKILL.md](../skills/saan-diagram/SKILL.md)，不要同时加载两份。
 
 把业务描述、需求文档、白板截图转成**统一规范的业务图示**。模型只写 YAML spec（用阶段 / 泳道 / 行定位，不写像素和颜色），坐标、走线、配色、图例都由 `render.py` 计算，校验不通过不能交付。

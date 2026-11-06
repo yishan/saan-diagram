@@ -117,3 +117,17 @@ To catch syntax errors as soon as Claude Code writes a file, add `scripts/hook.p
 python skills/saan-mermaid/scripts/check_mermaid.py --selftest
 python -m unittest discover -s tests/saan-mermaid -v
 ```
+
+## Changes
+
+### v1.2.0
+
+- DS1 no longer counts a dotted edge that loops back to an earlier step. Dotted lines are meant for returns.
+- CP4 warns when a control name matches several nodes, which the checks then treat as one step. Control lists accept node IDs (`must_pass: c_ok through c_chk`) to check one of them, and `separate` checks every node with the same name.
+
+### v1.1.0
+
+- `file:line` locations, including inside `.md` files, and `--json` output.
+- `--target <version>` flags syntax the host's Mermaid cannot render (V2).
+- Colors live in `assets/themes/`, with contrast checks; `--theme` accepts a brand theme.
+- New sequence, Gantt, ER, and SVG overlap rules, an optional Claude Code hook (`scripts/hook.py`), and one reference note per diagram type.

@@ -196,8 +196,9 @@ python3 scripts/render_smoke.py --png      # Also export PNGs with the local Chr
 
 GitHub Actions runs a Python version matrix, behavioral regression tests, and browser export checks. The self-test's 54/54 count measures rule-trigger coverage, not complete branch coverage, visual correctness, or actual business permissions. Whiteboard publishing tests use mocked subprocesses and do not access user boards.
 
-### Unreleased
+### Upgrading from v1.4
 
+- Title bars that are intentionally borderless and narrow no longer fail the contrast check, and decision and document labels are checked against their actual fill. Core limits are kept per diagram instead of in a process-wide value, so one diagram's limits no longer leak into the next in a batch.
 - New rules **G6** (a node or edge leaves the canvas) and **G7** (a swimlane node leaves its own lane). Exports used to crop such content silently. `--selftest` now checks 54 rules.
 - A label wider than one lane no longer spills into the next column; its span is limited to the lanes its column has. A 1-lane swimlane fits labels of up to 10 characters; wide decision diamonds still report G7.
 - The legend lists return lines (`kind: return`) as their own "Return" item instead of under "Data / integration". The 4 examples that contain return lines were re-exported.
