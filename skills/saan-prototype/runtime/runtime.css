@@ -36,7 +36,7 @@ button.p-slot { cursor: pointer; text-align: left; }
 .p-dialog > div { width: min(440px, 92vw); background: var(--surface); border-radius: var(--radius); padding: 20px; }
 .p-pending { padding: 10px 12px; border: 1px dashed var(--notice); border-radius: var(--radius); color: var(--notice); }
 /* review annotations */
-.p-badge { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 3px; font-size: 11px; line-height: 16px; vertical-align: middle; cursor: help; border: 1px solid; background: var(--surface); }
+.p-badge { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 3px; font-size: 11px; line-height: 16px; vertical-align: middle; justify-self: start; cursor: help; border: 1px solid; background: var(--surface); }
 .p-badge.proposal { color: var(--notice); }
 .p-badge.open { color: var(--danger); cursor: pointer; }
 .p-badge.rule { color: var(--muted); }
