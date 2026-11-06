@@ -54,6 +54,22 @@ class LoadTests(unittest.TestCase):
                     mod("design").load(write_profile(td, mutate))
                 self.assertIn(word, str(e.exception))
 
+    def test_malformed_shapes(self):
+        base = json.loads(PROFILE.read_text(encoding="utf-8"))
+        cases = [
+            ([], "顶层必须是对象"),
+            (dict(base, content=[]), "content 必须是对象"),
+            (dict(base, components={"X": "s"}), "组件 X 必须是对象"),
+            (dict(base, content={"forbid": "x"}), "content.forbid 必须是数组"),
+        ]
+        for data, word in cases:
+            with tempfile.TemporaryDirectory() as td, self.subTest(word=word):
+                p = Path(td) / "design.json"
+                p.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+                with self.assertRaises(ValueError) as e:
+                    mod("design").load(p)
+                self.assertIn(word, str(e.exception))
+
     def test_missing_file(self):
         with self.assertRaises(ValueError):
             mod("design").load(Path("/nonexistent/design.json"))
