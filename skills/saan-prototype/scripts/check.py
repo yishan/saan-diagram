@@ -105,7 +105,11 @@ def design_checks(p):
                     add("error", "D2", where, _with_message(f"出现规范禁用的「{f}」", rule))
             labels = [TAG.sub("", b).strip() for b in BUTTON.findall(line)] + [b.strip() for b in CONFIRM_TEXT.findall(line)]
             for rule in d["content"].get("button_forbid", []):
-                if rule["text"] in labels:
+                if rule["text"] not in labels:
+                    continue
+                if rule["text"] in confirmed:
+                    reported.setdefault((rule["text"], rule["text"]), where)
+                else:
                     add("error", "D2", where, _with_message(f"按钮文字只有「{rule['text']}」", rule))
             if RAW_COLOR.search(line):
                 add("error", "D4", where, "页面写死了颜色：用 runtime 的类名或主题令牌")

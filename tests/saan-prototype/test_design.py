@@ -180,6 +180,14 @@ class CheckTests(unittest.TestCase):
         self.assertNotIn(("error", "D2"), found(designed_parts('\nvar b = \'<button class="p-btn">确定人选</button>\';\n')))
         self.assertIn(("error", "D2"), found(designed_parts('\nc.confirm({title: "x", confirm: {text: "确定"}}, "go");\n')))
 
+    def test_confirmed_button_label_is_a_finding(self):
+        p = designed_parts('\nvar b = \'<button class="p-btn">确定</button>\';\nc.confirm({title: "x", confirm: {text: "确定"}}, "go");\n')
+        p["source"] += "\n已确认按钮：确定\n"
+        p["manifest"]["confirmed_text"].append("确定")
+        got = mod("check").check_parts(p)
+        self.assertNotIn(("error", "D2"), {(lvl, c) for lvl, c, _, _ in got})
+        self.assertEqual(len([1 for lvl, c, _, _ in got if (lvl, c) == ("finding", "D2")]), 1)
+
     def test_two_primary_buttons_is_a_note(self):
         self.assertIn(("note", "D3"), found(designed_parts('\nvar b = \'<button class="p-btn primary">另一个</button>\';\n')))
 

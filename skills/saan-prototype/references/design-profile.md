@@ -71,7 +71,7 @@ With `design` in the manifest, `check.py` adds D checks. Without a profile none 
 |---|---|---|
 | D1 | 必须修改 | A `data-component` name is not in the profile's `components` |
 | D2 | 必须修改 | Page or rule wording contains a `forbid` text, or a button label equals a `button_forbid` text |
-| D2 | 业务发现 | The forbidden text is inside wording the source confirms (`confirmed_text`) |
+| D2 | 业务发现 | The forbidden text is inside wording the source confirms (`confirmed_text`), or a forbidden button label is itself confirmed wording |
 | D3 | 提示 | A page file has more than one primary button (`p-btn` with `primary`) |
 | D4 | 必须修改 | A page or rule file writes a colour value instead of using the runtime classes or theme tokens |
 | B2 | 必须修改 | A profile theme fails the contrast check or misses a token |
