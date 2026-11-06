@@ -220,8 +220,23 @@ MUTATIONS = [
     ("N1", "验收场景未覆盖", lambda p: p.update(scenarios=p["scenarios"][:1])),
     ("N2", "动态拼出的标注编号", lambda p: _page(p, lambda s: s.replace('data-open="Q-01"', 'data-open="${q}"'))),
 ]
+
+
+def _designed():
+    p = _example()
+    p["design"] = B.design.load(B.SKILL / "assets" / "design-example" / "design.json")
+    _page(p, lambda s: s.replace('<span class="p-tag">', '<span class="p-tag" data-component="StatusBadge">'))
+    return p
+
+
+DESIGN_MUTATIONS = [
+    ("D1", "用了规范之外的组件名", lambda p: _page(p, lambda s: s + '\nvar x = \'<div data-component="Foo"></div>\';\n')),
+    ("D2", "文案用了规范禁用的字", lambda p: _page(p, lambda s: s + '\nc.flash("请您稍后再试");\n')),
+    ("D3", "一个页面两个主按钮", lambda p: _page(p, lambda s: s + '\nvar b = \'<button class="p-btn primary">再借</button>\';\n')),
+    ("D4", "页面写死颜色", lambda p: _page(p, lambda s: s + '\nvar t = \'<p style="color: #ff0000">x</p>\';\n')),
+]
 THEME_MUTATION = ("B2", "主题文字对比度不足")
-ALL_CODES = {"T1", "T2", "T3", "S1", "S3", "S4", "C1", "C2", "W1", "W2", "B1", "B2", "N1", "N2", "M1"}
+ALL_CODES = {"T1", "T2", "T3", "S1", "S3", "S4", "C1", "C2", "W1", "W2", "B1", "B2", "N1", "N2", "M1", "D1", "D2", "D3", "D4"}
 
 
 def selftest():
@@ -234,6 +249,19 @@ def selftest():
     covered = set()
     for code, what, fn in MUTATIONS:
         p = copy.deepcopy(base)
+        fn(p)
+        got = {c for _, c, _, _ in check_parts(p)}
+        hit = code in got
+        covered |= {code} if hit else set()
+        bad += not hit
+        print(f"  {'DETECTED' if hit else 'MISSED  '}  {code:<3} {what}" + ("" if hit else f"（实际：{sorted(got)}）"))
+    designed = _designed()
+    clean = check_parts(designed)
+    if clean:
+        print(f"  FAIL  带规范包的示例本身应当通过：{clean}")
+        bad += 1
+    for code, what, fn in DESIGN_MUTATIONS:
+        p = copy.deepcopy(designed)
         fn(p)
         got = {c for _, c, _, _ in check_parts(p)}
         hit = code in got
