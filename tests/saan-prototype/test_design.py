@@ -92,5 +92,48 @@ class LoadTests(unittest.TestCase):
             self.assertIn("无法读取", str(e.exception))
 
 
+def designed_copy(td, mutate_profile=None):
+    """Copy the example to td/prototype with the profile at prototype/design/design.json."""
+    dst = Path(td) / "prototype"
+    shutil.copytree(EXAMPLE.parent, dst)
+    (dst / "design").mkdir()
+    write_profile(dst / "design", mutate_profile)
+    m = json.loads((dst / "manifest.json").read_text(encoding="utf-8"))
+    m["design"] = "design/design.json"
+    m.pop("theme", None)
+    (dst / "manifest.json").write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
+    return dst / "manifest.json"
+
+
+def payload(html):
+    return json.loads(re.search(r'<script type="application/json" id="p-data">(.*?)</script>', html, re.S).group(1))
+
+
+class BuildTests(unittest.TestCase):
+    def test_profile_themes_replace_bundled_ones(self):
+        with tempfile.TemporaryDirectory() as td:
+            data = payload(mod("build").build(designed_copy(td)).read_text(encoding="utf-8"))
+        self.assertEqual(list(data["themes"]), ["light"])
+        self.assertEqual(data["theme"], "light")
+        self.assertEqual(data["design"]["name"], "示例规范")
+        self.assertEqual(data["design"]["components"]["StatusBadge"]["rule"], "单据状态统一用它，同时显示颜色、图标和文字")
+
+    def test_without_profile_design_is_null(self):
+        with tempfile.TemporaryDirectory() as td:
+            data = payload(mod("build").build(EXAMPLE, Path(td) / "p.html").read_text(encoding="utf-8"))
+        self.assertIsNone(data["design"])
+        self.assertEqual(sorted(data["themes"]), ["blue", "dark", "neutral"])
+
+    def test_unknown_theme_with_profile_fails(self):
+        with tempfile.TemporaryDirectory() as td:
+            with self.assertRaises(mod("build").BuildError):
+                mod("build").build(designed_copy(td), theme="neutral")
+
+    def test_bad_profile_is_a_build_error(self):
+        with tempfile.TemporaryDirectory() as td:
+            with self.assertRaises(mod("build").BuildError):
+                mod("build").build(designed_copy(td, lambda d: d.update(themes={})))
+
+
 if __name__ == "__main__":
     unittest.main()
