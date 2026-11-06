@@ -246,5 +246,15 @@ class CheckTests(unittest.TestCase):
             self.assertIn("M1", {c for _, c, _, _ in mod("check").check(mp)})
 
 
+class RuntimeTests(unittest.TestCase):
+    def test_runtime_has_design_features(self):
+        js = (SKILL / "runtime" / "runtime.js").read_text(encoding="utf-8")
+        css = (SKILL / "runtime" / "runtime.css").read_text(encoding="utf-8")
+        for name in ("confirm: function", "data-disabled-reason", "data-component", 'data-bar="components"', "data-p-close"):
+            self.assertIn(name, js)
+        for cls in (".p-status", ".p-reason", ".p-filter", ".p-cell-sub", ".p-changes", ".p-effects", "data-changed-from", ".p-badge.component"):
+            self.assertIn(cls, css)
+
+
 if __name__ == "__main__":
     unittest.main()
