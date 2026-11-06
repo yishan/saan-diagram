@@ -25,6 +25,15 @@ ATTR = re.compile(r"""data-(proposal|open|rule)\s*=\s*\\?["']([^"'\\]*)\\?["']""
 FLASH = re.compile(r"""\b(proposal|open|rule)\s*[:=]\s*["']([^"']+)["']""")      # { open: "Q-1" } or x.open = "Q-1"
 VARIABLE = re.compile(r"""\b(proposal|open|rule)\s*[:=]\s*(?!["'\s])([A-Za-z_$][\w.$\[\]]*)""")  # { rule: why.rule }
 EXTERNAL = re.compile(r"""(?:src|href)\s*=\s*\\?["']https?://|url\(\s*["']?https?://|\bfetch\s*\(|XMLHttpRequest|\bimport\s*\(""")
+COMPONENT = re.compile(r"""data-component\s*=\s*\\?["']([^"'\\]+)\\?["']""")
+COMPONENT_KEY = re.compile(r"""\bcomponent\s*:\s*["']([^"']+)["']""")  # c.confirm({component: "X"})
+BUTTON = re.compile(r"<button\b[^>]*>(.*?)</button>")
+TAG = re.compile(r"<[^>]+>")
+CLASS_ATTR = re.compile(r"""\bclass\s*=\s*\\?["']([^"'\\]*)\\?["']""")
+CONFIRM_TEXT = re.compile(r"""confirm\s*:\s*\{\s*text\s*:\s*["']([^"']*)["']""")
+RAW_COLOR = re.compile(r"""(?:color|background|border|fill|stroke|outline)[\w-]*\s*:\s*[^;"'<>]*?(?:#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\()""")
+COMMENT_BLOCK = re.compile(r"/\*.*?\*/", re.S)
+COMMENT_LINE = re.compile(r"(?:^|(?<=[\s;]))(?<!:)//.*$", re.M)
 KIND_OF_ATTR = {"open": "open", "rule": "rule"}
 LEVELS = {"error": "必须修改", "finding": "业务发现", "note": "提示"}
 
@@ -51,6 +60,67 @@ def annotations(pages):
                         yield rel, n, m.group(1), i
             for m in VARIABLE.finditer(line):
                 yield rel, n, m.group(1), "${" + m.group(2) + "}"
+
+
+def strip_comments(src):
+    src = COMMENT_BLOCK.sub(lambda m: "\n" * m.group(0).count("\n"), src)
+    return COMMENT_LINE.sub("", src)
+
+
+def _with_message(text, rule):
+    msg = rule.get("message", "")
+    return f"{text}：{msg}" if msg else text
+
+
+def primary_buttons(src):
+    """Count class attributes that carry both p-btn and primary, ignoring comments."""
+    return sum(1 for c in CLASS_ATTR.findall(strip_comments(src)) if {"p-btn", "primary"} <= set(c.split()))
+
+
+def design_checks(p):
+    out = []
+    add = lambda level, code, where, msg: out.append((level, code, where, msg))
+    d, m = p["design"], p["manifest"]
+    confirmed = m.get("confirmed_text", [])
+    files = p["pages"] + [(m.get("rules") or "rules.js", p["rules"])]
+    reported = {}
+    for rel, src in files:
+        lines = strip_comments(src).splitlines()
+        for n, line in enumerate(lines, 1):
+            where = f"{rel}:{n}"
+            for cm in list(COMPONENT.finditer(line)) + list(COMPONENT_KEY.finditer(line)):
+                if cm.group(1) not in d["components"]:
+                    add("error", "D1", where, f"组件「{cm.group(1)}」不在《{d['name']}》的组件清单中")
+            for rule in d["content"].get("forbid", []):
+                f = rule["text"]
+                if f not in line:
+                    continue
+                hits = [t for t in confirmed if f in t and t in line]
+                rest = line
+                for t in hits:
+                    rest = rest.replace(t, "")
+                for t in hits:
+                    reported.setdefault((t, f), where)
+                if f in rest:
+                    add("error", "D2", where, _with_message(f"出现规范禁用的「{f}」", rule))
+            labels = [TAG.sub("", b).strip() for b in BUTTON.findall(line)] + [b.strip() for b in CONFIRM_TEXT.findall(line)]
+            for rule in d["content"].get("button_forbid", []):
+                if rule["text"] not in labels:
+                    continue
+                if rule["text"] in confirmed:
+                    reported.setdefault((rule["text"], rule["text"]), where)
+                else:
+                    add("error", "D2", where, _with_message(f"按钮文字只有「{rule['text']}」", rule))
+            if RAW_COLOR.search(line):
+                add("error", "D4", where, "页面写死了颜色：用 runtime 的类名或主题令牌")
+        if rel in dict(p["pages"]):
+            primaries = primary_buttons(src)
+            if primaries > 1:
+                add("note", "D3", rel, f"这个页面的代码里有 {primaries} 个主按钮；规范要求每个视图一个，互斥分支可以忽略")
+    for (t, f), first in reported.items():
+        add("finding", "D2", "manifest.json",
+            f"已确认文案「{t}」含有规范禁用的「{f}」：报告给用户，不要为了通过而改（首次出现在 {first}）")
+    return out
 
 
 def check_parts(p, all_themes=None):
@@ -117,9 +187,13 @@ def check_parts(p, all_themes=None):
         for n, line in enumerate(src.splitlines(), 1):
             if EXTERNAL.search(line):
                 add("error", "B1", f"{rel}:{n}", "原型不能请求外部资源或网络：资源要内联，数据写进场景")
-    for name, t in (all_themes if all_themes is not None else B.themes()).items():
+    theme_set = all_themes if all_themes is not None else B.themes_for(p)
+    for name, t in theme_set.items():
+        where = f"design.json themes/{name}" if p.get("design") else f"themes/{name}.json"
         for msg in contrast.problems(t):
-            add("error", "B2", f"themes/{name}.json", msg)
+            add("error", "B2", where, msg)
+    if p.get("design"):
+        out += design_checks(p)
     return out
 
 
@@ -166,8 +240,23 @@ MUTATIONS = [
     ("N1", "验收场景未覆盖", lambda p: p.update(scenarios=p["scenarios"][:1])),
     ("N2", "动态拼出的标注编号", lambda p: _page(p, lambda s: s.replace('data-open="Q-01"', 'data-open="${q}"'))),
 ]
+
+
+def _designed():
+    p = _example()
+    p["design"] = B.design.load(B.SKILL / "assets" / "design-example" / "design.json")
+    _page(p, lambda s: s.replace('<span class="p-tag">', '<span class="p-tag" data-component="StatusBadge">'))
+    return p
+
+
+DESIGN_MUTATIONS = [
+    ("D1", "用了规范之外的组件名", lambda p: _page(p, lambda s: s + '\nvar x = \'<div data-component="Foo"></div>\';\n')),
+    ("D2", "文案用了规范禁用的字", lambda p: _page(p, lambda s: s + '\nc.flash("请您稍后再试");\n')),
+    ("D3", "一个页面两个主按钮", lambda p: _page(p, lambda s: s + '\nvar b = \'<button class="p-btn primary">再借</button>\';\n')),
+    ("D4", "页面写死颜色", lambda p: _page(p, lambda s: s + '\nvar t = \'<p style="color: #ff0000">x</p>\';\n')),
+]
 THEME_MUTATION = ("B2", "主题文字对比度不足")
-ALL_CODES = {"T1", "T2", "T3", "S1", "S3", "S4", "C1", "C2", "W1", "W2", "B1", "B2", "N1", "N2", "M1"}
+ALL_CODES = {"T1", "T2", "T3", "S1", "S3", "S4", "C1", "C2", "W1", "W2", "B1", "B2", "N1", "N2", "M1", "D1", "D2", "D3", "D4"}
 
 
 def selftest():
@@ -180,6 +269,19 @@ def selftest():
     covered = set()
     for code, what, fn in MUTATIONS:
         p = copy.deepcopy(base)
+        fn(p)
+        got = {c for _, c, _, _ in check_parts(p)}
+        hit = code in got
+        covered |= {code} if hit else set()
+        bad += not hit
+        print(f"  {'DETECTED' if hit else 'MISSED  '}  {code:<3} {what}" + ("" if hit else f"（实际：{sorted(got)}）"))
+    designed = _designed()
+    clean = check_parts(designed)
+    if clean:
+        print(f"  FAIL  带规范包的示例本身应当通过：{clean}")
+        bad += 1
+    for code, what, fn in DESIGN_MUTATIONS:
+        p = copy.deepcopy(designed)
         fn(p)
         got = {c for _, c, _, _ in check_parts(p)}
         hit = code in got

@@ -1,0 +1,723 @@
+[
+ {
+  "id": "s01",
+  "label": "甲新建预约：A 无预约",
+  "acceptance": [
+   "AC-01",
+   "AC-06",
+   "AC-07"
+  ],
+  "role": "jia",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "rooms",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s02",
+  "label": "乙预约：A 已有甲 09:00—10:00",
+  "acceptance": [
+   "AC-02",
+   "AC-03",
+   "AC-04"
+  ],
+  "role": "yi",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "rooms",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b1",
+     "room": "A",
+     "date": "2026-11-12",
+     "start": "09:00",
+     "end": "10:00",
+     "topic": "周会",
+     "creator": "jia",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s05",
+  "label": "时间规则：A 17:00 后无预约",
+  "acceptance": [
+   "AC-05"
+  ],
+  "role": "jia",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "book",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [],
+   "day": "2026-11-12",
+   "draft": {
+    "room": "A",
+    "date": "2026-11-12",
+    "start": "17:30",
+    "end": "18:00",
+    "topic": "临时讨论"
+   }
+  }
+ },
+ {
+  "id": "s08",
+  "label": "并发提交 B 14:00—15:00",
+  "acceptance": [
+   "AC-08"
+  ],
+  "role": "jia",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "book",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [],
+   "day": "2026-11-12",
+   "draft": {
+    "room": "B",
+    "date": "2026-11-12",
+    "start": "14:00",
+    "end": "15:00",
+    "topic": "评审会"
+   }
+  }
+ },
+ {
+  "id": "s09",
+  "label": "主题可见性：甲、M、乙分别查看",
+  "acceptance": [
+   "AC-09",
+   "AC-10"
+  ],
+  "role": "m",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "rooms",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b1",
+     "room": "A",
+     "date": "2026-11-12",
+     "start": "09:00",
+     "end": "10:00",
+     "topic": "周会",
+     "creator": "jia",
+     "status": "有效"
+    },
+    {
+     "id": "b2",
+     "room": "B",
+     "date": "2026-11-12",
+     "start": "09:00",
+     "end": "10:00",
+     "topic": "客户沟通",
+     "creator": "yi",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s11",
+  "label": "甲改期（换会议室 / 与原占用重叠）",
+  "acceptance": [
+   "AC-11",
+   "AC-12"
+  ],
+  "role": "jia",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "mine",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b1",
+     "room": "A",
+     "date": "2026-11-12",
+     "start": "09:00",
+     "end": "10:00",
+     "topic": "周会",
+     "creator": "jia",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s13",
+  "label": "甲改期到乙已占用的时段",
+  "acceptance": [
+   "AC-13"
+  ],
+  "role": "jia",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "mine",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b1",
+     "room": "A",
+     "date": "2026-11-12",
+     "start": "09:00",
+     "end": "10:00",
+     "topic": "周会",
+     "creator": "jia",
+     "status": "有效"
+    },
+    {
+     "id": "b3",
+     "room": "A",
+     "date": "2026-11-12",
+     "start": "10:00",
+     "end": "11:00",
+     "topic": "项目同步",
+     "creator": "yi",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s14",
+  "label": "甲直接提交对乙预约的改期、取消",
+  "acceptance": [
+   "AC-14"
+  ],
+  "role": "jia",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "mine",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b2",
+     "room": "B",
+     "date": "2026-11-12",
+     "start": "09:00",
+     "end": "10:00",
+     "topic": "客户沟通",
+     "creator": "yi",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s15",
+  "label": "停用的会议室 C",
+  "acceptance": [
+   "AC-15",
+   "AC-16"
+  ],
+  "role": "jia",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "mine",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b1",
+     "room": "A",
+     "date": "2026-11-12",
+     "start": "09:00",
+     "end": "10:00",
+     "topic": "周会",
+     "creator": "jia",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s17",
+  "label": "预约正在进行中",
+  "acceptance": [
+   "AC-17"
+  ],
+  "role": "jia",
+  "now": "2026-11-12T09:30:00+08:00",
+  "page": "mine",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b1",
+     "room": "A",
+     "date": "2026-11-12",
+     "start": "09:00",
+     "end": "10:00",
+     "topic": "周会",
+     "creator": "jia",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s18",
+  "label": "甲取消本人预约",
+  "acceptance": [
+   "AC-18",
+   "AC-19"
+  ],
+  "role": "jia",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "mine",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b1",
+     "room": "A",
+     "date": "2026-11-12",
+     "start": "09:00",
+     "end": "10:00",
+     "topic": "周会",
+     "creator": "jia",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s20",
+  "label": "M 取消所管会议室 A 中乙的预约",
+  "acceptance": [
+   "AC-20",
+   "AC-21"
+  ],
+  "role": "m",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "rooms",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b4",
+     "room": "A",
+     "date": "2026-11-12",
+     "start": "14:00",
+     "end": "15:00",
+     "topic": "部门例会",
+     "creator": "yi",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s22",
+  "label": "M 处理非所管会议室、他人预约改期",
+  "acceptance": [
+   "AC-22",
+   "AC-23"
+  ],
+  "role": "m",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "rooms",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b2",
+     "room": "B",
+     "date": "2026-11-12",
+     "start": "09:00",
+     "end": "10:00",
+     "topic": "客户沟通",
+     "creator": "yi",
+     "status": "有效"
+    },
+    {
+     "id": "b4",
+     "room": "A",
+     "date": "2026-11-12",
+     "start": "14:00",
+     "end": "15:00",
+     "topic": "部门例会",
+     "creator": "yi",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ },
+ {
+  "id": "s24",
+  "label": "M 改期本人在 B 的预约",
+  "acceptance": [
+   "AC-24"
+  ],
+  "role": "m",
+  "now": "2026-11-10T10:00:00+08:00",
+  "page": "mine",
+  "data": {
+   "rooms": [
+    {
+     "id": "A",
+     "name": "会议室 A",
+     "capacity": 8,
+     "enabled": true,
+     "admins": [
+      "m"
+     ]
+    },
+    {
+     "id": "B",
+     "name": "会议室 B",
+     "capacity": 4,
+     "enabled": true,
+     "admins": []
+    },
+    {
+     "id": "C",
+     "name": "会议室 C",
+     "capacity": 12,
+     "enabled": false,
+     "admins": []
+    }
+   ],
+   "bookings": [
+    {
+     "id": "b5",
+     "room": "B",
+     "date": "2026-11-12",
+     "start": "16:00",
+     "end": "17:00",
+     "topic": "管理员周会",
+     "creator": "m",
+     "status": "有效"
+    }
+   ],
+   "day": "2026-11-12"
+  }
+ }
+]

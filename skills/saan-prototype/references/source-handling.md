@@ -24,4 +24,5 @@ When the source is a description, a screenshot, or notes without IDs:
 
 - When two source documents disagree, follow the precedence the user or the documents state. If none is stated, do not choose: add an open question and show a pending block.
 - A source that is a draft stays a draft. The prototype does not make it confirmed.
+- When a confirmed rule cannot run without deciding an open boundary (for example whether "already started" includes the exact start time), pick one reading, name the open question in the rule's comment and in a pending block, and make sure no scenario depends on that boundary. Never set a scenario's data or time on the undecided boundary.
 - Missing visual design is normal. Do not claim the prototype reflects one.

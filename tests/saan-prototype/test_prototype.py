@@ -56,6 +56,11 @@ class ThemeTests(unittest.TestCase):
         t = dict(self.THEMES["neutral"], text="#C0C4CA")
         self.assertTrue(any(m.startswith("text 在 bg") for m in mod("contrast").problems(t)))
 
+    def test_optional_success_is_checked_when_present(self):
+        t = dict(self.THEMES["neutral"], success="#7FD39A")
+        self.assertTrue(any(m.startswith("success 在 surface") for m in mod("contrast").problems(t)))
+        self.assertEqual(mod("contrast").problems(dict(self.THEMES["neutral"], success="#1A7F37")), [])
+
     def test_known_ratio(self):
         self.assertAlmostEqual(mod("contrast").ratio("#000000", "#FFFFFF"), 21.0, places=1)
 

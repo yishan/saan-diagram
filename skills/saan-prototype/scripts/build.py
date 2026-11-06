@@ -11,6 +11,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 SKILL = HERE.parent
 sys.path.insert(0, str(HERE))
+import design  # noqa: E402
 import source_index  # noqa: E402
 
 REQUIRED = ("title", "source", "roles", "scenarios", "pages")
@@ -46,7 +47,18 @@ def load(manifest_path):
         raise BuildError(f"找不到 manifest 引用的文件：{e.filename}") from e
     if not parts["scenarios"]:
         raise BuildError("scenarios 至少要有一个场景")
+    parts["design"] = None
+    if m.get("design"):
+        try:
+            parts["design"] = design.load(root / m["design"])
+        except ValueError as e:
+            raise BuildError(str(e)) from e
     return parts
+
+
+def themes_for(parts):
+    """Themes a prototype may use: the profile's when it has one, otherwise the bundled set."""
+    return parts["design"]["themes"] if parts.get("design") else themes()
 
 
 def script_safe(text):
@@ -61,15 +73,18 @@ def json_safe(text):
 def build(manifest_path, out=None, theme=None):
     parts = load(manifest_path)
     m = parts["manifest"]
-    all_themes = themes()
-    theme = theme or m.get("theme") or "neutral"
+    all_themes = themes_for(parts)
+    theme = theme or m.get("theme") or ("neutral" if not parts["design"] else next(iter(all_themes)))
     if theme not in all_themes:
         raise BuildError(f"未知主题 '{theme}'，可选：{', '.join(all_themes)}")
     idx = source_index.index(parts["source"], source_index.patterns(m))
     defs = {i: d for ids in idx.values() for i, d in ids.items()}
     data = {"title": m["title"], "language": m.get("language", "zh-CN"), "timezone": m.get("timezone", "Asia/Shanghai"),
             "roles": m["roles"], "states": m.get("states", []), "theme": theme, "themes": all_themes,
-            "scenarios": parts["scenarios"], "defs": defs}
+            "scenarios": parts["scenarios"], "defs": defs,
+            "design": None if not parts["design"] else {
+                "name": parts["design"]["name"], "version": parts["design"]["version"],
+                "components": {k: {"rule": v.get("rule", "")} for k, v in parts["design"]["components"].items()}}}
     rt = SKILL / "runtime"
     html = (rt / "shell.html").read_text(encoding="utf-8")
     html = html.replace("@LANG@", m.get("language", "zh-CN")).replace("@TITLE@", m["title"])

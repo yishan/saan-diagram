@@ -1,0 +1,27 @@
+{
+  "name": "示例规范",
+  "version": "1.0",
+  "themes": {
+    "light": {"label": "示例浅色", "bg": "#F5F6F8", "surface": "#FFFFFF", "border": "#D5D8DE",
+              "text": "#1F2329", "muted": "#5C6370", "accent": "#2F5D9E", "accent_text": "#FFFFFF",
+              "danger": "#B42318", "notice": "#8A5A00", "success": "#1A7F37",
+              "radius": "4px", "font_size": "14px"}
+  },
+  "components": {
+    "StatusBadge": {"use": "status", "rule": "单据状态统一用它，同时显示颜色、图标和文字"},
+    "ActionBar": {"use": "actions", "rule": "不能执行的动作保留，并写明原因"},
+    "ChangeConfirm": {"use": "confirm", "rule": "提交、退回、作废前列出每项变化和后果"},
+    "Field": {"use": "field", "rule": "查看态显示文字，不用禁用的输入框"},
+    "FilterBar": {"use": "filter", "rule": "默认最多 3 个条件，其余收进“更多条件”"},
+    "DataTable": {"use": "table", "rule": "一行讲清一个对象，主次信息放在同一格的两行"},
+    "PeriodPicker": {"rule": "显示每个月的结账状态，不能选的月份也保留"}
+  },
+  "content": {
+    "forbid": [
+      {"text": "您", "message": "称呼用“你”或省略主语"},
+      {"text": "！", "message": "不使用感叹号"},
+      {"text": "操作失败", "message": "说明缺什么、在哪里改、找谁处理"}
+    ],
+    "button_forbid": [{"text": "确定", "message": "写明动作和对象，如“提交审批”"}]
+  }
+}

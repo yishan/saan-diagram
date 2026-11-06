@@ -16,3 +16,4 @@ Proto.action("closeDialog", function (c) { c.close(); });
 - Call `c.close()` at the end of the confirming action. While a dialog is open, `c.flash` messages appear inside it.
 - No `required` attribute: let the rule reject an empty reason, so the rejection can be demonstrated.
 - If the source does not ask for confirmation, a dialog is a proposal: put `data-proposal` on its title.
+- With a design profile that has a `confirm` component, use `c.confirm` from [components](components.md) instead.
