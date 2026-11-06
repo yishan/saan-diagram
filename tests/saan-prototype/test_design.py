@@ -191,6 +191,54 @@ class CheckTests(unittest.TestCase):
         p["pages"] = [(rel, src + '\nc.flash("请您稍后再试！");\n') for rel, src in p["pages"]]
         self.assertFalse({c for _, c in found(p)} & {"D1", "D2", "D3", "D4"})
 
+    def test_double_slash_inside_a_string_is_not_a_comment(self):
+        self.assertIn(("error", "D2"), found(designed_parts('\nc.flash("请选择 a//b，您好");\n')))
+
+    def test_primary_button_in_a_comment_is_not_d3(self):
+        p = designed_parts('\n// 不要再加 <button class="p-btn primary">\n/* class="primary p-btn" */\n')
+        self.assertNotIn(("note", "D3"), found(p))
+
+    def test_primary_button_class_order_does_not_matter(self):
+        self.assertIn(("note", "D3"), found(designed_parts('\nvar b = \'<button class="primary p-btn">另一个</button>\';\n')))
+
+    def test_button_text_with_inner_tags(self):
+        got = found(designed_parts('\nvar b = \'<button class="p-btn"><i class="p-icon"></i>确定</button>\';\n'))
+        self.assertIn(("error", "D2"), got)
+
+    def test_d2_location_after_a_block_comment(self):
+        p = designed_parts('\n/* 第一行\n第二行\n第三行 */\nc.flash("请您稍后");\n')
+        rel, src = p["pages"][0]
+        line = next(n for n, t in enumerate(src.splitlines(), 1) if 'c.flash("请您稍后")' in t)
+        wheres = {w for lvl, c, w, _ in mod("check").check_parts(p) if (lvl, c) == ("error", "D2")}
+        self.assertEqual(wheres, {f"{rel}:{line}"})
+
+    def test_b2_locations(self):
+        p = designed_parts()
+        p["design"]["themes"]["light"]["success"] = "#7FD39A"
+        self.assertIn("design.json themes/light", {w for _, c, w, _ in mod("check").check_parts(p) if c == "B2"})
+        p = mod("build").load(EXAMPLE)
+        weak = {"x": dict(mod("build").themes()["neutral"], text="#B0B4BA")}
+        self.assertIn("themes/x.json", {w for _, c, w, _ in mod("check").check_parts(p, weak) if c == "B2"})
+
+    def test_rule_without_message_has_no_dangling_colon(self):
+        p = designed_parts('\nc.flash("请您稍后");\nvar b = \'<button class="p-btn">确定</button>\';\n')
+        for rule in p["design"]["content"]["forbid"] + p["design"]["content"]["button_forbid"]:
+            rule.pop("message", None)
+        msgs = [msg for _, c, _, msg in mod("check").check_parts(p) if c == "D2"]
+        self.assertEqual(len(msgs), 2)
+        for msg in msgs:
+            self.assertFalse(msg.endswith("："), msg)
+
+    def test_confirmed_wording_finding_names_first_location(self):
+        p = designed_parts('\nc.flash("借用成功！");\nc.flash("借用成功！");\n')
+        p["source"] += "\n已确认提示：借用成功！\n"
+        p["manifest"]["confirmed_text"].append("借用成功！")
+        rel, src = p["pages"][0]
+        line = next(n for n, t in enumerate(src.splitlines(), 1) if "借用成功！" in t)
+        msgs = [msg for lvl, c, _, msg in mod("check").check_parts(p) if (lvl, c) == ("finding", "D2")]
+        self.assertEqual(len(msgs), 1)
+        self.assertIn(f"（首次出现在 {rel}:{line}）", msgs[0])
+
     def test_missing_profile_is_m1(self):
         with tempfile.TemporaryDirectory() as td:
             mp = designed_copy(td)
