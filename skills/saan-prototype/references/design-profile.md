@@ -61,7 +61,7 @@ The source wins. When the profile asks for something the source does not describ
 
 ## Only documentation, no design.json
 
-When the user has design-system documents but no profile, you may draft one: map the documented tokens to the theme keys, list the components with `use` and `rule`, copy fixed wording rules into `content`, and put the rest into `guide.md`. Start both files with a line saying the profile is a draft awaiting confirmation (草稿，待确认), show it to the user, and use it only after they confirm. Do not copy a real company's design system into examples or tests; keep examples fictional.
+When the user has design-system documents but no profile, you may draft one: map the documented tokens to the theme keys, list the components with `use` and `rule`, copy fixed wording rules into `content`, and put the rest into `guide.md`. Mark the draft in both files: put a line at the top of `guide.md` saying the profile is a draft awaiting confirmation (草稿，待确认), and add `"status": "草稿，待确认"` to `design.json` (a text line there would break the JSON and fail M1; unknown keys are accepted). Show it to the user, and use it only after they confirm. Do not copy a real company's design system into examples or tests; keep examples fictional.
 
 ## Checks
 

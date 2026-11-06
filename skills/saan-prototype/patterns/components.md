@@ -15,7 +15,7 @@ var TONE = {"有效": "success", "已取消": "neutral"};
 
 ## actions
 
-Keep an action that cannot run visible, with the reason next to it. Put `disabled` on the control and the reason in `data-disabled-reason`; the runtime shows the text beside the control and links it with `aria-describedby`. It works on buttons, links, and fields, not on `<option>`.
+Keep an action that cannot run visible, with the reason next to it. Show it as `<button class="p-btn" disabled data-disabled-reason="…">`; the runtime shows the text beside the button and links it with `aria-describedby`. The runtime blocks only disabled buttons, so do not use a link with `data-action` for an unavailable action: `<a>` has no `disabled`. `data-disabled-reason` on a field still shows the reason, but not on `<option>`.
 
 ```js
 var why = c.rules.canCancel(b, c.now);  // {ok, reason}
@@ -43,7 +43,7 @@ Proto.action("askCancel", function (c, a) {
   }, "cancel");
 });
 Proto.action("cancel", function (c, a) {
-  var r = c.rules.adminCancel(c.data, a.id, a.reason);  // FR-M03
+  var r = c.rules.adminCancel(c.data, a.id, a.fields.reason);  // FR-M03
   if (!r.ok) return c.flash(r.message, {kind: "error", rule: "FR-M03"});
   c.close();
   c.flash("已取消这条预约", {proposal: "FR-M04"});
@@ -55,12 +55,12 @@ Proto.action("cancel", function (c, a) {
 | Key | Value |
 |---|---|
 | `title` | The question. `proposal`, `open`, or `rule` next to it annotate the title. |
-| `body` | Raw HTML placed under the title, for example a reason field. Fields arrive in the action by `name`. |
+| `body` | Raw HTML placed under the title, for example a reason field. Fields arrive in the action as `a.fields`, by `name`. |
 | `changes` | `[{label, from, to}]`, one row per changed value |
 | `effects` | Strings, or `{text, proposal, open, rule}`. An effect with `open` renders as a pending item and is hidden when 标注 is off. |
 | `confirm` | `{text, proposal}`. Always write `text`; without it the button says 确认. |
 | `danger` | `true` for a destructive action: the button uses the danger style instead of primary |
-| `data` | `{key: value}` passed to the action. camelCase keys come back camelCase: `data: {bookingId: 1}` arrives as `a.bookingId`. |
+| `data` | `{key: value}` passed to the action. Values arrive as strings (they pass through `dataset`), and camelCase keys come back camelCase: `data: {bookingId: b.id}` arrives as `a.bookingId`, a string. Compare with `String(id)`, or keep ids as strings. |
 
 - `c.confirm` only changes how the step looks. The confirming action still calls the rule functions, shows their feedback, and calls `c.close()` when it succeeds.
 - If the source has no confirmation step, the confirmation itself is a proposal: put `proposal` on the `title`.
@@ -69,7 +69,7 @@ Proto.action("cancel", function (c, a) {
 
 ## field
 
-Read-only values are text, not disabled inputs. When editing changes a value, `data-changed-from` shows the old value beside it.
+Read-only values are text, not disabled inputs. When editing changes a value, `data-changed-from` shows the old value below the field value.
 
 ```js
 '<div class="p-field read" data-component="Field"><span>会议室</span><div>' + c.esc(b.room) + "</div></div>" +
