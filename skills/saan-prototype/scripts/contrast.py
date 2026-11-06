@@ -3,6 +3,7 @@
 PAIRS = [("text", "bg", 4.5), ("text", "surface", 4.5), ("muted", "surface", 4.5),
          ("accent_text", "accent", 4.5), ("danger", "surface", 4.5), ("notice", "surface", 4.5),
          ("accent", "surface", 3.0)]
+OPTIONAL_PAIRS = [("success", "surface", 4.5)]
 REQUIRED = {"label", "bg", "surface", "border", "text", "muted", "accent", "accent_text",
             "danger", "notice", "radius", "font_size"}
 
@@ -22,7 +23,7 @@ def ratio(a, b):
 def problems(theme):
     """Return a list of messages; empty means the theme passes."""
     out = [f"缺少 token：{k}" for k in sorted(REQUIRED - set(theme))]
-    for fg, bg, need in PAIRS:
+    for fg, bg, need in PAIRS + OPTIONAL_PAIRS:
         if fg in theme and bg in theme:
             r = ratio(theme[fg], theme[bg])
             if r < need:
