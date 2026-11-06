@@ -19,11 +19,9 @@ The GitHub repository is [`yishan/saankits`](https://github.com/yishan/saankits)
 | [`saan-discovery`](skills/saan-discovery/SKILL.md) | Interactive consumer, enterprise, public-sector, and mixed discovery, interview preparation, and product-fit assessment | Topic-based research briefs, interview guides, gap queues, and fit assessments | [Guide](docs/saan-discovery/README.md) · [中文指南](docs/saan-discovery/README.zh-CN.md) · [Introduction](https://kits.yishan.app/discovery/) · [中文介绍](https://kits.yishan.app/discovery/zh/) |
 | [`saan-prd-writing`](skills/saan-prd-writing/SKILL.md) | Full PRDs, requirements specifications, scoped feature changes, and document revisions | Concrete rules, business fields, state effects, acceptance scenarios, and open decisions | [Guide](docs/saan-prd-writing/README.md) · [中文指南](docs/saan-prd-writing/README.zh-CN.md) · [Introduction](https://kits.yishan.app/prd-writing/) |
 | [`saan-prototype`](skills/saan-prototype/SKILL.md) | Review prototypes from a requirements specification, with role and scenario switching and open questions marked in place | One offline HTML file, editable sources, a trace table, and check results | [Guide](docs/saan-prototype/README.md) · [中文指南](docs/saan-prototype/README.zh-CN.md) · [Introduction](https://kits.yishan.app/prototype/) |
-| [`saan-inquiry`](skills/saan-inquiry/SKILL.md) | Adaptive dialogue to clarify problems, examine blind spots, and choose and review next steps | Clearer problem framing, provisional judgments, actions, and review conditions | [Guide](docs/saan-inquiry/README.md) · [中文指南](docs/saan-inquiry/README.zh-CN.md) · [Local introduction](page/inquiry/index.html) |
+| [`saan-inquiry`](skills/saan-inquiry/SKILL.md) | Adaptive dialogue to clarify problems, examine blind spots, and choose and review next steps | Clearer problem framing, provisional judgments, actions, and review conditions | [Guide](docs/saan-inquiry/README.md) · [中文指南](docs/saan-inquiry/README.zh-CN.md) · [Introduction](https://kits.yishan.app/inquiry/) |
 
 Each skill has its own `SKILL.md` and carries the resources needed for its core workflow. Installing one skill does not require installing the whole collection.
-
-Saan Inquiry v0.1.0 is a local addition. From a checkout containing it, use `npx skills add . --skill saan-inquiry`; remote commands include it only after publication.
 
 ## Installation
 
@@ -53,11 +51,14 @@ npx skills add yishan/saankits --skill saan-prd-writing
 # Install just Saan Prototype
 npx skills add yishan/saankits --skill saan-prototype
 
+# Install just Saan Inquiry
+npx skills add yishan/saankits --skill saan-inquiry
+
 # Install all currently available skills to Codex
 npx skills add yishan/saankits --skill '*' -a codex
 ```
 
-Installation is project-level by default; add `-g` for user-level installation. The local catalog contains six skills; remote commands select the skills in the published repository. Skills added later require a subsequent installation; this is not a subscription to future skills.
+Installation is project-level by default; add `-g` for user-level installation. The collection currently contains six skills. Skills added later require a subsequent installation; this is not a subscription to future skills.
 
 Saan Discovery, Saan PRD Writing, and Saan Inquiry are text-only and need no external runtime or service for their core workflows. Accessing source files may require additional tools. Runtime dependencies belong to each skill. See [Saan Diagram dependencies](docs/saan-diagram/README.md#dependencies), [Saan Mermaid dependencies](docs/saan-mermaid/README.md#dependencies), and [Saan Prototype dependencies](docs/saan-prototype/README.md#dependencies).
 
