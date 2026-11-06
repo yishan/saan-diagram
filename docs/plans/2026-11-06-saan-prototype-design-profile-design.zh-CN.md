@@ -6,7 +6,7 @@ status: design
 
 # Saan Prototype v0.2 设计：设计规范包
 
-状态：设计已与用户确认（2026-11-06），尚未实现。v0.1 的设计见 [2026-11-05-saan-prototype-design.zh-CN.md](2026-11-05-saan-prototype-design.zh-CN.md)。
+状态：设计已与用户确认（2026-11-06），已实现。最终的接口以 `skills/saan-prototype/references/design-profile.md` 和 `patterns/components.md` 为准。v0.1 的设计见 [2026-11-05-saan-prototype-design.zh-CN.md](2026-11-05-saan-prototype-design.zh-CN.md)。
 
 ## 1. 要解决的问题
 
@@ -84,7 +84,7 @@ v0.2 让用户指定一个**设计规范包**。原型按它的令牌配色，�
 |---|---|---|
 | `status` | `<span class="p-status" data-tone="success">已审核</span>` | 颜色、图标和文字同时显示；`tone` 取 neutral、success、notice、danger |
 | `actions` | `<button data-action="submit" data-disabled-reason="…">` | 不可用的按钮保留显示，原因直接显示在按钮旁，不只靠悬停 |
-| `confirm` | `c.confirm({title, changes, effects, confirm: {text, proposal}}, "action")` | 列出每项“原值 → 新值”和后果，确认后才执行动作 |
+| `confirm` | `c.confirm({title, body, changes, effects, confirm: {text, proposal}, danger, data, component}, "action")` | 列出每项“原值 → 新值”和后果，确认后才执行动作 |
 | `field` | `<div class="p-field read" data-changed-from="…">` | 查看态显示文字；编辑时标出修改前的值 |
 | `filter` | `<details class="p-filter">` | 常用条件外露，其余收起，并显示已生效的隐藏条件数 |
 | `table` | `.p-table` 加 `.p-cell-sub` | 一格内两行信息（主信息和说明） |
@@ -115,7 +115,7 @@ v0.2 让用户指定一个**设计规范包**。原型按它的令牌配色，�
 | B2 | 必须修改 | 规范包的主题也做对比度检查，缺少令牌也报在这里；带 `success` 时，它对 `surface` 不低于 4.5:1 |
 | M1 | 必须修改 | `design.json` 缺失、无法解析，或结构不对（没有主题、`use` 不是第 4 节的取值） |
 
-D2 和 D3 是对静态代码的文本扫描，会去掉注释，但仍可能漏报，也可能把同一页面里互斥分支的按钮算两次，所以 D3 只作提示。检查器仍然不判断交互好坏，也看不出 `guide.md` 里的规则有没有被遵守。
+D1—D4 都是对静态代码的逐行文本扫描，会去掉注释，但仍可能漏报；D3 还可能把同一页面里互斥分支的按钮算两次，所以只作提示。检查器仍然不判断交互好坏，也看不出 `guide.md` 里的规则有没有被遵守。
 
 ## 7. 工作流程的变化
 
@@ -141,7 +141,7 @@ D2 和 D3 是对静态代码的文本扫描，会去掉注释，但仍可能漏�
 
 ## 9. 已确认的细节
 
-1. 组件名角标只显示规范里的名字。
+1. 组件名角标只显示规范里的名字，不显示 runtime 的通用名。规范之外的名字也会显示角标（提示“规范中没有该组件”），并由 D1 报为必须修改。
 2. v0.2 不支持覆盖字体和控件高度，只覆盖颜色、圆角和字号。
 3. 规范包可以带多套主题（包括深色），评审栏都能切换；不强制。
 4. 仓库里放一个虚构的“示例规范”，只用于示例和测试。

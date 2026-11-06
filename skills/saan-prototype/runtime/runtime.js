@@ -114,6 +114,7 @@
       b.title = "组件 · " + name + "\n" + (def ? def.rule || "" : "规范中没有该组件");
       if (/^(TABLE|UL|OL|SELECT|INPUT|TEXTAREA|IMG|HR|BR)$/.test(el.tagName)) el.insertAdjacentElement("beforebegin", b);
       else if (/^(THEAD|TBODY|TR)$/.test(el.tagName)) (el.querySelector("th,td") || el).appendChild(b);
+      else if (el.tagName === "FORM") (el.querySelector(".p-h") || el).appendChild(b);
       else el.appendChild(b);
     });
   }
