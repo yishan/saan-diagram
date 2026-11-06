@@ -25,6 +25,12 @@ ATTR = re.compile(r"""data-(proposal|open|rule)\s*=\s*\\?["']([^"'\\]*)\\?["']""
 FLASH = re.compile(r"""\b(proposal|open|rule)\s*[:=]\s*["']([^"']+)["']""")      # { open: "Q-1" } or x.open = "Q-1"
 VARIABLE = re.compile(r"""\b(proposal|open|rule)\s*[:=]\s*(?!["'\s])([A-Za-z_$][\w.$\[\]]*)""")  # { rule: why.rule }
 EXTERNAL = re.compile(r"""(?:src|href)\s*=\s*\\?["']https?://|url\(\s*["']?https?://|\bfetch\s*\(|XMLHttpRequest|\bimport\s*\(""")
+COMPONENT = re.compile(r"""data-component\s*=\s*\\?["']([^"'\\]+)\\?["']""")
+BUTTON = re.compile(r"<button\b[^>]*>([^<]*)</button>")
+CONFIRM_TEXT = re.compile(r"""confirm\s*:\s*\{\s*text\s*:\s*["']([^"']*)["']""")
+RAW_COLOR = re.compile(r"""(?:color|background|border|fill|stroke|outline)[\w-]*\s*:\s*[^;"'<>]*?(?:#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\()""")
+COMMENT_BLOCK = re.compile(r"/\*.*?\*/", re.S)
+COMMENT_LINE = re.compile(r"(?<![:\\])//.*$", re.M)
 KIND_OF_ATTR = {"open": "open", "rule": "rule"}
 LEVELS = {"error": "必须修改", "finding": "业务发现", "note": "提示"}
 
@@ -51,6 +57,50 @@ def annotations(pages):
                         yield rel, n, m.group(1), i
             for m in VARIABLE.finditer(line):
                 yield rel, n, m.group(1), "${" + m.group(2) + "}"
+
+
+def strip_comments(src):
+    src = COMMENT_BLOCK.sub(lambda m: "\n" * m.group(0).count("\n"), src)
+    return COMMENT_LINE.sub("", src)
+
+
+def design_checks(p):
+    out = []
+    add = lambda level, code, where, msg: out.append((level, code, where, msg))
+    d, m = p["design"], p["manifest"]
+    confirmed = m.get("confirmed_text", [])
+    files = p["pages"] + [(m.get("rules") or "rules.js", p["rules"])]
+    reported = set()
+    for rel, src in files:
+        lines = strip_comments(src).splitlines()
+        for n, line in enumerate(lines, 1):
+            where = f"{rel}:{n}"
+            for cm in COMPONENT.finditer(line):
+                if cm.group(1) not in d["components"]:
+                    add("error", "D1", where, f"组件「{cm.group(1)}」不在《{d['name']}》的组件清单中")
+            for rule in d["content"].get("forbid", []):
+                f = rule["text"]
+                if f not in line:
+                    continue
+                hits = [t for t in confirmed if f in t and t in line]
+                rest = line
+                for t in hits:
+                    rest = rest.replace(t, "")
+                for t in hits:
+                    if (t, f) not in reported:
+                        reported.add((t, f))
+                        add("finding", "D2", "manifest.json", f"已确认文案「{t}」含有规范禁用的「{f}」：报告给用户，不要为了通过而改")
+                if f in rest:
+                    add("error", "D2", where, f"出现规范禁用的「{f}」：{rule.get('message', '')}")
+            labels = [b.strip() for b in BUTTON.findall(line)] + [b.strip() for b in CONFIRM_TEXT.findall(line)]
+            for rule in d["content"].get("button_forbid", []):
+                if rule["text"] in labels:
+                    add("error", "D2", where, f"按钮文字只有「{rule['text']}」：{rule.get('message', '')}")
+            if RAW_COLOR.search(line):
+                add("error", "D4", where, "页面写死了颜色：用 runtime 的类名或主题令牌")
+        if rel in dict(p["pages"]) and src.count("p-btn primary") > 1:
+            add("note", "D3", rel, f"这个页面的代码里有 {src.count('p-btn primary')} 个主按钮；规范要求每个视图一个，互斥分支可以忽略")
+    return out
 
 
 def check_parts(p, all_themes=None):
@@ -117,9 +167,13 @@ def check_parts(p, all_themes=None):
         for n, line in enumerate(src.splitlines(), 1):
             if EXTERNAL.search(line):
                 add("error", "B1", f"{rel}:{n}", "原型不能请求外部资源或网络：资源要内联，数据写进场景")
-    for name, t in (all_themes if all_themes is not None else B.themes()).items():
+    theme_set = all_themes if all_themes is not None else B.themes_for(p)
+    theme_dir = "design.json themes" if p.get("design") else "themes"
+    for name, t in theme_set.items():
         for msg in contrast.problems(t):
-            add("error", "B2", f"themes/{name}.json", msg)
+            add("error", "B2", f"{theme_dir}/{name}", msg)
+    if p.get("design"):
+        out += design_checks(p)
     return out
 
 

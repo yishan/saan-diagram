@@ -58,7 +58,7 @@ def load(manifest_path):
 
 def themes_for(parts):
     """Themes a prototype may use: the profile's when it has one, otherwise the bundled set."""
-    return parts["design"]["themes"] if parts["design"] else themes()
+    return parts["design"]["themes"] if parts.get("design") else themes()
 
 
 def script_safe(text):

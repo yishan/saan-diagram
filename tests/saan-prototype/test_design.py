@@ -135,5 +135,68 @@ class BuildTests(unittest.TestCase):
                 mod("build").build(designed_copy(td, lambda d: d.update(themes={})))
 
 
+def designed_parts(page_suffix=""):
+    """Example parts with the profile attached and a StatusBadge on the status tag."""
+    p = mod("build").load(EXAMPLE)
+    p["design"] = mod("design").load(PROFILE)
+    p["pages"] = [(rel, src.replace('<span class="p-tag">', '<span class="p-tag" data-component="StatusBadge">') + page_suffix)
+                  for rel, src in p["pages"]]
+    return p
+
+
+def found(p):
+    return {(lvl, c) for lvl, c, _, _ in mod("check").check_parts(p)}
+
+
+class CheckTests(unittest.TestCase):
+    def test_designed_example_is_clean(self):
+        self.assertEqual(mod("check").check_parts(designed_parts()), [])
+
+    def test_unknown_component(self):
+        self.assertIn(("error", "D1"), found(designed_parts('\nvar x = \'<div data-component="Foo"></div>\';\n')))
+
+    def test_forbidden_text(self):
+        self.assertIn(("error", "D2"), found(designed_parts('\nc.flash("请您稍后再试");\n')))
+
+    def test_forbidden_text_in_comment_is_ignored(self):
+        self.assertNotIn(("error", "D2"), found(designed_parts("\n// 不写“您”\n/* 也不写感叹号！ */\n")))
+
+    def test_confirmed_wording_is_a_finding(self):
+        p = designed_parts('\nc.flash("借用成功！");\n')
+        p["source"] += "\n已确认提示：借用成功！\n"
+        p["manifest"]["confirmed_text"].append("借用成功！")
+        got = found(p)
+        self.assertIn(("finding", "D2"), got)
+        self.assertNotIn(("error", "D2"), got)
+
+    def test_button_text_must_match_exactly(self):
+        self.assertIn(("error", "D2"), found(designed_parts('\nvar b = \'<button class="p-btn">确定</button>\';\n')))
+        self.assertNotIn(("error", "D2"), found(designed_parts('\nvar b = \'<button class="p-btn">确定人选</button>\';\n')))
+        self.assertIn(("error", "D2"), found(designed_parts('\nc.confirm({title: "x", confirm: {text: "确定"}}, "go");\n')))
+
+    def test_two_primary_buttons_is_a_note(self):
+        self.assertIn(("note", "D3"), found(designed_parts('\nvar b = \'<button class="p-btn primary">另一个</button>\';\n')))
+
+    def test_raw_color(self):
+        self.assertIn(("error", "D4"), found(designed_parts('\nvar s = \'<p style="color: #ff0000">x</p>\';\n')))
+        self.assertNotIn(("error", "D4"), found(designed_parts('\nvar s = \'<a href="#add">x</a>\';\n')))
+
+    def test_profile_themes_are_contrast_checked(self):
+        p = designed_parts()
+        p["design"]["themes"]["light"]["success"] = "#7FD39A"
+        self.assertIn(("error", "B2"), found(p))
+
+    def test_no_profile_no_design_checks(self):
+        p = mod("build").load(EXAMPLE)
+        p["pages"] = [(rel, src + '\nc.flash("请您稍后再试！");\n') for rel, src in p["pages"]]
+        self.assertFalse({c for _, c in found(p)} & {"D1", "D2", "D3", "D4"})
+
+    def test_missing_profile_is_m1(self):
+        with tempfile.TemporaryDirectory() as td:
+            mp = designed_copy(td)
+            (mp.parent / "design" / "design.json").unlink()
+            self.assertIn("M1", {c for _, c, _, _ in mod("check").check(mp)})
+
+
 if __name__ == "__main__":
     unittest.main()
