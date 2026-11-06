@@ -45,7 +45,8 @@
       return "<li" + (ef.open ? ' class="p-pending p-review-only"' : "") + attrs(ef) + ">" + esc(ef.text) + "</li>";
     }).join("");
     var btn = Object.assign({ text: "确认" }, opt.confirm);
-    return '<form class="p-confirm" data-action="' + esc(name) + '"' + dattrs + ">" +
+    return '<form class="p-confirm" data-action="' + esc(name) + '"' + dattrs +
+      (opt.component ? ' data-component="' + esc(opt.component) + '"' : "") + ">" +
       '<h2 class="p-h"' + attrs(opt) + ">" + esc(opt.title) + "</h2>" + (opt.body || "") +
       (changes ? '<table class="p-table p-changes"><tbody>' + changes + "</tbody></table>" : "") +
       (effects ? '<ul class="p-effects">' + effects + "</ul>" : "") +

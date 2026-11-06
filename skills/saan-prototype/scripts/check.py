@@ -26,6 +26,7 @@ FLASH = re.compile(r"""\b(proposal|open|rule)\s*[:=]\s*["']([^"']+)["']""")     
 VARIABLE = re.compile(r"""\b(proposal|open|rule)\s*[:=]\s*(?!["'\s])([A-Za-z_$][\w.$\[\]]*)""")  # { rule: why.rule }
 EXTERNAL = re.compile(r"""(?:src|href)\s*=\s*\\?["']https?://|url\(\s*["']?https?://|\bfetch\s*\(|XMLHttpRequest|\bimport\s*\(""")
 COMPONENT = re.compile(r"""data-component\s*=\s*\\?["']([^"'\\]+)\\?["']""")
+COMPONENT_KEY = re.compile(r"""\bcomponent\s*:\s*["']([^"']+)["']""")  # c.confirm({component: "X"})
 BUTTON = re.compile(r"<button\b[^>]*>(.*?)</button>")
 TAG = re.compile(r"<[^>]+>")
 CLASS_ATTR = re.compile(r"""\bclass\s*=\s*\\?["']([^"'\\]*)\\?["']""")
@@ -87,7 +88,7 @@ def design_checks(p):
         lines = strip_comments(src).splitlines()
         for n, line in enumerate(lines, 1):
             where = f"{rel}:{n}"
-            for cm in COMPONENT.finditer(line):
+            for cm in list(COMPONENT.finditer(line)) + list(COMPONENT_KEY.finditer(line)):
                 if cm.group(1) not in d["components"]:
                     add("error", "D1", where, f"组件「{cm.group(1)}」不在《{d['name']}》的组件清单中")
             for rule in d["content"].get("forbid", []):

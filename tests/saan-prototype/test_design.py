@@ -155,6 +155,12 @@ class CheckTests(unittest.TestCase):
     def test_unknown_component(self):
         self.assertIn(("error", "D1"), found(designed_parts('\nvar x = \'<div data-component="Foo"></div>\';\n')))
 
+    def test_confirm_component_name_is_checked(self):
+        bad = '\nc.confirm({title: "x", component: "Foo", confirm: {text: "确认归还"}}, "go");\n'
+        self.assertIn(("error", "D1"), found(designed_parts(bad)))
+        good = "\nc.confirm({title: 'x', component: 'ChangeConfirm', confirm: {text: '确认归还'}}, 'go');\n"
+        self.assertNotIn(("error", "D1"), found(designed_parts(good)))
+
     def test_forbidden_text(self):
         self.assertIn(("error", "D2"), found(designed_parts('\nc.flash("请您稍后再试");\n')))
 
@@ -250,7 +256,7 @@ class RuntimeTests(unittest.TestCase):
     def test_runtime_has_design_features(self):
         js = (SKILL / "runtime" / "runtime.js").read_text(encoding="utf-8")
         css = (SKILL / "runtime" / "runtime.css").read_text(encoding="utf-8")
-        for name in ("confirm: function", "data-disabled-reason", "data-component", 'data-bar="components"', "data-p-close"):
+        for name in ("confirm: function", "data-disabled-reason", "data-component", 'data-bar="components"', "data-p-close", "opt.component"):
             self.assertIn(name, js)
         for cls in (".p-status", ".p-reason", ".p-filter", ".p-cell-sub", ".p-changes", ".p-effects", "data-changed-from", ".p-badge.component"):
             self.assertIn(cls, css)
