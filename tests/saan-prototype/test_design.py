@@ -61,6 +61,11 @@ class LoadTests(unittest.TestCase):
             (dict(base, content=[]), "content 必须是对象"),
             (dict(base, components={"X": "s"}), "组件 X 必须是对象"),
             (dict(base, content={"forbid": "x"}), "content.forbid 必须是数组"),
+            (dict(base, themes={"light": "x"}), "主题 light 必须是对象"),
+            (dict(base, content={"forbid": [{"text": 5}]}), "content.forbid[0] 缺少 text"),
+            (dict(base, content={"button_forbid": [{"text": "确定", "message": 5}]}),
+             "content.button_forbid[0] 的 message 必须是文字"),
+            (dict(base, version=1), "version 必须是文字"),
         ]
         for data, word in cases:
             with tempfile.TemporaryDirectory() as td, self.subTest(word=word):
@@ -71,8 +76,20 @@ class LoadTests(unittest.TestCase):
                 self.assertIn(word, str(e.exception))
 
     def test_missing_file(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             mod("design").load(Path("/nonexistent/design.json"))
+        self.assertIn("找不到", str(e.exception))
+
+    def test_read_errors(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "design.json"
+            p.write_bytes(b"\xff\xfe{")
+            with self.assertRaises(ValueError) as e:
+                mod("design").load(p)
+            self.assertIn("无法解析", str(e.exception))
+            with self.assertRaises(ValueError) as e:
+                mod("design").load(Path(td))
+            self.assertIn("无法读取", str(e.exception))
 
 
 if __name__ == "__main__":
