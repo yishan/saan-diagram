@@ -56,6 +56,33 @@ Open `prototype.html`. The review bar at the top lets you:
 
 Only **confirmed** rules become logic. An open question is shown as a placeholder, never implemented as a guess.
 
+## Design profiles
+
+A design profile makes the prototype match an existing design system: its themes, its component names, and its wording rules. It changes how the prototype looks and reads. It does not add pages, steps, or rules.
+
+A profile is a folder with two files:
+
+| File | Contents | Read by |
+|---|---|---|
+| `design.json` | Name and version, themes (same keys as the bundled ones), components (name, the runtime component it maps to, when to use it), and wording rules (`forbid`, `button_forbid`) | The scripts and the agent |
+| `guide.md` | Layout and interaction rules that cannot be written as fixed text, in prose | The agent only |
+
+Name the folder in your request:
+
+```text
+Use saan-prototype to build a review prototype from prd.md, following the design profile in design/.
+```
+
+The agent copies the profile to `prototype/design/`, so the prototype still builds after it is moved. The theme menu shows only the profile's themes. If you have design-system documents but no profile, the agent can draft one, marked 草稿，待确认 (draft, awaiting confirmation). It uses the draft only after you confirm it. `skills/saan-prototype/assets/design-example/` is a fictional profile that shows the format. If you do not mention a design system, the agent uses a bundled theme and does not ask.
+
+With a profile:
+
+- The review bar has a **组件名** (component names) switch. It is off by default and works separately from annotations. Turn it on to see which design-system component each block stands for.
+- `trace.md` gets a page-to-component table (页面—组件): each page, the components it uses, and which are only approximate (外观近似) because the profile has nothing that fits.
+- When the profile and the specification disagree, the specification wins. Additions the profile asks for, such as a confirmation step the specification does not have, are marked as proposals, and every conflict is listed in `trace.md`.
+
+Limits: the prototype looks close to the design system, not pixel-exact. Nothing checks the rules in `guide.md`; read the pages yourself. D2 and D4 are text scans of the code and can miss or misread a line.
+
 ## Checks
 
 ```bash
@@ -73,12 +100,17 @@ python3 skills/saan-prototype/scripts/check.py prototype/manifest.json
 | | C2 | Scenario data uses a state outside the manifest | Prototypes cannot add states |
 | | W1 | Confirmed wording does not appear verbatim | Fix the page |
 | | B1, B2 | An external resource is requested, or a theme fails contrast | Fix the prototype or theme |
-| | M1 | The manifest or a file is missing | Fix the files |
+| | M1 | The manifest or a file is missing, or `design.json` has the wrong shape | Fix the files |
+| | D1 | A component name is not in the design profile | Use a name from the profile |
+| | D2 | Page or rule wording contains text the profile forbids, or a button label is a forbidden word | Change the wording |
+| | D4 | A page or rule file writes a color value | Use the runtime classes or theme tokens |
 | Business finding (业务发现) | C1, W2 | A declared state or confirmed wording is not in the source | Report it; do not edit just to pass |
+| | D2 | The forbidden text is inside wording the source confirms | Report it; keep the confirmed wording as it is |
 | Note (提示) | N1 | An acceptance scenario is not covered by any scenario | Explain in `trace.md` why it cannot be shown |
 | | N2 | An annotation ID is only known at runtime and cannot be checked | Write it literally where possible |
+| | D3 | A page file has more than one primary button | Check whether the buttons are in different branches |
 
-IDs default to `Q-01`, `AC-01`, and `FR-B01` (the letters are optional). If your source uses another format, set `id_patterns` in the manifest.
+IDs default to `Q-01`, `AC-01`, and `FR-B01` (the letters are optional). If your source uses another format, set `id_patterns` in the manifest. The D checks run only when the manifest names a design profile.
 
 ## Limitations
 
@@ -96,3 +128,5 @@ python3 -m unittest discover -s tests/saan-prototype -v
 ```
 
 Two cases, the room-booking PRD and a short description with no PRD, were each run twice in fresh contexts against review criteria written before generation. The [validation record (Chinese)](validation.zh-CN.md) lists the process, the issues found, and the fixes.
+
+The design profile was run once in a fresh context with the room-booking PRD and the fictional example profile, against criteria written before generation. See the [design profile validation record (Chinese)](validation-design.zh-CN.md).
