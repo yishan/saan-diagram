@@ -41,7 +41,7 @@ button.p-slot { cursor: pointer; text-align: left; }
 .p-badge.open { color: var(--danger); cursor: pointer; }
 .p-badge.rule { color: var(--muted); }
 [data-proposal] { text-decoration: underline dotted var(--notice); text-underline-offset: 3px; }
-body.p-review-off .p-badge, body.p-review-off .p-review-only { display: none; }
+body.p-review-off .p-badge:not(.component), body.p-review-off .p-review-only { display: none; }
 body.p-review-off [data-proposal] { text-decoration: none; }
 #p-pop { position: fixed; z-index: 30; max-width: 360px; padding: 10px 12px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 6px 20px rgba(0, 0, 0, .18); font-size: 12px; }
 /* design profile components */

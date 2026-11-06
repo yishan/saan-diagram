@@ -109,7 +109,8 @@
       b.className = "p-badge component";
       b.textContent = name;
       b.title = "组件 · " + name + "\n" + (def ? def.rule || "" : "规范中没有该组件");
-      if (/^(TABLE|THEAD|TBODY|TR|UL|OL|SELECT|INPUT|TEXTAREA)$/.test(el.tagName)) el.insertAdjacentElement("beforebegin", b);
+      if (/^(TABLE|UL|OL|SELECT|INPUT|TEXTAREA)$/.test(el.tagName)) el.insertAdjacentElement("beforebegin", b);
+      else if (/^(THEAD|TBODY|TR)$/.test(el.tagName)) (el.querySelector("th,td") || el).appendChild(b);
       else el.appendChild(b);
     });
   }

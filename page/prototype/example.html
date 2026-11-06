@@ -48,7 +48,7 @@ button.p-slot { cursor: pointer; text-align: left; }
 .p-badge.open { color: var(--danger); cursor: pointer; }
 .p-badge.rule { color: var(--muted); }
 [data-proposal] { text-decoration: underline dotted var(--notice); text-underline-offset: 3px; }
-body.p-review-off .p-badge, body.p-review-off .p-review-only { display: none; }
+body.p-review-off .p-badge:not(.component), body.p-review-off .p-review-only { display: none; }
 body.p-review-off [data-proposal] { text-decoration: none; }
 #p-pop { position: fixed; z-index: 30; max-width: 360px; padding: 10px 12px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 6px 20px rgba(0, 0, 0, .18); font-size: 12px; }
 /* design profile components */
@@ -192,7 +192,8 @@ body:not(.p-components-on) .p-badge.component { display: none; }
       b.className = "p-badge component";
       b.textContent = name;
       b.title = "组件 · " + name + "\n" + (def ? def.rule || "" : "规范中没有该组件");
-      if (/^(TABLE|THEAD|TBODY|TR|UL|OL|SELECT|INPUT|TEXTAREA)$/.test(el.tagName)) el.insertAdjacentElement("beforebegin", b);
+      if (/^(TABLE|UL|OL|SELECT|INPUT|TEXTAREA)$/.test(el.tagName)) el.insertAdjacentElement("beforebegin", b);
+      else if (/^(THEAD|TBODY|TR)$/.test(el.tagName)) (el.querySelector("th,td") || el).appendChild(b);
       else el.appendChild(b);
     });
   }

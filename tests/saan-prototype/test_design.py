@@ -254,6 +254,7 @@ class RuntimeTests(unittest.TestCase):
             self.assertIn(name, js)
         for cls in (".p-status", ".p-reason", ".p-filter", ".p-cell-sub", ".p-changes", ".p-effects", "data-changed-from", ".p-badge.component"):
             self.assertIn(cls, css)
+        self.assertIn(".p-badge:not(.component)", css)  # turning off 标注 keeps 组件名
 
 
 if __name__ == "__main__":
