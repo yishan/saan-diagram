@@ -24,7 +24,7 @@ A profile is a folder with two files:
 | `version` | no | Text, for example `"1.0"` |
 | `themes` | yes, at least one | Theme name → token object with the same keys as `themes/*.json`: `label`, `bg`, `surface`, `border`, `text`, `muted`, `accent`, `accent_text`, `danger`, `notice`, `radius`, `font_size`, plus an optional `success`. Every theme must pass the contrast check; `success` needs 4.5:1 against `surface`. |
 | `components` | no | Component name (as in the design system) → `{"use": …, "rule": …}`. `use` names the runtime component it maps to: `status`, `actions`, `confirm`, `field`, `filter`, or `table`; see [components](../patterns/components.md). A component without `use` is built from the basic runtime classes. `rule` is one sentence on when to use it; it appears in the badge tooltip. |
-| `content` | no | `forbid`: `[{"text", "message"}]`, text that may not appear anywhere in page or rule wording. `button_forbid`: the same shape, matched only when a button's whole label equals `text`, so 确定 is caught and 确定人选 is not. Plain text, no regular expressions. |
+| `content` | no | `forbid`: `[{"text", "message"}]`, text that may not appear in `pages/*.js` or `rules.js` outside comments (attribute values included); sample data in `scenarios.json` is not checked, so keep it clean yourself. `button_forbid`: the same shape, matched only when a button's whole label equals `text`, so 确定 is caught and 确定人选 is not. Plain text, no regular expressions. |
 
 The profile's themes replace the bundled ones; the theme menu shows only the profile's themes. Token names that differ in the design system are mapped once, by whoever writes the profile, not at run time. Rules that cannot be written as fixed text (one primary button per view, long forms on one page, short tasks only in dialogs) go into `guide.md`.
 
@@ -41,7 +41,7 @@ Remove `theme`, or set it to one of the profile's theme names. Without `theme` t
 ## Build pages with it
 
 - Pick components first. For each block, read `components` and choose the one whose `rule` fits; then lay out the page as `guide.md` says.
-- Write `data-component="Name"` on each block that stands for a profile component: a table, a card, a field, a control. On a `<tr>` or `<tbody>` the badge goes into the first cell. The name must be a key in `components`.
+- Write `data-component="Name"` on each block that stands for a profile component: a table, a card, a field, a control. On a `<tr>` or `<tbody>` the badge goes into the first cell; on a `<table>`, list, or form field it goes just before it. For a confirmation, pass `component` to `c.confirm`. The name must be a key in `components`.
 - The review bar gets a 组件名 switch. It is off by default and independent of 标注: reviewers turn it on to see the component names, developers use it to match the component library.
 - When the profile has no component for something, build it from the basic classes in `patterns/` and write "外观近似" for it in `trace.md`. Do the same for components without `use`.
 - Use theme tokens through the runtime classes; never write colour values in pages.

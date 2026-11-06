@@ -8,7 +8,7 @@ Colour, icon, and text together, never colour alone. `data-tone` is `neutral`, `
 
 ```js
 var TONE = {"有效": "success", "已取消": "neutral"};
-'<span class="p-status" data-component="StatusBadge" data-tone="' + TONE[b.status] + '">' + c.esc(b.status) + "</span>"
+'<span class="p-status" data-component="StatusBadge" data-tone="' + (TONE[b.status] || "neutral") + '">' + c.esc(b.status) + "</span>"
 ```
 
 - The status text comes from the source states. Choosing a tone is presentation; it needs no annotation.
@@ -18,10 +18,10 @@ var TONE = {"有效": "success", "已取消": "neutral"};
 Keep an action that cannot run visible, with the reason next to it. Show it as `<button class="p-btn" disabled data-disabled-reason="…">`; the runtime shows the text beside the button and links it with `aria-describedby`. The runtime blocks only disabled buttons, so do not use a link with `data-action` for an unavailable action: `<a>` has no `disabled`. `data-disabled-reason` on a field still shows the reason, but not on `<option>`.
 
 ```js
-var why = c.rules.canCancel(b, c.now);  // {ok, reason}
+var why = c.rules.cancelBlocked(b, c.now);  // null, or the reason text
 '<div class="p-row" data-component="ActionBar">' +
-  (why.ok ? '<button class="p-btn" data-action="askCancel" data-id="' + c.esc(b.id) + '">取消预约</button>'
-          : '<button class="p-btn" disabled data-rule="FR-B05" data-disabled-reason="' + c.esc(why.reason) + '">取消预约</button>') +
+  (!why ? '<button class="p-btn" data-action="askCancel" data-id="' + c.esc(b.id) + '">取消预约</button>'
+        : '<button class="p-btn" disabled data-rule="FR-B05" data-disabled-reason="' + c.esc(why) + '">取消预约</button>') +
   "</div>"
 ```
 
@@ -35,7 +35,7 @@ Lists each change as old → new and the consequences, and runs the action only 
 ```js
 Proto.action("askCancel", function (c, a) {
   c.confirm({
-    title: "取消这条预约？", proposal: "FR-M04",
+    title: "取消这条预约？", proposal: "FR-M04", component: "ChangeConfirm",
     body: '<label class="p-field"><span>取消原因 *</span><textarea name="reason"></textarea></label>',
     changes: [{label: "状态", from: "有效", to: "已取消"}],
     effects: ["释放该时段的占用", {text: "预约人能否看到取消原因待定", open: "Q-08"}],
@@ -43,8 +43,10 @@ Proto.action("askCancel", function (c, a) {
   }, "cancel");
 });
 Proto.action("cancel", function (c, a) {
-  var r = c.rules.adminCancel(c.data, a.id, a.fields.reason);  // FR-M03
-  if (!r.ok) return c.flash(r.message, {kind: "error", rule: "FR-M03"});
+  var b = c.data.bookings.filter(function (x) { return x.id === a.id; })[0];  // ids kept as strings
+  var problem = c.rules.adminCancelProblem(b, a.fields.reason, c.now);  // FR-M03: null or the reason text
+  if (problem) return c.flash(problem, {kind: "error", rule: "FR-M03"});
+  b.status = "已取消"; b.cancelReason = a.fields.reason;
   c.close();
   c.flash("已取消这条预约", {proposal: "FR-M04"});
 });
@@ -58,8 +60,9 @@ Proto.action("cancel", function (c, a) {
 | `body` | Raw HTML placed under the title, for example a reason field. Fields arrive in the action as `a.fields`, by `name`. |
 | `changes` | `[{label, from, to}]`, one row per changed value |
 | `effects` | Strings, or `{text, proposal, open, rule}`. An effect with `open` renders as a pending item and is hidden when 标注 is off. |
-| `confirm` | `{text, proposal}`. Always write `text`; without it the button says 确认. |
+| `confirm` | `{text: …, proposal: …}`. Always write `text`, and write it first: D2 reads the button label only when `text` is the first key. Without it the button says 确认. |
 | `danger` | `true` for a destructive action: the button uses the danger style instead of primary |
+| `component` | The profile's component name, for example `"ChangeConfirm"`; written as `data-component` on the form and checked by D1 |
 | `data` | `{key: value}` passed to the action. Values arrive as strings (they pass through `dataset`), and camelCase keys come back camelCase: `data: {bookingId: b.id}` arrives as `a.bookingId`, a string. Compare with `String(id)`, or keep ids as strings. |
 
 - `c.confirm` only changes how the step looks. The confirming action still calls the rule functions, shows their feedback, and calls `c.close()` when it succeeds.
@@ -73,7 +76,7 @@ Read-only values are text, not disabled inputs. When editing changes a value, `d
 
 ```js
 '<div class="p-field read" data-component="Field"><span>会议室</span><div>' + c.esc(b.room) + "</div></div>" +
-'<div class="p-field read" data-component="Field" data-changed-from="' + c.esc(old.time) + '"><span>时间</span><div>' + c.esc(b.time) + "</div></div>"
+'<div class="p-field read" data-component="Field"' + (old.time !== b.time ? ' data-changed-from="' + c.esc(old.time) + '"' : "") + '><span>时间</span><div>' + c.esc(b.time) + "</div></div>"
 ```
 
 ## filter
@@ -81,6 +84,7 @@ Read-only values are text, not disabled inputs. When editing changes a value, `d
 Common conditions stay visible; the rest fold into 更多条件 with a count of the hidden conditions in effect.
 
 ```js
+var hidden = [c.data.filter.room].filter(Boolean).length;  // hidden conditions in effect
 '<div class="p-row" data-component="FilterBar">' +
   '<label class="p-field"><span>状态</span><select data-action="filterStatus">…</select></label>' +
   '<details class="p-filter"><summary>更多条件 <span class="p-count">' + hidden + "</span></summary>" +

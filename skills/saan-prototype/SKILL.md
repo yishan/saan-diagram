@@ -1,6 +1,6 @@
 ---
 name: "saan-prototype"
-description: "Turn a requirements specification into a review prototype: one offline HTML file with key interactions, states, role and scenario switching, and an annotation layer that marks proposed wording and open questions. Use for prototype requests from a PRD, requirements spec, or feature description (原型、可交互原型、评审原型、高保真原型、做个 demo 页面、设计规范、组件库). Not for production front-end code, visual design comps, or mobile device mockups."
+description: "Turn a requirements specification into a review prototype: one offline HTML file with key interactions, states, role and scenario switching, and an annotation layer that marks proposed wording and open questions. Use for prototype requests from a PRD, requirements spec, or feature description (原型、可交互原型、评审原型、高保真原型、做个 demo 页面、设计系统、设计规范、组件库). Not for production front-end code, visual design comps, or mobile device mockups."
 metadata:
   author: "Yishan"
   version: "0.2.0"
