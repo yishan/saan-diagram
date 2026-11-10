@@ -43,7 +43,7 @@ For a local change, state the problem, change boundary, affected roles and surfa
 
 ## Use one authoritative functional structure
 
-Keep a **module → function** hierarchy. Explain the module's responsibility and the relationship between its functions before individual screens. Within each function, use this sequence for content that applies:
+Keep a **module → function** hierarchy. Explain the module's responsibility and the relationship between its functions before individual screens. When a business object's state is read or changed by multiple functions, define its state list and transition table or state diagram once at the module level (or in Chapter 3.2 when shared across modules) so individual function rules reference it instead of scattering the lifecycle. Within each function, use this sequence for content that applies:
 
 1. **Business description / 业务描述.** Role, trigger, preconditions, task, business result; main flow followed by meaningful branches.
 2. **Interface design / 界面设计.** Entry points, regions, controls, interactions, visible changes, and prototype/callout references. If there is no visual design, specify structure and interaction without claiming visual validation. Mark proposed labels and messages as proposals when wording is not given.
@@ -58,7 +58,8 @@ Place general descriptions and data/interaction details within these sections. D
 - **Name the changed object and action.** “When…, the system shall…” or “当……时，系统应……” works for a numbered rule. Replace vague improvement claims with observable behavior.
 - **Name the role, surface, and data scope.** Do not assume identical permissions across roles. Hidden, disabled, and rejected operations differ. Include enforcement beyond the interface only when supported or explicitly marked as a recommendation.
 - **Give supported field constraints.** Source, default, requiredness, format, unit, precision, range, uniqueness, dependencies, validation timing, and failure result matter where applicable. Unknown limits stay unknown.
-- **Separate states and labels.** Business state, list grouping, display text, and allowed actions are distinct concepts. Map them when the distinction affects behavior.
+- **Make object lifecycles explicit.** Never leave a state machine implicit across scattered function rules or unstated combinations of flags and timestamps. For any stateful business object, list all confirmed states (marking initial and terminal states) and define transitions in one place as `current state × trigger/actor/condition → target state`. Specify what happens when an action is attempted from other states (rejected or no-op) and whether validation failure, cancellation, or processing error preserves the current state. If the source leaves a state, rollback target, or reverse transition unspecified, record it as an open decision rather than inventing one.
+- **Separate states and labels.** Persisted business state, runtime condition (such as whether a start time has passed), list grouping, display text, and allowed actions are distinct concepts. Map them when the distinction affects behavior.
 - **Follow the data.** Trace relevant input/source → saved object → display/use → export or external transfer. Explain which values affect which records, especially for bulk actions.
 - **Define outcomes.** Describe data effects before page feedback, navigation, and input preservation or clearing. Distinguish success, user cancellation, closing a dialog, validation failure, and relevant unavailable states.
 - **State conditions and precedence.** Make show/hide, enable/disable, defaults, selection, sorting, switching, and fallback rules explicit when relevant. If several conditions or validations can fail on the same action, preserve their confirmed priority; if validation order affects the user-visible message or return state and the source does not specify it, record it as an open decision rather than inventing a sequence. Do not choose atomic, per-item, or partial processing from the word “batch” alone.
@@ -84,8 +85,8 @@ Derive acceptance scenarios from confirmed rules. Cover relevant positive, negat
 Review the finished artifact for:
 
 - source-preserved roles, scope, field meaning, units, formulas, states, and exact messages;
-- consistency between the function list, detailed functions, prototypes, fields, diagrams, rules, and acceptance scenarios;
-- relevant exceptions, data effects, and unresolved contradictions;
+- consistency between the function list, state model, detailed functions, prototypes, fields, diagrams, rules, and acceptance scenarios;
+- explicit state transitions, relevant exceptions, data effects, and unresolved contradictions;
 - no unsupported historical constants, invented defaults, duplicate authoritative rules, empty scaffolding, or phantom table-of-contents entries;
 - document status, sources, and review records that reflect what actually happened.
 

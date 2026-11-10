@@ -12,7 +12,7 @@ Sources: [materials actually read, versions, dates, locations]. Project baseline
 
 ## [Module]
 
-[Responsibility, main flow, and relationships between functions. Repeat the function unit as needed. A single function does not need a duplicate function inventory.]
+[Responsibility, main flow, and relationships between functions. Repeat the function unit as needed. A single function does not need a duplicate function inventory. When the change affects a business object's state across functions, define the confirmed state list (initial and terminal states) and transition table or state diagram (`current state × trigger/actor/condition → target state`, plus rejected states and state preservation on failure or cancellation) here so individual rules reference it instead of forming an implicit state machine.]
 
 ### [Function]
 
@@ -38,7 +38,7 @@ Sources: [materials actually read, versions, dates, locations]. Project baseline
 
 | ID | Condition / trigger | Processing and data / state result | Feedback / exception |
 |---|---|---|---|
-| FR-001 | [Who acts under which conditions] | [Validation, processing, effects] | [Feedback or failure result] |
+| FR-001 | [Who acts in which state and conditions] | [Validation, processing, referenced state transition or state preservation, data effects] | [Feedback or failure result] |
 
 [Add other dependencies, permissions, or inputs/outputs only if not already covered. Do not create a parallel set of repeated rules.]
 

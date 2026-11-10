@@ -6,7 +6,7 @@ Turn briefs, research notes, existing specifications, and prototypes into PRDs f
 
 `SKILL.md` is the canonical English instruction entry point. The [introduction](https://kits.yishan.app/prd-writing/) includes English and Chinese and initially follows the browser language. Top-right controls switch language and choose system, light, or dark appearance. Manual choices are remembered in the current browser. Actual interaction and deliverables follow the requested language, falling back to the request language.
 
-Skill version: **1.0.0**.
+Skill version: **1.0.1**.
 
 ## Installation
 
@@ -112,6 +112,7 @@ saan-prd-writing/
 
 ### v1.0.1
 
+- Added explicit object lifecycle rules to avoid implicit state machines: centralize confirmed state lists (including initial and terminal states) and transition tables or diagrams (`current state × trigger/actor/condition → target state`, rejected states, and state preservation on failure or cancellation) at the module level or in Chapter 3.2, and reference them in individual function rules.
 - Clarified that when multiple validations can fail on the same action and their order affects user-visible feedback or return state, an unspecified order should be recorded as an open decision rather than invented downstream.
 
 ### v1.0.0

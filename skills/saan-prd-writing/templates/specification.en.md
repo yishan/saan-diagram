@@ -72,7 +72,7 @@ Record databases, middleware, and deployment choices only when confirmed. Do not
 
 ### 3.2 Overall business framework
 
-[Business flow or relationship diagram showing role collaboration, object movement, state changes, and scope. This explains business cooperation; section 3.1 explains system boundaries. Avoid two copies of a menu tree.]
+[Business flow or relationship diagram showing role collaboration, object movement, state changes, and scope. When a core business object's states are shared across modules, define its state list and transition table or diagram here (`current state × trigger/actor/condition → target state`, terminal states, and rejected/unchanged states) to avoid an implicit state machine scattered across chapters. This explains business cooperation; section 3.1 explains system boundaries. Avoid two copies of a menu tree.]
 
 ### 3.3 Function inventory
 
@@ -86,7 +86,7 @@ Adjust hierarchy depth to the project. Keep overview rows brief; put validation 
 
 ### 4.1 [Module]
 
-[Responsibility, roles, inputs/results, and relationships between functions. Add a module flow when it clarifies handoffs or branches.]
+[Responsibility, roles, inputs/results, and relationships between functions. Add a module flow when it clarifies handoffs or branches. When functions in this module read or change a business object's state (and it is not already defined in 3.2), enumerate all confirmed states (marking initial and terminal states) and define the transition table or state diagram (`current state × trigger/actor/condition → target state`, rejected states, and state preservation on failure/cancellation) here so individual functions reference it rather than creating an implicit state machine.]
 
 ### 4.1.1 [Function]
 
@@ -118,7 +118,7 @@ Add source/default or persistence/display/export columns only if useful. Disting
 |---|---|---|---|---|
 | FR-001 | [Role, condition, action] | [Check/calculation] | [Persist, update, transition, or preserve] | [Feedback, navigation, failure result] |
 
-A numbered list may replace a wide table. Keep rules independently referenceable. Cover relevant permissions and data scope, state/label mappings, validation timing, priority, calculations, success, cancellation, errors, empty/unavailable states, bulk semantics, concurrency, and data transfers. Unsupported behaviors remain open questions.
+A numbered list may replace a wide table. Keep rules independently referenceable. Cover relevant permissions and data scope, persisted state vs. runtime condition/label mappings (referencing the centralized state transitions in 3.2 or 4.1), validation timing, priority, calculations, success, cancellation, errors (including whether failed or cancelled actions preserve the current state), empty/unavailable states, bulk semantics, concurrency, and data transfers. Unsupported states, rollback targets, or reverse transitions remain open questions.
 
 Reference shared security requirements in chapter 5. Put technical or deployment limits in chapter 6. Keep one authoritative statement per rule.
 
