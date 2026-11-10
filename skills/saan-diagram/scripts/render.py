@@ -102,16 +102,21 @@ def make_theme(brand=None, titlebar="plain"):
     t = dict(NEUTRAL)
     sys_ext = mix(brand, "#FFFFFF", 0.45)
     tint = mix(brand, "#FFFFFF", 0.86)
-    # 文字和描边用主色时要看得清：不够 4.5:1 就往深色压一点（VI 色相不变），深底白字同理
+    # 文字和描边用主色时要看得清：对比度须 > 4.51（W3C WCAG AA 4.5:1），不够就调整明度（VI 色相不变）
     accent, sys_int = brand, brand
     for k in range(1, 21):
-        if contrast(accent, tint) >= 4.5:
+        if contrast(accent, tint) > 4.51 and contrast(accent, "#E9ECF1") > 4.51:
             break
         accent = mix(brand, "#0B1B3A", k * 0.05)
-    if contrast(sys_int, "#FFFFFF") < 4.5 and contrast(sys_int, NEUTRAL["ink"]) < 4.5:
+    if contrast(sys_int, on(sys_int)) <= 4.51:
         for k in range(1, 21):
             sys_int = mix(brand, "#0B1B3A", k * 0.05)
-            if contrast(sys_int, "#FFFFFF") >= 4.5:
+            if contrast(sys_int, "#FFFFFF") > 4.51:
+                break
+    if contrast(sys_ext, on(sys_ext)) <= 4.51:
+        for k in range(1, 21):
+            sys_ext = mix(brand, "#FFFFFF", 0.45 + k * 0.025)
+            if contrast(sys_ext, NEUTRAL["ink"]) > 4.51:
                 break
     t.update({
         "accent": accent, "accent_tint": tint, "accent_zone": mix(brand, "#FFFFFF", 0.88),
@@ -119,7 +124,7 @@ def make_theme(brand=None, titlebar="plain"):
         "sys_ext": sys_ext, "sys_ext_text": on(sys_ext),
         "zone": "#E9ECF1", "zone_core": mix(brand, "#FFFFFF", 0.88), "zone_warm": "#FCEBD3",
     })
-    bar = {"plain": t["paper"], "outline": t["paper"], "gray": "#EDEEF0", "brand": brand, "dark": "#2B2F36"}[titlebar]
+    bar = {"plain": t["paper"], "outline": t["paper"], "gray": "#EDEEF0", "brand": sys_int, "dark": "#2B2F36"}[titlebar]
     # plain（默认）：白底无边框，只有标题文字；outline：白底 + 中性灰 1px 线框；其余为实心底色，边框与底色同色
     edge = t["frame"] if titlebar == "outline" else bar
     t.update({"titlebar": bar, "titletext": on(bar), "titleedge": edge})
@@ -913,7 +918,7 @@ class Diagram:
             ty = n.cy + 4 - (6 if n.sub else 0)
             A(f'<text x="{n.cx:.1f}" y="{ty:.1f}" text-anchor="middle" fill="{tc}" font-size="{FS}" font-weight="500">{esc(n.label)}</text>')
             if n.sub:
-                A(f'<text x="{n.cx:.1f}" y="{ty+13:.1f}" text-anchor="middle" fill="{tc}" fill-opacity=".8" font-size="9" font-family="{MONO}">{esc(n.sub)}</text>')
+                A(f'<text x="{n.cx:.1f}" y="{ty+13:.1f}" text-anchor="middle" fill="{tc}" font-size="9" font-family="{MONO}">{esc(n.sub)}</text>')
             return
         if n.kind == "label":
             A(f'<text x="{n.cx:.1f}" y="{n.cy+4:.1f}" text-anchor="middle" fill="{t["soft"]}" font-size="{FS}">{esc(n.label)}</text>')
@@ -3739,7 +3744,7 @@ FIX = {
     "E3": "meta 连线补 label（≤8 字）。",
     "F1": "只留真正的核心（默认 ≤3 处，确需更多时写 core_limit），其余用 hub 表示主线。",
     "CT1": "形状和背景太接近：换深一档的底色，或加描边（白底分区内的模块用白底，普通模块不要叠在同色底上）。",
-    "CT2": "文字看不清：深底配白字、浅底配深字；分区底色不要太深。",
+    "CT2": "文字看不清（须 > 4.51 符合 W3C WCAG AA 标准）：深底配白字、浅底配深字；分区底色不要太深。",
     "L1": "连线标签精简到 ≤8 字，写动作或数据名。",
     "L2": "用 label_at: start / end 把标签挪到经过空白的那一段。",
     "L3": "删掉能从布局看出来的标签，或换 label_at、拉开行距；数据流图用处理/存储交替排行 + label_at: 1。",
@@ -3936,7 +3941,7 @@ def verify_flow(d):
 
 
 # ---------------------------------------------------------------- 对比度
-CT_ELEMENT, CT_CONTAINER, CT_STROKE, CT_TEXT = 1.15, 1.05, 1.3, 4.5
+CT_ELEMENT, CT_CONTAINER, CT_STROKE, CT_TEXT = 1.15, 1.05, 1.3, 4.51
 
 
 def _ct_attr(tag, name):
@@ -3950,7 +3955,7 @@ def _ct_color(v):
 
 def contrast_findings(svg):
     """按绘制顺序走一遍 SVG：每个形状和压在它下面的底色比，每段文字和它所在的底色比。
-    CT1 形状：小元素 ≥1.15、大分区 ≥1.05，或有 ≥1.3 的描边；CT2 文字 ≥4.5（≥18px 为 3）。"""
+    CT1 形状：小元素 ≥1.15、大分区 ≥1.05，或有 ≥1.3 的描边；CT2 页面文字对比度 > 4.51（W3C WCAG AA 4.5:1）。"""
     items = []
     for m in _re.finditer(r"<(rect|text)\b([^>]*)>(?:([^<]*)</text>)?", svg):
         kind, tag, body = m.group(1), m.group(2), m.group(3)
@@ -3964,10 +3969,11 @@ def contrast_findings(svg):
         else:
             try:
                 x, y = float(_ct_attr(tag, "x") or 0), float(_ct_attr(tag, "y") or 0)
+                op = float(_ct_attr(tag, "fill-opacity") or _ct_attr(tag, "opacity") or 1)
             except ValueError:
                 continue
             items.append(("text", x, y, _ct_color(_ct_attr(tag, "fill")), float(_ct_attr(tag, "font-size") or 12), body or "",
-                          _ct_color(_ct_attr(tag, "data-ct-bg"))))
+                          _ct_color(_ct_attr(tag, "data-ct-bg")), op))
     rects = [i for i in items if i[0] == "rect"]
     has_child = set()
     for i, a in enumerate(rects):
@@ -4001,14 +4007,15 @@ def contrast_findings(svg):
                     out.append(("CT1", f"[CT1] 形状 {fill} 和背景 {bg} 对比度只有 {contrast(fill, bg):.2f}，看不出边界：换深一档或加描边"))
             painted.append(it)
         else:
-            _, x, y, fill, size, body, backdrop = it
+            _, x, y, fill, size, body, backdrop, op = it
             if not fill or not _re.search(r"[0-9A-Za-z\u4e00-\u9fff]", body):
                 continue
             bg = backdrop or under(x, y - size / 2)
-            need = 3 if size >= 18 else CT_TEXT
-            if contrast(fill, bg) < need and (fill, bg, "t") not in seen:
-                seen.add((fill, bg, "t"))
-                out.append(("CT2", f"[CT2] 文字『{body[:12]}』{fill} 在背景 {bg} 上对比度 {contrast(fill, bg):.2f}，低于 {need}"))
+            eff = mix(bg, fill, max(0.0, min(1.0, op))) if op < 1 else fill
+            need = CT_TEXT
+            if contrast(eff, bg) <= need and (eff, bg, "t") not in seen:
+                seen.add((eff, bg, "t"))
+                out.append(("CT2", f"[CT2] 文字『{body[:12]}』{eff} 在背景 {bg} 上对比度 {contrast(eff, bg):.2f}，低于 {need}"))
     return out
 
 

@@ -168,6 +168,7 @@ Publishing results are saved to `<slug>.wb.publish.json`. Successful readback an
 | Highlighted capability `special` | Light orange; category named by `special.label`, such as “AI capabilities” |
 | Business flow / data integration / configuration dependency | Solid / dotted / purple dashed line |
 | Title bar | Borderless by default; optional `outline`, `gray`, `brand`, or `dark` |
+| Page text contrast | Every text element must exceed `4.51` (`> 4.5:1` W3C WCAG AA) against its background (`CT2`) |
 
 See [SKILL.md](../../skills/saan-diagram/SKILL.md) for the canonical instructions, or the [Chinese reading version](../../docs/SKILL.zh-CN.md).
 
@@ -201,6 +202,7 @@ GitHub Actions runs a Python version matrix, behavioral regression tests, and br
 - **D1** density in stage and swimlane diagrams now checks occupied rows (`≤ 12`) and actual occupied lanes (`≤ 12` for a single track, `≤ 16` when multiple lanes hold side-by-side nodes), so widening `lanes` on a column no longer bypasses the density budget.
 - Stage and swimlane diagrams support `sections: [{label: ..., row: ...}]` to draw cross-swimlane section headers and dashed dividers for multi-segment flows.
 - Running a separate export flag such as `--svg` after `--all` preserves up-to-date generated artifacts (`png`, `whiteboard_dsl`) in `<slug>.result.json` when the spec has not changed.
+- **CT2** enforces a contrast ratio `> 4.51` (`> 4.5:1` W3C WCAG AA) across all page text (including titles, subtitles, and opacity-adjusted text), and theme generation adjusts brand/system/titlebar shades automatically to meet the threshold.
 - `SKILL.md` clarifies handoff rules from requirements specifications: keep atomic outcomes together, do not invent retry loops on rejection, disclose layout-only validation ordering and prerequisite open questions, and keep parallel paths symmetric.
 
 ### Upgrading from v1.4

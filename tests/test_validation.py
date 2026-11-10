@@ -45,11 +45,25 @@ def layout_codes(diagram):
 
 class ContrastTests(unittest.TestCase):
     def test_single_column_single_node_passes_all_titlebars(self):
-        for orientation in ("horizontal", "vertical"):
-            for titlebar in r.TITLEBARS:
-                with self.subTest(orientation=orientation, titlebar=titlebar):
-                    spec = dict(single_node(), orientation=orientation, titlebar=titlebar, brand="#1456F0")
-                    self.assertEqual(r.collect(r.build_spec(spec)[0])[:2], ([], []))
+        for brand in (None, "#3370FF", "#1456F0", "#2000A0"):
+            for orientation in ("horizontal", "vertical"):
+                for titlebar in r.TITLEBARS:
+                    with self.subTest(brand=brand, orientation=orientation, titlebar=titlebar):
+                        spec = dict(single_node("system", owner="internal", sub="API"),
+                                    orientation=orientation, titlebar=titlebar)
+                        if brand is not None:
+                            spec["brand"] = brand
+                        self.assertEqual(r.collect(r.build_spec(spec)[0])[:2], ([], []))
+
+    def test_page_text_contrast_must_exceed_4_51_including_large_or_translucent_text(self):
+        self.assertGreaterEqual(r.CT_TEXT, 4.51)
+        # #767676 on #FFFFFF has contrast ~4.54 (> 4.51); #777777 on #FFFFFF has ~4.48 (<= 4.51)
+        ok_svg = '<svg><rect x="0" y="0" width="200" height="80" fill="#FFFFFF"/><text x="20" y="40" font-size="20" fill="#767676">Heading</text></svg>'
+        self.assertEqual(r.contrast_findings(ok_svg), [])
+        low_large_svg = '<svg><rect x="0" y="0" width="200" height="80" fill="#FFFFFF"/><text x="20" y="40" font-size="20" fill="#777777">Heading</text></svg>'
+        self.assertIn("CT2", [code for code, _ in r.contrast_findings(low_large_svg)])
+        low_opacity_svg = '<svg><rect x="0" y="0" width="200" height="80" fill="#316CF5"/><text x="20" y="40" font-size="12" fill="#FFFFFF" fill-opacity=".8">Sub</text></svg>'
+        self.assertIn("CT2", [code for code, _ in r.contrast_findings(low_opacity_svg)])
 
     def test_single_column_flow_passes(self):
         spec = single_node()

@@ -84,7 +84,7 @@ For an English starting point, copy a matching file from `assets/en/`, such as `
 - Never shrink text to force a fit. Node labels have a 10-unit width budget; ordinary edge labels have 8 units. A CJK character counts as 1 unit and a typical Latin character as 0.5. These are width budgets, not English word limits. Keep English words intact; abbreviate only when meaning remains clear. Use the layout's measured fit checks and inspect the result.
 - Connectors are orthogonal, do not cross nodes or share overlapping strokes, and retain a visible segment before the arrowhead.
 - Align connected elements: put vertically connected nodes in the same `lane` and horizontally connected nodes in the same `row`, so an edge bends at most once. The renderer nudges slightly-off neighbors into line; auto-routed edges that still bend twice fail lint (G5).
-- Keep shapes distinguishable from their background and text legible: `CT1` / `CT2` check contrast on every diagram. Put white items on tinted zones instead of stacking similar grays.
+- Keep shapes distinguishable from their background and ensure all page text has a contrast ratio > 4.51 (W3C WCAG AA 4.5:1) against its background: `CT1` / `CT2` check contrast on every diagram. Put white items on tinted zones instead of stacking similar grays.
 - For overview flows: no internal role lanes by default, business actions as nodes, forward path only, borderless tinted zones (`kind: zone`), solid gray connectors (`connector_style: solid`). Approval and audit flows must keep decisions and returns.
 - The default title bar is borderless (`titlebar: plain`) and does not consume a core highlight.
 - Correct problematic routing or colors in source diagrams and identify substantive corrections in the delivery notes.
