@@ -120,6 +120,10 @@ python -m unittest discover -s tests/saan-mermaid -v
 
 ## Changes
 
+### v1.2.1
+
+- Documented the transcription rules when reviewing a `saan-diagram` YAML or JSON spec with `saan-mermaid` (mapping role columns to `swimlane-beta`, keeping node IDs, mapping `flow` / `return` edges, and ignoring layout-only fields).
+
 ### v1.2.0
 
 - DS1 no longer counts a dotted edge that loops back to an earlier step. Dotted lines are meant for returns.

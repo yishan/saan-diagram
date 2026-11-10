@@ -179,6 +179,10 @@ def validate_spec(spec):
                 for j, n in enumerate(records(row, "steps", path=f"paths.rows[{i}]")):
                     node(n, f"paths.rows[{i}].steps[{j}]")
             records(paths, "edges", ("from", "to"), "paths")
+        for i, sec in enumerate(records(spec, "sections", ("label", "row"))):
+            text(sec["label"], f"sections[{i}].label")
+            if sec["row"] < 0:
+                fail(f"sections[{i}].row", "不能小于 0")
         records(spec, "edges", ("from", "to"))
     elif layout == "layers":
         def items(obj, key, path):

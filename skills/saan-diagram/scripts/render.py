@@ -300,8 +300,10 @@ class Diagram:
 
     def _finish_extent(self):
         if self.vertical:
+            sec_r = [self.row_pos(float(s["row"])) + up4(text_w(s["label"], FS) + 24)
+                     for s in self.spec.get("sections") or []]
             right = max([b.r for b in self.nodes.values()] + [c.r for c in self.containers.values()]
-                        + [self.left + 4 * CW])
+                        + sec_r + [self.left + 4 * CW])
             self.width = up4(right + 16 + BODY_PAD)
 
     def row_pos(self, row):
@@ -331,6 +333,7 @@ class Diagram:
     def _make_node(self, nid, label, kind, col, lane, row, sub=None, **kw):
         if kind not in NODE_KINDS:
             raise SpecError(f"节点 '{label}' 的 kind '{kind}' 无效，可选 {sorted(NODE_KINDS)}")
+        kw.update(lane=lane, row=row)
         x0, y0 = self.cell(col, lane, row)
         if kind in ("system", "external"):
             w = max(SYS_W, up4(text_w(label) + 28))
@@ -725,12 +728,31 @@ class Diagram:
         return x0 + LABEL_GAP, my - h / 2, w, h, i
 
     def bounds(self):
-        content_bottom = max([b.b for b in self.nodes.values()] + [c.b for c in self.containers.values()])
+        sec_b = [self.row_pos(float(s["row"])) + 20 for s in self.spec.get("sections") or []] if not self.vertical else []
+        content_bottom = max([b.b for b in self.nodes.values()] + [c.b for c in self.containers.values()] + sec_b)
         if self.vertical:
             content_bottom = max(content_bottom, self.body_end - 24)
         legend_y = content_bottom + 40
         extra = self.legend_layout(legend_y)[1] + 22 * len(self.notes())
         return legend_y, legend_y + 56 + extra
+
+    def section_items(self, legend_y=None):
+        """Section dividers and title boxes across swimlanes/stages."""
+        W = self.width
+        body_bottom = (legend_y or self.bounds()[0]) - 16
+        out = []
+        for sec in self.spec.get("sections") or []:
+            r = float(sec["row"])
+            w, h = up4(text_w(sec["label"], FS) + 8), 16
+            if r <= 0:
+                line = None
+                lx, ly = ( self.left - 12, TOP_TITLE + 8 ) if self.vertical else (BODY_PAD + 10, self.top - 14)
+            else:
+                p = self.row_pos(r)
+                line = (p, TOP_TITLE, p, body_bottom) if self.vertical else (BODY_PAD, p, W - BODY_PAD, p)
+                lx, ly = (p - w / 2, TOP_TITLE + 8) if self.vertical else (BODY_PAD + 10, p - h / 2)
+            out.append((line, (lx, ly, w, h), sec["label"]))
+        return out
 
     def chrome(self, legend_y):
         """Stage frames, header boxes, header rule and path divider for either orientation."""
@@ -793,6 +815,11 @@ class Diagram:
             lbl = (self.spec.get("paths") or {}).get("label")
             if lbl:
                 A(f'<text x="{lx}" y="{ly}" fill="{t["soft"]}" font-size="12" font-weight="500">{esc(lbl)}</text>')
+        for line, (lx, ly, lw, lh), label in self.section_items(legend_y):
+            if line:
+                A(f'<line x1="{line[0]:.1f}" y1="{line[1]:.1f}" x2="{line[2]:.1f}" y2="{line[3]:.1f}" stroke="{t["rule"]}" stroke-dasharray="4,3"/>')
+            A(f'<rect x="{lx:.1f}" y="{ly:.1f}" width="{lw}" height="{lh}" fill="{t["paper"]}"/>')
+            A(f'<text x="{lx + 4:.1f}" y="{ly + 12:.1f}" fill="{t["soft"]}" font-size="{FS}" font-weight="600">{esc(label)}</text>')
         # groups: only core tint and/or frame are visible; plain groups are pure layout
         for c in self.containers.values():
             if not (c.frame or c.core):
@@ -1143,6 +1170,10 @@ def to_wb_dsl(d, route_mode="fixed"):
         if lbl:
             lx, ly = divider[1]
             N.append(text(lx - 4, ly - 16, 120, 24, lbl, FS, t["soft"], "left"))
+    for line, (lx, ly, lw, lh), label in d.section_items(legend_y):
+        if line:
+            N.append(hline(*line))
+        N.append(text(lx, ly - 2, lw + 8, 20, label, FS, t["soft"], "left"))
     ids = {}
     for c in d.containers.values():
         if c.frame or c.core:
@@ -1447,11 +1478,21 @@ def lint(d):
                 continue
             if getattr(n, lo) < c["s"] - .5 or getattr(n, hi) > c["s"] + c["size"] + .5:
                 out.append(("G7", f"[G7] 节点 '{n.label}' 越出了泳道 '{c['label']}'：给该列加 lanes、改 lane，或缩短名称"))
-    # D1 density
+    # Section headers
+    for _, (lx, ly, lw, lh), label in d.section_items():
+        if wide_len(label) > 10:
+            out.append(("T1", f"[T1] 分区标题 '{label}' 过长：精简到 10 个字以内"))
+        for n in nodes:
+            if n.kind != "label" and _overlap_rect((lx, ly, lx + lw, ly + lh), (n.x, n.y, n.r, n.b)):
+                out.append(("G1", f"[G1] 节点 '{n.label}' 与分区标题 '{label}' 重叠：调整 row"))
+    # D1 density: count actual occupied lanes and rows so widening `lanes` cannot bypass the budget
     for cid, c in d.cols.items():
-        cnt = sum(1 for n in nodes if n.col == cid and not getattr(n, "path", None))
-        if cnt > c["lanes"] * 12:
-            out.append(("D1", f"[D1] 列 '{c['label']}' 有 {cnt} 个节点，超出密度预算，拆成全景 + 子图"))
+        col_nodes = [n for n in nodes if n.col == cid and not getattr(n, "path", None)]
+        cnt = len(col_nodes)
+        rows = len({round(getattr(n, "row", 0), 1) for n in col_nodes})
+        used_lanes = len({round(getattr(n, "lane", 0)) for n in col_nodes})
+        if rows > 12 or cnt > (12 if used_lanes <= 1 else 16):
+            out.append(("D1", f"[D1] 列 '{c['label']}' 有 {cnt} 个节点（{rows} 行），超出密度预算，拆成全景 + 子图"))
     return out
 
 
@@ -4294,6 +4335,20 @@ def main():
     notes = note_lines(accepted, ok, d.t)
     svg, H2 = add_notes_svg(svg, W, H, d.t, notes)
     out = Path(a.out) if a.out else outdir / f"{slug}.html"
+    if result_path and result_path.is_file():
+        try:
+            prior = json.loads(result_path.read_text(encoding="utf-8"))
+            spec_mtime = Path(a.spec).stat().st_mtime
+            if isinstance(prior, dict) and prior.get("validation") == "passed":
+                for k, v in (prior.get("artifacts") or {}).items():
+                    if isinstance(v, dict) and v.get("status") == "generated" and v.get("path"):
+                        ap_path = Path(v["path"])
+                        if not ap_path.is_file():
+                            ap_path = result_path.parent / ap_path.name
+                        if ap_path.is_file() and ap_path.stat().st_size > 0 and ap_path.stat().st_mtime >= spec_mtime:
+                            result["artifacts"][k] = dict(v)
+        except (OSError, ValueError):
+            pass
 
     def produce(kind, path, writer):
         dest = Path(path)

@@ -120,6 +120,10 @@ python -m unittest discover -s tests/saan-mermaid -v
 
 ## 更新记录
 
+### v1.2.1
+
+- 补充用 `saan-mermaid` 审查 `saan-diagram` YAML/JSON spec 时的转写约定（角色列转 `swimlane-beta`、保留节点 ID、`flow`/`return` 连线对应实线与虚线、忽略纯排版字段）。
+
 ### v1.2.0
 
 - DS1 不再统计回到前面步骤的虚线；虚线本来就用于退回。

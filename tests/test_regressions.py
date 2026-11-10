@@ -208,6 +208,21 @@ class CLITests(unittest.TestCase):
         self.assertEqual(result["status"], "generated")
         self.assertNotIn("png", result["artifacts"])
 
+    def test_separate_svg_run_preserves_fresh_png_in_result_json(self):
+        self.spec.write_text(r.yaml.safe_dump(flow()), encoding="utf-8")
+        svg = self.root / "sample.svg"
+        with patch.object(sys, "argv", ["render.py", str(self.spec), "--all", "--result-json", str(self.result)]), \
+                patch.object(r, "snapshot", side_effect=lambda h, p, s=1.5: Path(p).write_bytes(b"\x89PNG")), \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(r.main(), 0)
+        with patch.object(sys, "argv", ["render.py", str(self.spec), "--svg", str(svg), "--result-json", str(self.result)]), \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(r.main(), 0)
+        result = json.loads(self.result.read_text())
+        self.assertEqual(result["artifacts"]["png"]["status"], "generated")
+        self.assertEqual(result["artifacts"]["svg"]["status"], "generated")
+        self.assertEqual(result["artifacts"]["whiteboard_dsl"]["status"], "generated")
+
     def test_assets_and_guides_are_runtime_sources(self):
         for name in r.INIT_ALIAS:
             p = subprocess.run([sys.executable, str(SCRIPTS / "render.py"), "--init", name], capture_output=True, text=True)
@@ -502,6 +517,26 @@ class SwimlaneBoundsTests(unittest.TestCase):
         labels = [x[3] for x in r.Diagram(swim("提交")).legend_items()]
         self.assertIn("退回", labels)
         self.assertNotIn("数据 / 集成 / 推送", labels)
+
+    def test_widening_lanes_does_not_bypass_d1_density(self):
+        sp = {"column_semantics": "roles",
+              "columns": [{"id": "sys", "label": "系统", "lanes": 4}],
+              "nodes": [{"id": f"n{i}", "label": f"步骤{i}", "col": "sys", "lane": 0.5, "row": i * 1.4} for i in range(13)],
+              "edges": []}
+        self.assertIn("D1", [c for c, _ in r.lint(r.Diagram(sp))])
+
+    def test_swimlane_sections_render_and_check_overlap(self):
+        sp = swim("提交")
+        sp["sections"] = [{"label": "新建预约", "row": 0}, {"label": "改期处理", "row": 1.4}]
+        d, svg, *_ = r.build_spec(sp)
+        self.assertIn("新建预约", svg)
+        self.assertIn("改期处理", svg)
+        self.assertNotIn("G1", [c for c, _ in r.lint(d)])
+        wb_texts = [n.get("text") for n in r.to_wb_dsl(d)["nodes"]]
+        self.assertIn("新建预约", wb_texts)
+        self.assertIn("改期处理", wb_texts)
+        sp["sections"][1]["row"] = 0.6  # collides with node x in col a at row 0.4
+        self.assertIn("G1", [c for c, _ in r.lint(r.Diagram(sp))])
 
 
 if __name__ == "__main__":

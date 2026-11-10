@@ -196,6 +196,13 @@ python3 scripts/render_smoke.py --png      # Also export PNGs with the local Chr
 
 GitHub Actions runs a Python version matrix, behavioral regression tests, and browser export checks. The self-test's 54/54 count measures rule-trigger coverage, not complete branch coverage, visual correctness, or actual business permissions. Whiteboard publishing tests use mocked subprocesses and do not access user boards.
 
+### Upgrading from v1.5.0
+
+- **D1** density in stage and swimlane diagrams now checks occupied rows (`≤ 12`) and actual occupied lanes (`≤ 12` for a single track, `≤ 16` when multiple lanes hold side-by-side nodes), so widening `lanes` on a column no longer bypasses the density budget.
+- Stage and swimlane diagrams support `sections: [{label: ..., row: ...}]` to draw cross-swimlane section headers and dashed dividers for multi-segment flows.
+- Running a separate export flag such as `--svg` after `--all` preserves up-to-date generated artifacts (`png`, `whiteboard_dsl`) in `<slug>.result.json` when the spec has not changed.
+- `SKILL.md` clarifies handoff rules from requirements specifications: keep atomic outcomes together, do not invent retry loops on rejection, disclose layout-only validation ordering and prerequisite open questions, and keep parallel paths symmetric.
+
 ### Upgrading from v1.4
 
 - Title bars that are intentionally borderless and narrow no longer fail the contrast check, and decision and document labels are checked against their actual fill. Core limits are kept per diagram instead of in a process-wide value, so one diagram's limits no longer leak into the next in a batch.

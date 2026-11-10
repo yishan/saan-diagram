@@ -108,6 +108,16 @@ saan-prd-writing/
   examples/bulk-archive/prd.zh-CN.md
 ```
 
+## Changes
+
+### v1.0.1
+
+- Clarified that when multiple validations can fail on the same action and their order affects user-visible feedback or return state, an unspecified order should be recorded as an open decision rather than invented downstream.
+
+### v1.0.0
+
+- Initial release with full specification and scoped change templates in English and Chinese, source and uncertainty handling, and the bulk-archive worked example.
+
 Back to [Saan Kits](../../README.md).
 
 [Language and appearance validation](../site-preferences-validation.zh-CN.md)

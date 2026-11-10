@@ -3,7 +3,7 @@ name: "saan-mermaid"
 description: "Draw diagrams as Mermaid code for Markdown, READMEs, and design docs, and review business processes against an independent control list. Use for Mermaid requests, process reviews, and sequence, state, or Gantt diagrams (流程审查、时序图、状态图、甘特图、用 Mermaid 画)."
 metadata:
   author: "Yishan"
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 # Saan Mermaid
@@ -185,6 +185,8 @@ Each Markdown host ships its own Mermaid version, so beta types may not render o
 ## Review an existing process
 
 When the user brings an existing process, do not redraw it to match your reading. Transcribe it as it is, add the declaration and the control list, run the script, and report what it found. Do not add nodes or lines to make it pass.
+
+If the input is a `saan-diagram` YAML or JSON spec, transcribe its business graph without changing steps or branches: map role `columns` (`column_semantics: roles`) to `swimlane-beta` subgraphs, `nodes` (`id`, `label`, `kind: decision` as `{...}`) to Mermaid nodes keeping the spec's node IDs, `edges` with `kind: flow` to `-->` and `kind: return` to `-.->`, and ignore layout-only fields (`lane`, `row`, `route`, `offset`, `mid_x`, `mid_row`, `sections`).
 
 ## Deliver
 

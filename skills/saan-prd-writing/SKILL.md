@@ -3,7 +3,7 @@ name: saan-prd-writing
 description: Write or revise implementation-facing PRDs and requirements specifications from business requirements, research, existing documents, and prototypes. Use for full specifications or scoped feature changes that need concrete rules, fields, state effects, acceptance scenarios, and unresolved decisions.
 metadata:
   author: Yishan
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Saan PRD Writing
@@ -61,7 +61,7 @@ Place general descriptions and data/interaction details within these sections. D
 - **Separate states and labels.** Business state, list grouping, display text, and allowed actions are distinct concepts. Map them when the distinction affects behavior.
 - **Follow the data.** Trace relevant input/source → saved object → display/use → export or external transfer. Explain which values affect which records, especially for bulk actions.
 - **Define outcomes.** Describe data effects before page feedback, navigation, and input preservation or clearing. Distinguish success, user cancellation, closing a dialog, validation failure, and relevant unavailable states.
-- **State conditions and precedence.** Make show/hide, enable/disable, defaults, selection, sorting, switching, and fallback rules explicit when relevant. If several conditions can match, preserve their confirmed priority. Do not choose atomic, per-item, or partial processing from the word “batch” alone.
+- **State conditions and precedence.** Make show/hide, enable/disable, defaults, selection, sorting, switching, and fallback rules explicit when relevant. If several conditions or validations can fail on the same action, preserve their confirmed priority; if validation order affects the user-visible message or return state and the source does not specify it, record it as an open decision rather than inventing a sequence. Do not choose atomic, per-item, or partial processing from the word “batch” alone.
 - **Make calculations assessable.** Name variables, units, eligible records, timing, and precision. A worked example may explain a formula; label invented demonstration values and keep the formula authoritative.
 - **Preserve exact UI wording when supplied.** Use consistent labels and messages. In Chinese, 「」 can mark literal interface text. Keep release-note language separate from implementation rules.
 

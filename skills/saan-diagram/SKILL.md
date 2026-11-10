@@ -3,7 +3,7 @@ name: "saan-diagram"
 description: "Create consistent business diagrams from descriptions, requirements, or whiteboard screenshots. Use for business architecture, process flows, role handoffs, data relationships, and milestones in English or Chinese. Render HTML/SVG/PNG; publish to a Feishu/Lark whiteboard when requested. Not for sequence diagrams, state machines, physical database schemas, or task-level Gantt charts."
 metadata:
   author: "Yishan"
-  version: "1.5.0"
+  version: "1.5.1"
 ---
 
 # Saan Diagram
@@ -53,7 +53,8 @@ For sequence diagrams, state machines, physical database schemas, or task-level 
 
 Infer the diagram type from the request and source. Unless specified, use horizontal orientation, the default blue brand color, a borderless title bar, and HTML + PNG delivery. Ask only when missing information changes business meaning, the delivery target, or the scope of an external write. Reuse existing authorization and preferences.
 
-- Do not invent core functions, controls, completion states, role permissions, or other missing business facts.
+- Do not invent core functions, controls, completion states, role permissions, or other missing business facts. Do not split a single atomic outcome (such as updating status and writing its audit record in the same action) into sequential steps, or add a retry loop back to an input step when the source only says the request is rejected.
+- When the source does not specify the order of multiple validation checks, note in the spec comments and delivery response that the drawn sequence is for layout only, and list any open questions (including prerequisite ones) that affect the drawn checks. Keep parallel paths symmetric when the source rules are symmetric, and give repeated checks or outcomes across paths distinct IDs (and disambiguated labels when needed for downstream review).
 - Only when whiteboard delivery is selected, run `python3 scripts/wb_publish.py --probe` and read `guides/feishu.md`. Local rendering does not require a Feishu probe.
 - A supplied board target and append instruction authorize that write. Overwriting existing content requires explicit approval. Without an external target, deliver local files and clarify the destination if publishing is still needed.
 
