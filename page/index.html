@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Saan Kits: skills for thinking through problems, preparing research, writing requirements, building review prototypes, and drawing business diagrams.">
+<meta name="description" content="Saan Kits: skills for thinking through problems, reverse-engineering existing systems, preparing research, writing requirements, building review prototypes, and drawing business diagrams.">
 <title>Saan Kits</title>
 <link rel="canonical" href="https://kits.yishan.app/">
 <link rel="alternate" hreflang="en" href="./">
@@ -40,8 +40,8 @@
     </div>
   </div>
   <h1>Saan Kits</h1>
-  <p class="lead">Skills for everyday work: think through a problem, prepare research, write requirements, build a review prototype, or draw a business diagram. Choose what you need and install it in your AI assistant.</p>
-  <p class="skill-count">6 skills</p>
+  <p class="lead">Skills for everyday work: think through a problem, reverse-engineer an existing system, prepare research, write requirements, build a review prototype, or draw a business diagram. Choose what you need and install it in your AI assistant.</p>
+  <p class="skill-count">7 skills</p>
   <ul class="skill-list" role="list">
     <li class="skill">
       <h2><a href="diagram/">Saan Diagram</a></h2>
@@ -84,6 +84,13 @@
       <p class="fit">Once you have enough to decide, bring the discussion together and choose a next step. Return with the results to see what changed.</p>
       <div class="copy-row"><pre id="code-inquiry"><code>npx skills add . <span class="nb">--skill saan-inquiry</span></code></pre><button type="button" class="copy" data-copy="inquiry" aria-label="Copy the local Saan Inquiry install command" hidden></button></div>
       <a class="more" href="inquiry/">See conversation examples and local installation</a>
+    </li>
+    <li class="skill">
+      <h2><a href="xray/">Saan X-Ray</a></h2>
+      <p>Walk through an existing live system, codebase, or UI screenshots to understand what a project actually does today—in plain product language rather than a raw file tree.</p>
+      <p class="fit">Get a 5-minute System Overview Briefing first, with observed facts kept distinct from inferences and blind spots, then drill into As-Is module specifications on demand.</p>
+      <div class="copy-row"><pre id="code-xray"><code>npx skills add yishan/saankits <span class="nb">--skill saan-xray</span></code></pre><button type="button" class="copy" data-copy="xray" aria-label="Copy the Saan X-Ray install command" hidden></button></div>
+      <a class="more" href="xray/">See the two-pass workflow and safety modes</a>
     </li>
   </ul>
   <section class="install" aria-labelledby="collection-install">

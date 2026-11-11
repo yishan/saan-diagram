@@ -1,6 +1,6 @@
 # Site
 
-Static pages for the collection, published at [kits.yishan.app](https://kits.yishan.app/). All seven pages include English and Chinese, selected from browser preferences on first visit.
+Static pages for the collection, published at [kits.yishan.app](https://kits.yishan.app/). All eight pages include English and Chinese, selected from browser preferences on first visit.
 
 | Path | Source | Content |
 |---|---|---|
@@ -18,6 +18,8 @@ Static pages for the collection, published at [kits.yishan.app](https://kits.yis
 | `/prototype/zh/` | `prototype/zh/index.html` | Explicit Chinese Prototype introduction |
 | `/inquiry/` | `inquiry/index.html` | Inquiry introduction |
 | `/inquiry/zh/` | `inquiry/zh/index.html` | Explicit Chinese Inquiry introduction |
+| `/xray/` | `xray/index.html` | Saan X-Ray introduction |
+| `/xray/zh/` | `xray/zh/index.html` | Explicit Chinese Saan X-Ray introduction |
 
 The overview page forwards old `/#anchor` links to `/diagram/#anchor`, except its own `#collection-install` section. Each new skill gets its own second-level directory and a row on the overview page. Keep the localized skill count in sync with that list. Skill text aligns with the main heading; decorative circles and a connecting line sit in the left gutter.
 

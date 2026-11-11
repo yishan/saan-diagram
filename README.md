@@ -6,7 +6,7 @@
 
 An expanding collection of agent skills for turning requirements into diagrams, documents, and prototypes. Install the skills you need, or select the whole collection.
 
-**Available today: `saan-diagram`, `saan-mermaid`, `saan-discovery`, `saan-prd-writing`, `saan-prototype`, and `saan-inquiry`.**
+**Available today: `saan-diagram`, `saan-mermaid`, `saan-discovery`, `saan-prd-writing`, `saan-prototype`, `saan-inquiry`, and `saan-xray`.**
 
 The GitHub repository is [`yishan/saankits`](https://github.com/yishan/saankits), renamed from `yishan/saan-diagram`. Use the new source in installation commands. The existing `saan-diagram` skill and plugin identifiers are unchanged.
 
@@ -20,6 +20,7 @@ The GitHub repository is [`yishan/saankits`](https://github.com/yishan/saankits)
 | [`saan-prd-writing`](skills/saan-prd-writing/SKILL.md) | Full PRDs, requirements specifications, scoped feature changes, and document revisions | Concrete rules, business fields, state effects, acceptance scenarios, and open decisions | [Guide](docs/saan-prd-writing/README.md) · [中文指南](docs/saan-prd-writing/README.zh-CN.md) · [Introduction](https://kits.yishan.app/prd-writing/) |
 | [`saan-prototype`](skills/saan-prototype/SKILL.md) | Review prototypes from a requirements specification, with role and scenario switching and open questions marked in place | One offline HTML file, editable sources, a trace table, and check results | [Guide](docs/saan-prototype/README.md) · [中文指南](docs/saan-prototype/README.zh-CN.md) · [Introduction](https://kits.yishan.app/prototype/) |
 | [`saan-inquiry`](skills/saan-inquiry/SKILL.md) | Adaptive dialogue to clarify problems, examine blind spots, and choose and review next steps | Clearer problem framing, provisional judgments, actions, and review conditions | [Guide](docs/saan-inquiry/README.md) · [中文指南](docs/saan-inquiry/README.zh-CN.md) · [Introduction](https://kits.yishan.app/inquiry/) |
+| [`saan-xray`](skills/saan-xray/SKILL.md) | Walk through a live system (via browser or Computer Use), codebase, or UI screenshots to understand an existing project and extract As-Is baselines | System Overview Briefing, module capability maps, As-Is module specifications, and UI-vs-code findings | [Guide](docs/saan-xray/README.md) · [中文指南](docs/saan-xray/README.zh-CN.md) · [Introduction](https://kits.yishan.app/xray/) |
 
 Each skill has its own `SKILL.md` and carries the resources needed for its core workflow. Installing one skill does not require installing the whole collection.
 
@@ -54,13 +55,16 @@ npx skills add yishan/saankits --skill saan-prototype
 # Install just Saan Inquiry
 npx skills add yishan/saankits --skill saan-inquiry
 
+# Install just Saan X-Ray
+npx skills add yishan/saankits --skill saan-xray
+
 # Install all currently available skills to Codex
 npx skills add yishan/saankits --skill '*' -a codex
 ```
 
-Installation is project-level by default; add `-g` for user-level installation. The collection currently contains six skills. Skills added later require a subsequent installation; this is not a subscription to future skills.
+Installation is project-level by default; add `-g` for user-level installation. The collection currently contains seven skills. Skills added later require a subsequent installation; this is not a subscription to future skills.
 
-Saan Discovery, Saan PRD Writing, and Saan Inquiry are text-only and need no external runtime or service for their core workflows. Accessing source files may require additional tools. Runtime dependencies belong to each skill. See [Saan Diagram dependencies](docs/saan-diagram/README.md#dependencies), [Saan Mermaid dependencies](docs/saan-mermaid/README.md#dependencies), and [Saan Prototype dependencies](docs/saan-prototype/README.md#dependencies).
+Saan Discovery, Saan PRD Writing, Saan Inquiry, and Saan X-Ray are text-only and need no external runtime or service for their core workflows. Accessing source files or walking a live application may require additional tools. Runtime dependencies belong to each skill. See [Saan Diagram dependencies](docs/saan-diagram/README.md#dependencies), [Saan Mermaid dependencies](docs/saan-mermaid/README.md#dependencies), and [Saan Prototype dependencies](docs/saan-prototype/README.md#dependencies).
 
 ### Claude Code plugin
 
@@ -89,6 +93,7 @@ skills/                  Installable skill packages
   saan-prd-writing/      Requirements writing, templates, and a worked example
   saan-prototype/        Review prototype runtime, themes, page patterns, and checks
   saan-inquiry/          Adaptive problem clarification and reflection
+  saan-xray/             Live system and codebase overview briefings and As-Is specs
 docs/                    User documentation and preview images
   saan-diagram/          English and Chinese diagram guides
   saan-mermaid/          English and Chinese Mermaid guides
@@ -96,13 +101,14 @@ docs/                    User documentation and preview images
   saan-prd-writing/      English and Chinese PRD guides and validation records
   saan-prototype/        English and Chinese Prototype guides and validation record
   saan-inquiry/          English and Chinese Inquiry guides and validation records
+  saan-xray/             English and Chinese X-Ray guides and validation record
 scripts/                 Repository maintenance and validation helpers
 tests/                   Saan Diagram regression tests; saan-mermaid/ holds Mermaid tests
 page/                    Collection overview, with one second-level page per skill
 .claude-plugin/          Collection packaging; legacy identifiers retained
 ```
 
-Agent instructions live in `skills/<skill-name>/SKILL.md`. Root READMEs provide the collection catalog; detailed user guides live in `docs/<skill-name>/`. The site overview is at `/`, with `/diagram/`, `/mermaid/`, `/discovery/`, `/prd-writing/`, `/prototype/`, and `/inquiry/` below it. All seven pages have English and Chinese versions. Top-right controls initially follow the browser language and system theme; manual choices are remembered across the site. Diagram and Mermaid examples retain their source language.
+Agent instructions live in `skills/<skill-name>/SKILL.md`. Root READMEs provide the collection catalog; detailed user guides live in `docs/<skill-name>/`. The site overview is at `/`, with `/diagram/`, `/mermaid/`, `/discovery/`, `/prd-writing/`, `/prototype/`, `/inquiry/`, and `/xray/` below it. All eight pages have English and Chinese versions. Top-right controls initially follow the browser language and system theme; manual choices are remembered across the site. Diagram and Mermaid examples retain their source language.
 
 ## Development
 

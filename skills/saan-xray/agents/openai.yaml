@@ -1,0 +1,4 @@
+interface:
+  display_name: "Saan X-Ray"
+  short_description: "X-ray live systems, codebases, or UI screens into overview briefings and As-Is specs"
+  default_prompt: "Use $saan-xray to walk through this system or project and give me a clear System Overview Briefing first, keeping observed facts distinct from inferences and blind spots."

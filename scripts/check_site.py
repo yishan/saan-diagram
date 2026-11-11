@@ -73,7 +73,7 @@ def main():
             assert 'code-' + source in page.ids, f'{path}: missing copy source {source}'
         for link in page.links:
             url = urlsplit(link)
-            if url.scheme or url.netloc:
+            if url.scheme or url.netloc or url.path.startswith('/_vercel/'):
                 continue
             target = (SITE / unquote(url.path).lstrip('/') if url.path.startswith('/')
                       else path.parent / unquote(url.path)).resolve() if url.path else path
@@ -100,8 +100,14 @@ def main():
     spec.loader.exec_module(build)
     with tempfile.TemporaryDirectory() as td:
         for demo, manifest in DEMOS.items():
-            fresh = build.build(ROOT / manifest, Path(td) / 'demo.html').read_bytes()
-            assert (SITE / demo).read_bytes() == fresh, f'{demo}: rebuild with skills/saan-prototype/scripts/build.py {manifest}'
+            fresh = build.build(ROOT / manifest, Path(td) / 'demo.html').read_text(encoding='utf-8')
+            actual = re.sub(
+                r'\n<script>\s*window\.va = .*?</script>\n<script defer src="/_vercel/insights/script\.js"></script>',
+                '',
+                (SITE / demo).read_text(encoding='utf-8'),
+                flags=re.S,
+            )
+            assert actual == fresh, f'{demo}: rebuild with skills/saan-prototype/scripts/build.py {manifest}'
     print('PASS: prototype demos match a fresh build')
 
 

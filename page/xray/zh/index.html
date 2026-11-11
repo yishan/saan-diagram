@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN" data-language-entry="explicit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Saan X-Ray：透视运行中的系统、项目代码库或界面截图，先生成易读的系统概览简报，再按需下钻模块现状规格。">
+<title>Saan X-Ray · 存量系统全景简报与现状规格逆向</title>
+<link rel="canonical" href="https://kits.yishan.app/xray/zh/">
+<link rel="alternate" hreflang="en" href="../">
+<link rel="alternate" hreflang="zh-CN" href="./">
+<script src="../../site-preferences.js"></script>
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@900&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../xray.css?v=2">
+<link rel="stylesheet" href="../../site.css?v=85e8aacbdc">
+<script src="../../site.js" defer></script>
+<script>
+  window.va = window.va || function () {
+    (window.vaq = window.vaq || []).push(arguments);
+  };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-top">
+      <nav class="site-nav" aria-label="技能导航"><a href="../../zh/">Saan Kits</a><a href="../../diagram/zh/">Diagram</a><a href="../../mermaid/zh/">Mermaid</a><a href="../../discovery/zh/">Discovery</a><a href="../../prd-writing/zh/">PRD Writing</a><a href="../../prototype/zh/">Prototype</a><a href="../../inquiry/zh/">Inquiry</a><a href="./" aria-current="page">X-Ray</a></nav>
+      <div class="site-controls">
+      <details class="preference-picker" data-preference="language" name="site-preferences">
+        <summary class="preference-trigger" aria-label="语言" title="语言"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9Z"/></svg></summary>
+        <nav class="preference-menu" aria-label="语言"><a href="./?lang=zh" data-language="zh" lang="zh-CN" hreflang="zh-CN" aria-current="page">中文</a><a href="../?lang=en" data-language="en" lang="en" hreflang="en">English</a></nav>
+      </details>
+      <details class="preference-picker" data-preference="theme" data-theme-controls name="site-preferences" hidden>
+        <summary class="preference-trigger" data-preference-label="外观" aria-label="外观" title="外观"><svg data-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><svg data-theme-icon="light" hidden viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="dark" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></summary>
+        <div class="preference-menu" role="group" aria-label="外观"><button type="button" data-theme-choice="system" aria-label="跟随系统" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>跟随系统</span></button><button type="button" data-theme-choice="light" aria-label="浅色" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><span>浅色</span></button><button type="button" data-theme-choice="dark" aria-label="深色" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg><span>深色</span></button></div>
+      </details>
+    </div>
+    </div>
+    <div class="skill-heading"><h1>Saan X-Ray</h1><span class="skill-version">v0.1.0</span></div>
+    <p class="lead">接手存量系统或历史项目时，先用产品和业务语言看清它现在到底做什么、怎么运转。</p>
+    <p>可以指向运行中的界面（通过浏览器或 Computer Use）、项目代码库或界面截图。它不会一上来堆砌文件目录树，而是先交付一份几分钟就能读完的系统概览简报；需要改某个模块时，再按需下钻字段、校验规则和状态流转表。</p>
+    <dl class="intro">
+      <div><dt>适合用在</dt><dd>存量系统摸底、UI 与代码交叉逆向、改版前梳理现状基线</dd></div>
+      <div><dt>得到什么</dt><dd>5 分钟可读完的系统概览简报，以及按需展开的模块现状规格</dd></div>
+      <div><dt>安全与证据</dt><dd>线上走查默认只读漫游（Observe-only），严格区分实测事实与推断</dd></div>
+    </dl>
+    <nav class="section-nav" aria-label="页内导航"><a href="#passes">两阶段交付</a><a href="#sources">多源透视与安全</a><a href="#example">透视示例</a><a href="#evidence">证据分级</a><a href="#handoff">衔接其他技能</a><a href="#install">开始使用</a></nav>
+  </header>
+  <section aria-labelledby="passes">
+    <h2 id="passes">先给全景简报，再按需深挖模块</h2>
+    <div class="structure">
+      <div>
+        <h3>Pass 1：系统概览简报（默认必交）</h3>
+        <p>第一轮默认控制信息密度，用业务语言建立全局心智模型，不把框架样板代码当结论：</p>
+        <ol>
+          <li>系统定性与本次透视覆盖范围</li>
+          <li>角色与入口视图（≤4 类角色/端）</li>
+          <li>模块与功能地图（按 <code>模块 → 功能</code> 组织，≤6 个模块）</li>
+          <li>2–4 条端到端核心业务主线</li>
+          <li>核心业务对象与已确认状态流转（≤5 个对象）</li>
+          <li>界面与代码差异、待核实盲区</li>
+        </ol>
+      </div>
+      <div>
+        <h3>Pass 2：模块现状规格（按需下钻）</h3>
+        <p>选定要改版或深究的模块后，提取直接对齐 <a href="../../prd-writing/zh/">Saan PRD Writing</a> 的现状基线：</p>
+        <ol>
+          <li>页面区域、筛选项、列表列与表单字段清单</li>
+          <li>校验规则、边界条件与报错提示</li>
+          <li>集中定义的状态流转表（<code>当前状态 × 触发动作/角色/条件 → 目标状态</code>）</li>
+          <li>待确认事项（<code>OQ-*</code>），可直接转入局部变更或完整 PRD</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+  <section aria-labelledby="sources">
+    <h2 id="sources">安全走查运行界面、代码库或混合来源</h2>
+    <ul class="rules">
+      <li><b>运行界面（浏览器 / Computer Use）：</b>默认采用 <code>Observe-only</code>（只读漫游）——只切换菜单、标签页、列表筛选项和只读详情，打开新建弹窗读取字段后取消关闭，<b>不点击保存、提交、删除、审批、支付或发送</b>；仅在明确授权测试环境与测试账号时才启用 <code>Sandbox / Test-walk</code>。</li>
+      <li><b>项目代码与接口定义：</b>从路由表、领域模型、状态枚举、权限守卫和定时任务提取业务规则，自动略过构建配置与通用 UI 样板。</li>
+      <li><b>界面与代码交叉印证：</b>同时具备界面和代码时，主动标出“代码里有但界面藏掉的隐藏功能”、“界面有按钮但未接线的空壳”以及“界面文案与底层枚举的术语映射”。</li>
+    </ul>
+  </section>
+  <section aria-labelledby="example">
+    <h2 id="example">单看界面或单看代码容易漏掉的事实</h2>
+    <div class="example">
+      <p class="label">仿真评测案例 · 存量差旅与日常报销系统</p>
+      <blockquote>“我们刚接手这套遗留报销系统，历史文档找不到了。请以只读模式（Observe-only）结合员工端页面与 <code>server.py</code> 做一次透视。”</blockquote>
+      <ol>
+        <li><b>发现隐藏的二级审批状态：</b>员工端状态筛选器只有 6 个选项，但后端 <code>server.py</code> 定义了第 7 个状态 <code>MANAGER_OK</code>——单笔超过 5,000 元经部门经理通过后，会转入待 CFO 复核。</li>
+        <li><b>识别前端空壳与后台定时任务：</b>列表顶部的“导出 PDF”按钮只是未接线的占位符（<code>onclick="return false;"</code>），而每天凌晨 02:00 的定时任务会自动归档超过 14 天未补件的退回单据。</li>
+        <li><b>下钻模块现状规格：</b>继续对“我的报销单”执行 Pass 2，即可提取完整的 7 状态流转矩阵、表单校验先后顺序与 6 项待业务拍板问题（<code>OQ-001</code>～<code>006</code>），直接交接给 <a href="../../prd-writing/zh/">Saan PRD Writing</a>。</li>
+      </ol>
+      <p class="note">完整的双阶段评测样本与输出结果保存在仓库的 <code>tests/saan-xray/</code> 目录中。</p>
+    </div>
+  </section>
+  <section aria-labelledby="evidence">
+    <h2 id="evidence">把实测事实、合理推断和盲区分开</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>证据标记</th><th>含义</th><th>处理方式</th></tr></thead>
+        <tbody>
+          <tr><td><code>[Observed-UI]</code></td><td>在运行界面、DOM 状态或截图中直接看到的表现</td><td>记录为已确认界面事实，并注明页面或路由</td></tr>
+          <tr><td><code>[Observed-Code]</code></td><td>在路由、模型、校验逻辑或定时任务中确认的实现</td><td>用业务语言表述规则，附上文件或接口引注</td></tr>
+          <tr><td><code>[Inferred]</code></td><td>由局部线索推断（如筛选下拉框有某状态但未触发过）</td><td>与已确认规则分开列出，并说明核实办法</td></tr>
+          <tr><td><code>[Unobserved]</code></td><td>受限于当前账号权限、环境或线下制度而未覆盖的部分</td><td>在盲区清单中显式列出，不靠常识暗中补齐</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section aria-labelledby="handoff">
+    <h2 id="handoff">在 Saan Kits 工作流中的位置</h2>
+    <p>当手头只有存量系统、测试环境或代码库时，先用 <b>Saan X-Ray</b> 摸清现状，再把结果交给其他技能继续推进：</p>
+    <ul class="rules">
+      <li><b>交接 <a href="../../prd-writing/zh/">Saan PRD Writing</a>：</b>把 Pass 2 的模块现状规格与状态流转表作为改版需求（<code>change</code>）或二期规格书的现状基线。</li>
+      <li><b>交接 <a href="../../diagram/zh/">Saan Diagram</a> 或 <a href="../../mermaid/zh/">Saan Mermaid</a>：</b>把梳理出的模块地图、跨角色泳道、数据实体关系或单据状态机画成业务图。</li>
+      <li><b>交接 <a href="../../discovery/zh/">Saan Discovery</a>：</b>把 <code>[Inferred]</code> 与 <code>[Unobserved]</code> 的业务盲区转为面向业务方或产品负责人的核实提纲。</li>
+    </ul>
+  </section>
+  <section aria-labelledby="install">
+    <h2 id="install">开始使用</h2>
+    <p>从 Saan Kits 单独安装 Saan X-Ray：</p>
+    <div class="copy-row"><pre id="code-install"><code>npx skills add yishan/saankits --skill saan-xray</code></pre><button type="button" class="copy" data-copy="install" aria-label="复制 Saan X-Ray 安装命令" hidden></button></div>
+    <p>先让它输出一份系统概览简报：</p>
+    <div class="copy-row"><pre id="code-request"><code>用 saan-xray 透视当前项目（如果提供了测试环境地址，请以 Observe-only 只读模式走查界面）。先给我一份系统概览简报：用业务语言讲清系统定位、角色入口、模块与功能地图、核心业务主线、核心业务对象与状态流转，以及未覆盖的盲区。</code></pre><button type="button" class="copy" data-copy="request" aria-label="复制 Saan X-Ray 透视请求" hidden></button></div>
+    <p class="note">本技能为纯文本包，复用 Agent 当前可用的文件读取、浏览器或 Computer Use 工具。</p>
+  </section>
+  <footer class="site-footer"><span>Saan X-Ray · <a href="https://yishan.li">Yishan</a> · MIT</span><a href="https://github.com/yishan/saankits/tree/main/skills/saan-xray">技能源码</a><a href="https://github.com/yishan/saankits/blob/main/docs/saan-xray/README.zh-CN.md">使用指南</a><a href="../../zh/">Saan Kits</a></footer>
+</main>
+</body>
+</html>

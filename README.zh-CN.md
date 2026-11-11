@@ -6,7 +6,7 @@
 
 一套逐步扩展的 Agent 技能工具集，帮助用户把需求转化为图示、文档和原型。可以按需安装单个技能，也可以选择整套工具集。
 
-**目前可用：`saan-diagram`、`saan-mermaid`、`saan-discovery`、`saan-prd-writing`、`saan-prototype` 和 `saan-inquiry`。**
+**目前可用：`saan-diagram`、`saan-mermaid`、`saan-discovery`、`saan-prd-writing`、`saan-prototype`、`saan-inquiry` 和 `saan-xray`。**
 
 GitHub 仓库已由 `yishan/saan-diagram` 更名为 [`yishan/saankits`](https://github.com/yishan/saankits)。安装命令使用新仓库地址，现有 `saan-diagram` 技能名和插件标识保持不变。
 
@@ -20,6 +20,7 @@ GitHub 仓库已由 `yishan/saan-diagram` 更名为 [`yishan/saankits`](https://
 | [`saan-prd-writing`](skills/saan-prd-writing/SKILL.md) | 完整 PRD、需求规格说明书、局部功能变更与既有文档修订 | 具体规则、业务字段、状态变化、验收场景和待确认事项 | [中文指南](docs/saan-prd-writing/README.zh-CN.md) · [English guide](docs/saan-prd-writing/README.md) · [介绍页](https://kits.yishan.app/prd-writing/) |
 | [`saan-prototype`](skills/saan-prototype/SKILL.md) | 根据需求规格生成评审原型，可切换角色和场景，在界面上标出待确认事项 | 单个离线 HTML、可修改的源码、追溯表和检查结果 | [中文指南](docs/saan-prototype/README.zh-CN.md) · [English guide](docs/saan-prototype/README.md) · [介绍页](https://kits.yishan.app/prototype/zh/) |
 | [`saan-inquiry`](skills/saan-inquiry/SKILL.md) | 通过自适应对话澄清问题、探索盲点、形成下一步并回看结果 | 清晰的问题表述、暂定判断、行动和回看条件 | [中文指南](docs/saan-inquiry/README.zh-CN.md) · [English guide](docs/saan-inquiry/README.md) · [介绍页](https://kits.yishan.app/inquiry/zh/) |
+| [`saan-xray`](skills/saan-xray/SKILL.md) | 透视运行中的系统（浏览器 / Computer Use）、代码库或界面截图，快速摸清既有项目并提取现状基线 | 系统概览简报、模块能力地图、模块现状规格与 UI/代码差异发现 | [中文指南](docs/saan-xray/README.zh-CN.md) · [English guide](docs/saan-xray/README.md) · [介绍页](https://kits.yishan.app/xray/zh/) |
 
 每个技能有独立的 `SKILL.md`，并携带核心流程需要的资源。安装单个技能不要求安装整个工具集。
 
@@ -54,13 +55,16 @@ npx skills add yishan/saankits --skill saan-prototype
 # 只安装 Saan Inquiry
 npx skills add yishan/saankits --skill saan-inquiry
 
+# 只安装 Saan X-Ray
+npx skills add yishan/saankits --skill saan-xray
+
 # 把当前全部可用技能安装到 Codex
 npx skills add yishan/saankits --skill '*' -a codex
 ```
 
-默认安装到当前项目；加 `-g` 可安装到用户级目录。工具集目前包含以上六个技能。以后新增的技能需要再次安装，整套安装不会自动订阅未来技能。
+默认安装到当前项目；加 `-g` 可安装到用户级目录。工具集目前包含以上七个技能。以后新增的技能需要再次安装，整套安装不会自动订阅未来技能。
 
-Saan Discovery、Saan PRD Writing 和 Saan Inquiry 是文本技能，核心流程无需外部运行环境或服务。读取来源文件可能需要额外工具。运行依赖由各技能分别说明。见 [Saan Diagram 依赖说明](docs/saan-diagram/README.zh-CN.md#依赖)、[Saan Mermaid 依赖说明](docs/saan-mermaid/README.zh-CN.md#依赖)和 [Saan Prototype 依赖说明](docs/saan-prototype/README.zh-CN.md#依赖)。
+Saan Discovery、Saan PRD Writing、Saan Inquiry 和 Saan X-Ray 是文本技能，核心流程无需外部运行环境或服务。读取来源文件或走查运行界面可能需要额外工具。运行依赖由各技能分别说明。见 [Saan Diagram 依赖说明](docs/saan-diagram/README.zh-CN.md#依赖)、[Saan Mermaid 依赖说明](docs/saan-mermaid/README.zh-CN.md#依赖)和 [Saan Prototype 依赖说明](docs/saan-prototype/README.zh-CN.md#依赖)。
 
 ### Claude Code 插件
 
@@ -89,6 +93,7 @@ skills/                  可独立安装的技能包
   saan-prd-writing/      需求写作、模板与完整示例
   saan-prototype/        评审原型的运行时、主题、页面范式和检查
   saan-inquiry/          自适应问题澄清与结果回看
+  saan-xray/             存量系统与代码库全景简报及现状规格提取
 docs/                    用户说明和预览图片
   saan-diagram/          图示技能的中英文指南
   saan-mermaid/          Mermaid 技能的中英文指南
@@ -96,13 +101,14 @@ docs/                    用户说明和预览图片
   saan-prd-writing/      PRD 中英文指南和验证记录
   saan-prototype/        Prototype 中英文指南和验证记录
   saan-inquiry/          Inquiry 中英文指南和验证记录
+  saan-xray/             X-Ray 中英文指南和验证记录
 scripts/                 仓库维护和验证脚本
 tests/                   Saan Diagram 回归测试；saan-mermaid/ 放 Mermaid 测试
 page/                    工具集总览页，每个技能一个二级页面
 .claude-plugin/          工具集打包信息，保留原有标识
 ```
 
-Agent 执行入口位于 `skills/<skill-name>/SKILL.md`。根目录 README 提供工具集目录，技能详细使用说明放在 `docs/<skill-name>/`。站点总览在 `/`，下设 `/diagram/`、`/mermaid/`、`/discovery/`、`/prd-writing/`、`/prototype/` 和 `/inquiry/`。七个页面均提供中英文版本，右上角统一切换语言和主题。默认跟随浏览器语言与系统主题，手动选择在全站记忆。Diagram 与 Mermaid 的示例保留源文件语言。
+Agent 执行入口位于 `skills/<skill-name>/SKILL.md`。根目录 README 提供工具集目录，技能详细使用说明放在 `docs/<skill-name>/`。站点总览在 `/`，下设 `/diagram/`、`/mermaid/`、`/discovery/`、`/prd-writing/`、`/prototype/`、`/inquiry/` 和 `/xray/`。八个页面均提供中英文版本，右上角统一切换语言和主题。默认跟随浏览器语言与系统主题，手动选择在全站记忆。Diagram 与 Mermaid 的示例保留源文件语言。
 
 ## 开发
 
