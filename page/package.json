@@ -1,0 +1,13 @@
+{
+  "name": "saan-kits-page",
+  "version": "1.0.0",
+  "description": "Saan Kits collection overview and documentation site",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No tests configured yet\" && exit 0"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.4.1"
+  },
+  "devDependencies": {}
+}
